@@ -133,7 +133,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Castle.cpp" />
+    <ClCompile Include="Continent.cpp" />
+    <ClCompile Include="Die.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Province.cpp" />
+    <ClCompile Include="WorldMap.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Castle.h" />
+    <ClInclude Include="Continent.h" />
+    <ClInclude Include="Die.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Province.h" />
+    <ClInclude Include="WorldMap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
