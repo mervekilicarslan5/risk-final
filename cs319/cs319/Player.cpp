@@ -81,4 +81,28 @@ void Player::setId(int _id)
 	id = _id;
 }
 
+//void Player::captureProvince(WorldMap* worldMap, Province * _province)
+//{
+//
+//	provinces.push_back(worldMap->findIndex(_province));
+//	_province->setOwner(this);
+//}
+//
+//bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
+//{
+//	int index = worldMap->findIndex(_province);
+//	if (!hasProvince(worldMap, _province))
+//		return false;
+//	_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
+//	return true;
+//}
+//
+//bool Player::hasProvince(WorldMap * worldMap, Province * _province)
+//{
+//	int index = worldMap->findIndex(_province);
+//	if (provinces.end() == find(provinces.begin(), provinces.end(), index))
+//		return false;
+//	return true;
+//}
+//
 

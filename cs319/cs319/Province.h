@@ -1,10 +1,13 @@
 #pragma once
 
-using namespace std;
-#include <string>
-#include <iostream>
+#ifndef PROVINCE_H
+#define PROVINCE_H
+
 #include "Castle.h"
 #include "Player.h"
+
+#include <vector>
+
 
 class Province
 {
@@ -12,7 +15,7 @@ public:
 	Province();
 	Province(string _name, string _color);
 	~Province();
-	string getName();
+	/*string getName();
 	Player* getOwner();
 	string getColor();
 	int getNumberOfSoldiers();
@@ -21,12 +24,13 @@ public:
 	void setOwner(Player* _owner);
 	void setColor(string _color);
 	void setNumberOfSoldiers(int _numberOfSoldiers);
-	
-private:
-	string name;
-	Player* owner;
-	string color;
-	int numberOfSoldiers;
-	Castle* castle;
+	*/
+//private:
+//	string name;
+//	Player* owner;
+//	string color;
+//	int numberOfSoldiers;
+//	Castle* castle;
 };
 
+#endif

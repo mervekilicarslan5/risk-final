@@ -1,7 +1,13 @@
 #pragma once
 
+#ifndef PLAYER_H
+#define PLAYER_H
+
 using namespace std;
+
+#include "WorldMap.h"
 #include <vector>
+#include <string>
 
 class Player
 {
@@ -21,7 +27,9 @@ public:
 	void setBattlesLost(int _battlesLost);
 	void setName(string _name);
 	void setId(int _id);
-
+	/*void captureProvince(WorldMap* worldMap, Province* _province);
+	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
+	bool hasProvince(WorldMap * worldMap, Province* _province);*/
 private:
 	string name;
 	int money;
@@ -32,3 +40,4 @@ private:
 	vector<int> bonusCards;
 };
 
+#endif
