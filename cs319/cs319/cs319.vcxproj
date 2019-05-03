@@ -140,7 +140,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Province.cpp" />
-    <ClCompile Include="Top.cpp" />
     <ClCompile Include="WorldMap.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -150,7 +149,6 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Province.h" />
-    <ClInclude Include="Top.h" />
     <ClInclude Include="WorldMap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
