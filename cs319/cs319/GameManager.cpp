@@ -1,20 +1,20 @@
-#include "GameManager.h"
-
-
-
-GameManager::GameManager()
-{
-	worldMap = new WorldMap();
-	die = new Die(6);
-}
-
-
-GameManager::~GameManager()
-{
-	delete worldMap;
-	delete die;
-}
-
+//#include "GameManager.h"
+//
+//
+//
+//GameManager::GameManager()
+//{
+//	worldMap = new WorldMap();
+//	die = new Die(6);
+//}
+//
+//
+//GameManager::~GameManager()
+//{
+//	delete worldMap;
+//	delete die;
+//}
+//
 //void GameManager::addPlayer(string _name)
 //{
 //	int numberOfPlayers = players.size();
@@ -22,7 +22,7 @@ GameManager::~GameManager()
 //		players.push_back(new Player(_name, numberOfPlayers));
 //	}
 //}
-
+//
 //
 //bool GameManager::placeSoldier(Player * player, Province * province, int amount)
 //{
