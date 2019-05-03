@@ -30,6 +30,7 @@ Castle::Castle()
 
 Castle::Castle(int _price)
 {
+	built = false;
 	price = _price;
 	level = 0;
 }
@@ -64,6 +65,16 @@ void Castle::upgradeLevel()
 		level = 1;
 }
 
+bool Castle::isBuilt() {
+	return built;
+}
+void Castle::build() {
+	built = true;
+}
+void Castle::destroy() {
+	built = false;
+	level = 0;
+}
 
 Continent::Continent()
 {
@@ -197,9 +208,12 @@ void Player::setId(int _id)
 
 void Player::captureProvince(WorldMap* worldMap, Province * _province)
 {
-
 	provinces.push_back(worldMap->findIndex(_province));
 	_province->setOwner(this);
+}
+
+void Player::loseProvince(WorldMap* worldMap, Province* _province) {
+	provinces.erase(provinces.begin() + worldMap->findIndex(_province));
 }
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
@@ -216,6 +230,15 @@ bool Player::hasProvince(WorldMap * worldMap, Province * _province)
 	if (provinces.end() == find(provinces.begin(), provinces.end(), index))
 		return false;
 	return true;
+}
+
+bool Player::buildCastle(Province* province) {
+	if (province->getCastle()->getPrice() > money) {
+		cout << "Insufficient money to build castle!";
+		return false;
+	}
+	province->getCastle()->build();
+	money -= province->getCastle()->getPrice();
 }
 
 WorldMap::WorldMap()
@@ -310,6 +333,35 @@ bool WorldMap::hasPath(Player * player, Province * from, Province * to)
 
 }
 
+void WorldMap::getProvinceByName(string name, int & index, Province* & ptr) {
+	int i = 0;
+	for (auto it = provinceList.begin(); it != provinceList.end(); it++) {
+		if ((*it)->getName() == name) {
+			index = i;
+			ptr = *it;
+			return;
+		}
+		i++;
+	}
+	index = -1;
+	ptr = NULL;
+}
+
+void WorldMap::showProvinceStatus(Province* p) {
+	cout << "------------------------------------" << endl;
+	cout << "Province Name: " << p->getName() << endl;
+	if(p->getOwner() == NULL)
+		cout << "Current Owner: None" << endl;
+	else
+		cout << "Current Owner: " << p->getOwner()->getName() << endl;
+	cout << "Number of Soldiers: " << p->getNumberOfSoldiers() << endl;
+}
+
+void WorldMap::showWorldStatus() {
+	for (auto it = provinceList.begin(); it != provinceList.end(); it++) {
+		showProvinceStatus(*it);
+	}
+}
 
 Province::Province()
 {
@@ -317,7 +369,7 @@ Province::Province()
 	color = "";
 	numberOfSoldiers = 0;
 	owner = NULL;
-	castle = NULL;
+	castle = new Castle(150);
 }
 
 Province::Province(string _name, string _color)
@@ -326,7 +378,7 @@ Province::Province(string _name, string _color)
 	color = _color;
 	numberOfSoldiers = 0;
 	owner = NULL;
-	castle = NULL;
+	castle = new Castle(150);
 }
 
 
@@ -386,11 +438,28 @@ GameManager::GameManager()
 	die = new Die(6);
 }
 
-
 GameManager::~GameManager()
 {
 	delete worldMap;
 	delete die;
+}
+
+WorldMap* GameManager::getWorldMap() {
+	return worldMap;
+}
+
+void GameManager::createProvince(string name, string color) {
+	Province* p = new Province(name, color);
+	worldMap->addProvince(p);
+}
+
+void GameManager::createNeighbor(string first, string second) {
+	Province* firstPtr;
+	Province* secondPtr;
+	int i;
+	worldMap->getProvinceByName(first, i, firstPtr);
+	worldMap->getProvinceByName(second, i, secondPtr);
+	worldMap->addNeighbor(firstPtr, secondPtr);
 }
 
 void GameManager::addPlayer(string _name)
@@ -401,12 +470,139 @@ void GameManager::addPlayer(string _name)
 	}
 }
 
+Player* GameManager::getPlayerByID(int id, string & name) {
+	for (auto it = players.begin(); it != players.end(); it++) {
+		if ((*it)->getId() == id) {
+			name = (*it)->getName();
+			return *it;
+		}
+	}
+	name = "";
+	cout << "There is no such player with ID: " << id << endl;
+	return NULL;
+}
 
-bool GameManager::placeSoldier(Player * player, Province * province, int amount)
-{
+Player* GameManager::getPlayerByName(string name, int & id) {
+	for (auto it = players.begin(); it != players.end(); it++) {
+		if ((*it)->getName() == name) {
+			id = (*it)->getId();
+			return *it;
+		}
+	}
+	id = -1;
+	cout << "There is no such player with name: " << name << endl;
+	return NULL;
+}
+
+bool GameManager::buildCastle(Player* player, Province* province) {
+	if (province->getOwner() != player) {
+		cout << "This province does not belong to the player." << endl;
+		return false;
+	}
+	player->buildCastle(province);
+	cout << player->getName() << " built a castle in " << province->getName() << endl;
+	return true;
+}
+bool GameManager::buildCastle(int playerId, string provinceName) {
+	string str;
+	Player* player = getPlayerByID(playerId, str);
+	Province* province; int i;
+	worldMap->getProvinceByName(provinceName, i, province);
+	return buildCastle(player, province);
+}
+bool GameManager::buildCastle(string playerName, string provinceName) {
+	int i;
+	Player* player = getPlayerByName(playerName, i);
+	Province* province;
+	worldMap->getProvinceByName(provinceName, i, province);
+	return buildCastle(player, province);
+}
+
+bool GameManager::placeSoldier(Player * player, string provinceName, int amount)
+{	
+	Province* province; int i;
+	worldMap->getProvinceByName(provinceName, i, province);
 	if (province->getOwner() != NULL && province->getOwner() != player)
 		return false;
 	if (!player->hasProvince(worldMap, province))
 		player->captureProvince(worldMap, province);
 	return player->placeSoldier(worldMap, amount, province);
+}
+
+bool GameManager::placeSoldier(string playerName, string provinceName, int amount)
+{
+	int i;
+	Player* p = getPlayerByName(playerName, i);
+	if (p == NULL)
+		return false;
+	return placeSoldier(p, provinceName, amount);
+}
+
+bool GameManager::placeSoldier(int playerId, string provinceName, int amount)
+{
+	string str;
+	Player* p = getPlayerByID(playerId, str);
+	if (p == NULL)
+		return false;
+	return placeSoldier(p, provinceName, amount);
+}
+
+bool GameManager::fortify(Player* player, Province* from, Province * to, int amount) {
+	if (from->getNumberOfSoldiers() <= amount) {
+		cout << "There has to be at least one soldier in a province!" << endl;
+		return false;
+	}
+	if (!worldMap->hasPath(player, from, to)) {
+		cout << "No path between " << from->getName() << " and " << to->getName() << endl;
+		return false;
+	}
+		
+	from->setNumberOfSoldiers(from->getNumberOfSoldiers() - amount);
+	to->setNumberOfSoldiers(to->getNumberOfSoldiers() + amount);
+	cout << amount << " soldiers have been fortified from " << from->getName() << " to " << to->getName() << endl;
+	return true;
+}
+
+bool GameManager::fortify(int playerID, string fromStr, string toStr, int amount) {
+	string str;
+	Player* player = getPlayerByID(playerID, str);
+	if (player == NULL)
+		return false;
+
+	Province* from, *to;
+	int i;
+	worldMap->getProvinceByName(fromStr, i, from);
+	if (i == -1)
+		return false;
+	worldMap->getProvinceByName(fromStr, i, to);
+	if (i == -1)
+		return false;
+
+	return fortify(player, from, to, amount);
+}
+
+bool GameManager::fortify(string name, string fromStr, string toStr, int amount) {
+	int ind;
+	Player* player = getPlayerByName(name, ind);
+	if (player == NULL)
+		return false;
+	Province* from, *to;
+	int i;
+	worldMap->getProvinceByName(fromStr, i, from);
+	if (i == -1)
+		return false;
+	worldMap->getProvinceByName(toStr, i, to);
+	if (i == -1)
+		return false;
+
+	return fortify(player, from, to, amount);
+}
+
+void GameManager::showWorldStatus() {
+	worldMap->showWorldStatus();
+}
+void GameManager::showProvinceStatus(string name) {
+	int i; Province* ptr;
+	worldMap->getProvinceByName(name, i, ptr);
+	worldMap->showProvinceStatus(ptr);
 }

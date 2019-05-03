@@ -39,9 +39,13 @@ public:
 	int getLevel();
 	void setLevel(int _level);
 	void upgradeLevel();
+	bool isBuilt();
+	void build();
+	void destroy();
 private:
 	int price;
 	int level;
+	bool built;
 };
 
 class Province
@@ -87,8 +91,10 @@ public:
 	void setName(string _name);
 	void setId(int _id);
 	void captureProvince(WorldMap* worldMap, Province* _province);
+	void loseProvince(WorldMap* worldMap, Province* _province);
 	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
 	bool hasProvince(WorldMap * worldMap, Province* _province);
+	bool buildCastle(Province* province);
 private:
 	string name;
 	int money;
@@ -110,6 +116,9 @@ public:
 	bool isNeighbor(Province* first, Province* second);
 	bool hasPath(Player* player, Province* from, Province* to);
 	int findIndex(Province* _province);
+	void getProvinceByName(string name, int & index, Province* & ptr);
+	void showWorldStatus();
+	void showProvinceStatus(Province* p);
 private:
 	int numberOfProvinces;
 	vector< Province* > provinceList;
@@ -145,9 +154,25 @@ public:
 	GameManager();
 	~GameManager();
 
+	WorldMap* getWorldMap();
+	void createProvince(string name, string color);
+	void createNeighbor(string first, string second);
 	void addPlayer(string _name);
-	bool placeSoldier(Player* player, Province* province, int amount);
+	Player* getPlayerByID(int id, string & name);
+	Player* getPlayerByName(string name, int & id);
+	bool buildCastle(Player* player, Province* province);
+	bool buildCastle(int playerID, string provinceName);
+	bool buildCastle(string playerName, string provinceName);
+	bool placeSoldier(Player* player, string provinceName, int amount);
+	bool placeSoldier(int playerID, string provinceName, int amount);
+	bool placeSoldier(string playerName, string provinceName, int amount);
 	bool fortify(Player* player, Province* from, Province * to, int amount);
+	bool fortify(int playerID, string from, string to, int amount);
+	bool fortify(string name, string from, string to, int amount);
+	bool attack(Player* attacker, Player* defender, Province* from, Province * to, int amount);
+	bool attack(int attacker, int defender, string from, string to, int amount);
+	void showWorldStatus();
+	void showProvinceStatus(string name);
 
 private:
 	vector<Player*> players;
