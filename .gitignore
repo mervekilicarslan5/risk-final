@@ -7,8 +7,18 @@
 *.userosscache
 *.sln.docstates
 
+# ignore a single file
+cs319.vcxproj
+cs319.vcxproj.filters
+cs319.vcxproj.user
+
+
 # ignore a file type
 *.vcxproj
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
