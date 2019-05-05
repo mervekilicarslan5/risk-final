@@ -173,6 +173,7 @@ public:
 	bool attack(int attacker, int defender, string from, string to, int amount);
 	void showWorldStatus();
 	void showProvinceStatus(string name);
+	vector<int> roleDice(int attacker, int defender);
 
 private:
 	vector<Player*> players;

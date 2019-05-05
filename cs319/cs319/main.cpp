@@ -36,9 +36,11 @@ int main() {
 	GM->placeSoldier("serdar", "eskisehir", 2);
 	GM->placeSoldier("serdar", "edirne", 3);
 
-	cout << GM->fortify("serdar", "eskisehir", "ankara", 1) << endl ;
+	GM->fortify("serdar", "eskisehir", "ankara", 1);
 
-	GM->showWorldStatus();
+	GM->roleDice(3, 2);
+
+	//GM->showWorldStatus();
 
 	system("PAUSE");
 

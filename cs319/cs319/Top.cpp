@@ -510,6 +510,7 @@ bool GameManager::buildCastle(int playerId, string provinceName) {
 	worldMap->getProvinceByName(provinceName, i, province);
 	return buildCastle(player, province);
 }
+
 bool GameManager::buildCastle(string playerName, string provinceName) {
 	int i;
 	Player* player = getPlayerByName(playerName, i);
@@ -605,4 +606,33 @@ void GameManager::showProvinceStatus(string name) {
 	int i; Province* ptr;
 	worldMap->getProvinceByName(name, i, ptr);
 	worldMap->showProvinceStatus(ptr);
+}
+
+vector<int> GameManager::roleDice(int attacker, int defender) {
+	
+	vector<int> attackerResults, defenderResults;
+	vector<int> result;
+	result.push_back(attacker);
+	result.push_back(defender);
+
+	for (int i = 0; i < attacker; i++) {
+		attackerResults.push_back(die->roll());
+	}
+	std::sort(attackerResults.rbegin(), attackerResults.rend());
+	for (int i = 0; i < defender; i++) {
+		defenderResults.push_back(die->roll());
+	}
+	std::sort(defenderResults.rbegin(), defenderResults.rend());
+
+	int mn = min(attacker, defender);
+
+	for (int i = 0; i < mn; i++) {
+		cout << "Attacker : " << attackerResults[i] << " vs " << defenderResults[i] << " : Defender" << endl;
+		if (attackerResults[i] > defenderResults[i])
+			result[1]--;
+		else
+			result[0]--;
+	}
+
+	return result; 
 }
