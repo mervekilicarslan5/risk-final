@@ -32,15 +32,15 @@ int main() {
 	GM->placeSoldier("ahmet", "konya", 4);
 	GM->placeSoldier("ahmet", "istanbul", 1);
 	GM->placeSoldier("serdar", "kars", 1);
-	GM->placeSoldier("serdar", "antalya", 4);
+	GM->placeSoldier("serdar", "antalya", 2);
 	GM->placeSoldier("serdar", "eskisehir", 2);
 	GM->placeSoldier("serdar", "edirne", 3);
 
 	GM->fortify("serdar", "eskisehir", "ankara", 1);
 
-	GM->roleDice(3, 2);
+	GM->attack("ahmet", "serdar", "konya", "antalya", 3);
 
-	//GM->showWorldStatus();
+	GM->showWorldStatus();
 
 	system("PAUSE");
 

@@ -170,10 +170,10 @@ public:
 	bool fortify(int playerID, string from, string to, int amount);
 	bool fortify(string name, string from, string to, int amount);
 	bool attack(Player* attacker, Player* defender, Province* from, Province * to, int amount);
-	bool attack(int attacker, int defender, string from, string to, int amount);
+	bool attack(string attacker, string defender, string from, string to, int amount);
 	void showWorldStatus();
 	void showProvinceStatus(string name);
-	vector<int> roleDice(int attacker, int defender);
+	vector<int> rollDice(int attacker, int defender);
 
 private:
 	vector<Player*> players;

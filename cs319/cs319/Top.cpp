@@ -599,6 +599,70 @@ bool GameManager::fortify(string name, string fromStr, string toStr, int amount)
 	return fortify(player, from, to, amount);
 }
 
+bool GameManager::attack(Player* attacker, Player* defender, Province* from, Province * to, int amount) {
+	if (from->getOwner() != attacker) {
+		cout << from->getName() << " does not belong to " << attacker->getName() << endl;
+		return false;
+	}
+	if (to->getOwner() != defender) {
+		cout << to->getName() << "does not belong to " << defender->getName() << endl;
+		return false;
+	}
+	if (!worldMap->isNeighbor(from, to)) {
+		cout << from->getName() << " and " << to->getName() << " are not neighbors!" << endl;
+		return false;
+	}
+	if (amount >= from->getNumberOfSoldiers()) {
+		cout << "There has to be at least one soldier left!" << endl;
+		return false;
+	}
+	vector<int> result;
+	if (to->getNumberOfSoldiers() == 1) {
+		result = rollDice(amount, 1);
+	}
+	else {
+		result = rollDice(amount, 2);
+	}
+	cout << "Attacker lost " << result[1] << " soldiers" << endl;
+	cout << "Defender lost " << result[0] << " soldiers" << endl;
+	from->setNumberOfSoldiers(from->getNumberOfSoldiers() - result[1]);
+	to->setNumberOfSoldiers(to->getNumberOfSoldiers() - result[0]);
+	if (to->getNumberOfSoldiers() == 0) {
+		cout << attacker->getName() << " has captured the city " << to->getName() << endl;
+		attacker->captureProvince(worldMap, to);
+		int number = -1;
+		while (number <= 0 || number >= from->getNumberOfSoldiers()) {
+			cout << "Enter the number of soldiers you want to place on this city: ";
+			cin >> number;
+		}
+		fortify(attacker, from, to, number);
+		return true;
+	}
+	return false;
+}
+
+bool GameManager::attack(string attackerName, string defenderName, string fromStr, string toStr, int amount) {
+	int i;
+	Player* attacker = getPlayerByName(attackerName, i);
+	Player* defender = getPlayerByName(defenderName, i);
+	if (attacker == NULL || defender == NULL) {
+		cout << "No such players" << endl;
+		return false;
+	}
+	Province* from, * to;
+	worldMap->getProvinceByName(fromStr, i, from);
+	if (i == -1) {
+		cout << fromStr << " does not exist!" << endl;
+		return false;
+	}
+	worldMap->getProvinceByName(toStr, i, to);
+	if (i == -1) {
+		cout << toStr << " does not exist!" << endl;
+		return false;
+	}
+	return attack(attacker, defender, from, to, amount);
+}
+
 void GameManager::showWorldStatus() {
 	worldMap->showWorldStatus();
 }
@@ -608,12 +672,12 @@ void GameManager::showProvinceStatus(string name) {
 	worldMap->showProvinceStatus(ptr);
 }
 
-vector<int> GameManager::roleDice(int attacker, int defender) {
+vector<int> GameManager::rollDice(int attacker, int defender) {
 	
 	vector<int> attackerResults, defenderResults;
 	vector<int> result;
-	result.push_back(attacker);
-	result.push_back(defender);
+	result.push_back(0);
+	result.push_back(0);
 
 	for (int i = 0; i < attacker; i++) {
 		attackerResults.push_back(die->roll());
@@ -629,9 +693,9 @@ vector<int> GameManager::roleDice(int attacker, int defender) {
 	for (int i = 0; i < mn; i++) {
 		cout << "Attacker : " << attackerResults[i] << " vs " << defenderResults[i] << " : Defender" << endl;
 		if (attackerResults[i] > defenderResults[i])
-			result[1]--;
+			result[0]++;
 		else
-			result[0]--;
+			result[1]++;
 	}
 
 	return result; 
