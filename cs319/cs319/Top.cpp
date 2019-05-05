@@ -357,6 +357,10 @@ void WorldMap::showProvinceStatus(Province* p) {
 	cout << "Number of Soldiers: " << p->getNumberOfSoldiers() << endl;
 }
 
+int WorldMap::getNumberOfProvinces() {
+	return numberOfProvinces;
+}
+
 void WorldMap::showWorldStatus() {
 	for (auto it = provinceList.begin(); it != provinceList.end(); it++) {
 		showProvinceStatus(*it);
@@ -600,6 +604,10 @@ bool GameManager::fortify(string name, string fromStr, string toStr, int amount)
 }
 
 bool GameManager::attack(Player* attacker, Player* defender, Province* from, Province * to, int amount) {
+	if (attacker == defender) {
+		cout << "You cannot attack yourself!" << endl;
+		return false;
+	}
 	if (from->getOwner() != attacker) {
 		cout << from->getName() << " does not belong to " << attacker->getName() << endl;
 		return false;
@@ -672,7 +680,7 @@ void GameManager::showProvinceStatus(string name) {
 	worldMap->showProvinceStatus(ptr);
 }
 
-vector<int> GameManager::rollDice(int attacker, int defender) {
+vector<int> GameManager::rollDice(int attacker, int defender)  {
 	
 	vector<int> attackerResults, defenderResults;
 	vector<int> result;
@@ -699,4 +707,62 @@ vector<int> GameManager::rollDice(int attacker, int defender) {
 	}
 
 	return result; 
+}
+
+void GameManager::startPlacement() {
+	cout << "*** INITIAL SOLDIER PLACEMENT ***" << endl << endl;
+	int turn = 0;
+	int numberOfPlayers = players.size();
+	int numberOfProvinces = worldMap->getNumberOfProvinces();
+
+	for (int i = 0; i < numberOfProvinces; i++) {
+		Player* currentPlayer = players[turn % numberOfPlayers];
+		cout << currentPlayer->getName() << "'s turn" << endl; 
+		
+		Province* currentProvince;
+		string city;
+		while (true) {
+			cout << "Choose a city to place a soldier: ";
+			 cin >> city;
+			int dummy;
+			
+			worldMap->getProvinceByName(city, dummy, currentProvince);
+			
+			if (currentProvince == NULL) {
+				cout << "No such city." << endl;
+			}
+			else if (currentProvince->getOwner() != NULL) {
+				cout << city << " has already been taken." << endl;
+			}
+			else
+				break;
+		}
+		placeSoldier(currentPlayer, city, 1);
+		turn++;
+	}
+
+	cout << "*** SOLDIER PLACEMENT IS DONE ***" << endl;
+		
+}
+
+void GameManager::loadProvinces() {
+	createProvince("ankara", "");
+	createProvince("istanbul", "");
+	createProvince("konya", "");
+	createProvince("antalya", "");
+	createProvince("eskisehir", "");
+	createProvince("edirne", "");
+	createProvince("kars", "");
+	createProvince("aksaray", "");
+
+	createNeighbor("ankara", "konya");
+	createNeighbor("ankara", "eskisehir");
+	createNeighbor("konya", "antalya");
+	createNeighbor("aksaray", "konya");
+	createNeighbor("istanbul", "edirne");
+}
+
+void GameManager::startGame() {
+	loadProvinces();
+	startPlacement();
 }
