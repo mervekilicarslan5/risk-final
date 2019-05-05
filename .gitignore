@@ -15,7 +15,6 @@ cs319.vcxproj.user
 
 # ignore a file type
 *.vcxproj
-*.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
 
