@@ -120,6 +120,7 @@ public:
 	void showWorldStatus();
 	void showProvinceStatus(Province* p);
 	int getNumberOfProvinces();
+	Province* getProvinceByID(int id);
 private:
 	int numberOfProvinces;
 	vector< Province* > provinceList;
@@ -176,8 +177,11 @@ public:
 	void showProvinceStatus(string name);
 	vector<int> rollDice(int attacker, int defender);
 	void startPlacement();
+	void startTurn(int id);
 	void loadProvinces();
 	void startGame();
+	void startPlacementPhase(int id);
+	void randomPlacement();
 
 private:
 	vector<Player*> players;

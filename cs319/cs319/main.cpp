@@ -30,7 +30,7 @@ int main() {
 	//GM->attack("ahmet", "ahmet", "konya", "ankara", 3);
 
 
-	GM->showWorldStatus();
+	//GM->showWorldStatus();
 
 	system("PAUSE");
 

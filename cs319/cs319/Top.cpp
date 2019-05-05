@@ -361,6 +361,12 @@ int WorldMap::getNumberOfProvinces() {
 	return numberOfProvinces;
 }
 
+Province* WorldMap::getProvinceByID(int id) {
+	if (id < provinceList.size())
+		return provinceList[id];
+	return NULL;
+}
+
 void WorldMap::showWorldStatus() {
 	for (auto it = provinceList.begin(); it != provinceList.end(); it++) {
 		showProvinceStatus(*it);
@@ -711,6 +717,7 @@ vector<int> GameManager::rollDice(int attacker, int defender)  {
 
 void GameManager::startPlacement() {
 	cout << "*** INITIAL SOLDIER PLACEMENT ***" << endl << endl;
+
 	int turn = 0;
 	int numberOfPlayers = players.size();
 	int numberOfProvinces = worldMap->getNumberOfProvinces();
@@ -742,7 +749,13 @@ void GameManager::startPlacement() {
 	}
 
 	cout << "*** SOLDIER PLACEMENT IS DONE ***" << endl;
-		
+}
+
+void GameManager::startTurn(int id) {
+	string playerName;
+	Player* currentPlayer = getPlayerByID(id, playerName);
+	cout << "*** " << playerName << "'s turn ***" << endl;
+	startPlacementPhase(id);
 }
 
 void GameManager::loadProvinces() {
@@ -764,5 +777,85 @@ void GameManager::loadProvinces() {
 
 void GameManager::startGame() {
 	loadProvinces();
-	startPlacement();
+	//startPlacement();
+	randomPlacement();
+	showWorldStatus();
+	bool gameOn = true;
+
+	int turn = 0;
+	int numberOfPlayers = players.size();
+	int numberOfProvinces = worldMap->getNumberOfProvinces();
+
+	while (gameOn) {
+		cout << endl <<  "==================================  " << players[turn]->getName() << "'s turn " << endl;
+		startPlacementPhase(turn);
+
+		turn = (turn + 1) % numberOfPlayers;
+	}
 }
+
+void GameManager::startPlacementPhase(int id) {
+	string playerName;
+	Player* player = getPlayerByID(id, playerName);
+
+	cout << endl << "*** SOLDIER PLACEMENT PHASE ***" << endl;
+	int n = 4;
+	string choice = "";
+	while (n > 0) {
+		cout << "You have " << n << " soldiers to place." << endl;
+		cout << "city : ";
+		string cityName; int amount;
+		cin >> cityName;
+		Province* city;
+		worldMap->getProvinceByName(cityName, amount, city);
+		if (city != NULL) {
+			cout << "amount : ";
+			cin >> amount;
+			if (amount <= n) {
+				if (placeSoldier(player, cityName, amount)) {
+					cout << amount << " soldiers have been placed to " << cityName << endl;
+					n -= amount;
+				}
+				else {
+					cout << cityName << " does not belong to you." << endl;
+				}
+			}
+			else {
+				cout << "The amount cannot be more than " << n << endl;
+			} 
+		}
+		else {
+			cout << "No such city" << endl;
+		}
+	}
+}
+
+void GameManager::randomPlacement() {
+	
+	int size = worldMap->getNumberOfProvinces();
+	Die die(size);
+	int* shuffledArray = new int[size];
+	for (int i = 0; i < size; i++) {
+		shuffledArray[i] = i;
+	}
+	for (int i = 0; i < size; i++) {
+		int r = die.roll() - 1;
+		int temp;
+		temp = shuffledArray[i];
+		shuffledArray[i] = shuffledArray[r];
+		shuffledArray[r] = temp;
+	}
+	int t = 0;
+	int numberOfPlayers = players.size();
+	for (int i = 0; i < size; i++) {
+		Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
+		placeSoldier(players[t], curProvince->getName(), 1);
+		t = (t + 1) % numberOfPlayers;
+	}
+	cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
+	delete shuffledArray;
+}
+
+
+
+
