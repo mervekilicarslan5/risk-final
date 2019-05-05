@@ -6,6 +6,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+
+# ignore a file type
 *.vcxproj
 
 # User-specific files (MonoDevelop/Xamarin Studio)
