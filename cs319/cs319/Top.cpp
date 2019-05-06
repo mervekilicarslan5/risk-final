@@ -1051,6 +1051,91 @@ void GameManager::randomPlacement() {
 	delete shuffledArray;
 }
 
+WindowManager::WindowManager()
+{
+	zoom = 1.0;
 
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
 
+	cout << screenHeight << ", " << screenWidth << endl;
 
+	leftMargin = screenWidth / 10;
+	rightMargin = (screenWidth * 9) / 10;
+	topMargin = screenHeight / 10;
+	bottomMargin = (screenHeight * 9) / 10;
+
+	if (!mapImg.loadFromFile("assets/map.jpeg")) {
+		cout << "Unable to open file" << endl;
+	}
+
+	mapTex.loadFromImage(mapImg);
+	mapSprite.setTexture(mapTex);
+	mainView.setSize(screenWidth, screenHeight);
+}
+
+WindowManager::~WindowManager() {
+
+}
+
+void WindowManager::createWindow() {
+	window.setVerticalSyncEnabled(true);
+	window.setKeyRepeatEnabled(false);
+	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
+
+	while (window.isOpen()) {
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+			else if (event.type == sf::Event::MouseWheelScrolled)
+			{
+				if (zoom > 0.5 && event.mouseWheelScroll.delta > 0) {
+					mainView.zoom(0.80);
+					zoom *= 0.8;
+					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+				}
+				else if (zoom < 1 && event.mouseWheelScroll.delta < 0) {
+					mainView.zoom(1.25);
+					zoom *= 1.25;
+					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+				}
+			}
+			else if (event.type == sf::Event::MouseButtonPressed)
+			{
+				if (event.mouseButton.button == sf::Mouse::Left)
+				{
+				}
+			}
+			
+		}
+		sf::Vector2i mousePos = mouse.getPosition(window);
+		//cout << "x: " << mousePos.x << " y: " << mousePos.y << endl;
+		if (mousePos.x < leftMargin) {
+			mainView.move(-0.2, 0);
+			cout << "Move Left" << endl;
+		}
+		else if (mousePos.x > rightMargin) {
+			mainView.move(0.2, 0);
+			cout << "Move Right" << endl;
+		}
+		if (mousePos.y < topMargin) {
+			mainView.move(0, -0.2);
+			cout << "Move Up" << endl;
+		}
+		else if (mousePos.y > bottomMargin) {
+			mainView.move(0, 0.2);
+			cout << "Move Down" << endl;
+		}
+
+		window.setView(mainView);
+
+		window.clear(sf::Color::Black);
+
+		window.draw(mapSprite);
+
+		window.display();
+	}
+
+}

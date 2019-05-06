@@ -1,5 +1,6 @@
 #pragma once
-
+#include <SFML/Graphics.hpp>
+#include <Windows.h>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -196,3 +197,22 @@ private:
 	bool gameOn;
 };
 
+class WindowManager {
+public: 
+	double zoom;
+	int screenWidth;
+	int screenHeight;
+	int leftMargin, rightMargin, topMargin, bottomMargin;
+	sf::Image mapImg;
+	sf::Texture mapTex;
+	sf::View mainView;
+	sf::Sprite mapSprite;
+	sf::RenderWindow window;
+	sf::Mouse mouse;
+	
+
+	WindowManager();
+	~WindowManager();
+	void createWindow();
+
+};
