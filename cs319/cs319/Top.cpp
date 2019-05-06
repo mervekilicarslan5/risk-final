@@ -10,7 +10,6 @@ Die::Die(int _numberOfFaces)
 	numberOfFaces = _numberOfFaces;
 }
 
-
 Die::~Die()
 {
 }
@@ -22,6 +21,7 @@ int Die::roll()
 	std::uniform_real_distribution<double> dist(1, numberOfFaces + 1);
 	return dist(mt);
 }
+
 
 
 Castle::Castle()
@@ -68,18 +68,22 @@ void Castle::upgradeLevel()
 bool Castle::isBuilt() {
 	return built;
 }
+
 void Castle::build() {
 	built = true;
 }
+
 void Castle::destroy() {
 	built = false;
 	level = 0;
 }
 
+
+
+
 Continent::Continent()
 {
 }
-
 
 Continent::~Continent()
 {
@@ -125,6 +129,8 @@ void Continent::setProvinces(vector<int> _provinces)
 	provinces = _provinces;
 }
 
+
+
 Player::Player()
 {
 	name = "";
@@ -142,7 +148,6 @@ Player::Player(string _name, int _id)
 	battlesWon = 0;
 	money = 200;
 }
-
 
 Player::~Player()
 {
@@ -254,6 +259,8 @@ bool Player::buildCastle(Province* province) {
 int Player::getNumberOfProvinces() {
 	return provinces.size();
 }
+
+
 
 WorldMap::WorldMap()
 {
@@ -387,6 +394,9 @@ void WorldMap::showWorldStatus() {
 	}
 }
 
+
+
+
 Province::Province()
 {
 	name = "";
@@ -404,7 +414,6 @@ Province::Province(string _name, string _color)
 	owner = NULL;
 	castle = new Castle(150);
 }
-
 
 Province::~Province()
 {
@@ -455,6 +464,9 @@ void Province::setNumberOfSoldiers(int _numberOfSoldiers)
 {
 	numberOfSoldiers = _numberOfSoldiers;
 }
+
+
+
 
 GameManager::GameManager()
 {
@@ -705,6 +717,7 @@ bool GameManager::attack(string attackerName, string defenderName, string fromSt
 void GameManager::showWorldStatus() {
 	worldMap->showWorldStatus();
 }
+
 void GameManager::showProvinceStatus(string name) {
 	int i; Province* ptr;
 	worldMap->getProvinceByName(name, i, ptr);
