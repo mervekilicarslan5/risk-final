@@ -131,6 +131,7 @@ Player::Player()
 	id = -1;
 	battlesLost = 0;
 	battlesWon = 0;
+	money = 200;
 }
 
 Player::Player(string _name, int _id)
@@ -139,6 +140,7 @@ Player::Player(string _name, int _id)
 	id = _id;
 	battlesLost = 0;
 	battlesWon = 0;
+	money = 200;
 }
 
 
@@ -196,6 +198,14 @@ void Player::setBattlesLost(int _battlesLost)
 	battlesLost = _battlesLost;
 }
 
+void Player::incBattlesLost() {
+	battlesLost++;
+}
+
+void Player::incBattlesWon() {
+	battlesWon++;
+}
+
 void Player::setName(string _name)
 {
 	name = _name;
@@ -239,6 +249,10 @@ bool Player::buildCastle(Province* province) {
 	}
 	province->getCastle()->build();
 	money -= province->getCastle()->getPrice();
+}
+
+int Player::getNumberOfProvinces() {
+	return provinces.size();
 }
 
 WorldMap::WorldMap()
@@ -513,6 +527,7 @@ bool GameManager::buildCastle(Player* player, Province* province) {
 	cout << player->getName() << " built a castle in " << province->getName() << endl;
 	return true;
 }
+
 bool GameManager::buildCastle(int playerId, string provinceName) {
 	string str;
 	Player* player = getPlayerByID(playerId, str);
@@ -641,9 +656,19 @@ bool GameManager::attack(Player* attacker, Player* defender, Province* from, Pro
 	cout << "Defender lost " << result[0] << " soldiers" << endl;
 	from->setNumberOfSoldiers(from->getNumberOfSoldiers() - result[1]);
 	to->setNumberOfSoldiers(to->getNumberOfSoldiers() - result[0]);
+	if (result[0] > result[1]) {
+		attacker->incBattlesWon();
+		defender->incBattlesLost();
+	}
+	else {
+		attacker->incBattlesLost();
+		defender->incBattlesWon();
+	}
+		
 	if (to->getNumberOfSoldiers() == 0) {
 		cout << attacker->getName() << " has captured the city " << to->getName() << endl;
 		attacker->captureProvince(worldMap, to);
+
 		int number = -1;
 		while (number <= 0 || number >= from->getNumberOfSoldiers()) {
 			cout << "Enter the number of soldiers you want to place on this city: ";
@@ -756,6 +781,12 @@ void GameManager::startTurn(int id) {
 	Player* currentPlayer = getPlayerByID(id, playerName);
 	cout << "*** " << playerName << "'s turn ***" << endl;
 	startPlacementPhase(id);
+	startAttackingPhase(id);
+	if (gameOn) {
+		startMarket(id);
+		startFortifyPhase(id);
+	}
+	showWorldStatus();
 }
 
 void GameManager::loadProvinces() {
@@ -767,12 +798,15 @@ void GameManager::loadProvinces() {
 	createProvince("edirne", "");
 	createProvince("kars", "");
 	createProvince("aksaray", "");
+	createProvince("kocaeli", "");
 
 	createNeighbor("ankara", "konya");
 	createNeighbor("ankara", "eskisehir");
 	createNeighbor("konya", "antalya");
 	createNeighbor("aksaray", "konya");
 	createNeighbor("istanbul", "edirne");
+	createNeighbor("istanbul", "kocaeli");
+	createNeighbor("eskisehir", "kocaeli");
 }
 
 void GameManager::startGame() {
@@ -780,7 +814,7 @@ void GameManager::startGame() {
 	//startPlacement();
 	randomPlacement();
 	showWorldStatus();
-	bool gameOn = true;
+	gameOn = true;
 
 	int turn = 0;
 	int numberOfPlayers = players.size();
@@ -788,7 +822,7 @@ void GameManager::startGame() {
 
 	while (gameOn) {
 		cout << endl <<  "==================================  " << players[turn]->getName() << "'s turn " << endl;
-		startPlacementPhase(turn);
+		startTurn(turn);
 
 		turn = (turn + 1) % numberOfPlayers;
 	}
@@ -799,7 +833,7 @@ void GameManager::startPlacementPhase(int id) {
 	Player* player = getPlayerByID(id, playerName);
 
 	cout << endl << "*** SOLDIER PLACEMENT PHASE ***" << endl;
-	int n = 4;
+	int n = player->getNumberOfProvinces() / 3;
 	string choice = "";
 	while (n > 0) {
 		cout << "You have " << n << " soldiers to place." << endl;
@@ -815,6 +849,7 @@ void GameManager::startPlacementPhase(int id) {
 				if (placeSoldier(player, cityName, amount)) {
 					cout << amount << " soldiers have been placed to " << cityName << endl;
 					n -= amount;
+					showProvinceStatus(cityName);
 				}
 				else {
 					cout << cityName << " does not belong to you." << endl;
@@ -828,6 +863,166 @@ void GameManager::startPlacementPhase(int id) {
 			cout << "No such city" << endl;
 		}
 	}
+}
+
+void GameManager::startAttackingPhase(int id) {
+	string playerName;
+	Player* player = getPlayerByID(id, playerName);
+
+	cout << endl << "*** ATTACKING PHASE ***" << endl;
+
+	string from, to;
+	while (true) {
+		cout << "city: ";
+		cin >> from;
+		if (from == "done")
+			break;
+		Province* fromPtr; int dummy;
+		worldMap->getProvinceByName(from, dummy, fromPtr);
+		if (fromPtr == NULL) {
+			cout << "No such city " << endl;
+		}
+		else if (fromPtr->getOwner() != player) {
+			cout << "This city does not belong to you" << endl;
+		}
+		else {
+			cout << "attack to: ";
+			cin >> to;
+			Province* toPtr; 
+			worldMap->getProvinceByName(to, dummy, toPtr);
+			if (toPtr == NULL) {
+				cout << "No such city" << endl;
+			}
+			else if (toPtr->getOwner() == player) {
+				cout << "You cannot attack your own city." << endl;
+			}
+			else if (!worldMap->isNeighbor(fromPtr, toPtr)) {
+				cout << "The cities must be neighbor" << endl;
+			}
+			else {
+				int amount;
+				cout << "amount: ";
+				cin >> amount;
+				if (amount >= fromPtr->getNumberOfSoldiers() ) {
+					cout << "There has to be at least one soldier left in the city" << endl;
+				}
+				else if (amount > 3 || amount < 1){
+					cout << "The number needs to be betwen 1 - 3" << endl;
+				}
+				else {
+					attack(player, toPtr->getOwner(), fromPtr, toPtr, amount);
+					showProvinceStatus(from);
+					showProvinceStatus(to);
+					if (player->getNumberOfProvinces() == worldMap->getNumberOfProvinces()) {
+						gameOn = false;
+						cout << "*** " << player->getName() << " WON" << endl;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+void GameManager::startMarket(int id) {
+	string playerName;
+	Player* player = getPlayerByID(id, playerName);
+
+	cout << endl << "*** MARKET PHASE ***" << endl;
+	cout << "Your money: " << player->getMoney() << endl;
+	cout << "How many soldiers do you want? (100 gold per soldier): ";
+	int amount; 
+	while (true) {
+		cin >> amount;
+		if (amount * 100 > player->getMoney()) {
+			cout << "Insufficient money" << endl;
+		}
+		else {
+			player->setMoney(player->getMoney()-amount*100);
+			break;
+		}
+	}
+
+	int n = amount;
+	string choice = "";
+	while (n > 0) {
+		cout << "You have " << n << " soldiers to place." << endl;
+		cout << "city : ";
+		string cityName; int amount;
+		cin >> cityName;
+		Province* city;
+		worldMap->getProvinceByName(cityName, amount, city);
+		if (city != NULL) {
+			cout << "amount : ";
+			cin >> amount;
+			if (amount <= n) {
+				if (placeSoldier(player, cityName, amount)) {
+					cout << amount << " soldiers have been placed to " << cityName << endl;
+					n -= amount;
+					showProvinceStatus(cityName);
+				}
+				else {
+					cout << cityName << " does not belong to you." << endl;
+				}
+			}
+			else {
+				cout << "The amount cannot be more than " << n << endl;
+			}
+		}
+		else {
+			cout << "No such city" << endl;
+		}
+	}
+}
+
+void GameManager::startFortifyPhase(int id) {
+	string playerName;
+	Player* player = getPlayerByID(id, playerName);
+
+	cout << endl << "*** FORTIFY PHASE ***" << endl;
+
+	string from, to;
+	while (true) {
+		cout << "from: ";
+		cin >> from;
+		if (from == "done")
+			break;
+		Province* fromPtr; int dummy;
+		worldMap->getProvinceByName(from, dummy, fromPtr);
+		if (fromPtr == NULL) {
+			cout << "No such city " << endl;
+		}
+		else if (fromPtr->getOwner() != player) {
+			cout << "This city does not belong to you" << endl;
+		}
+		else {
+			cout << "to: ";
+			cin >> to;
+			Province* toPtr;
+			worldMap->getProvinceByName(to, dummy, toPtr);
+			if (toPtr == NULL) {
+				cout << "No such city" << endl;
+			}
+			else if (toPtr->getOwner() != player) {
+				cout << "This city does not belong to you" << endl;
+			}
+			else if (!worldMap->hasPath(player,fromPtr,toPtr)) {
+				cout << "There must be a path between the cities" << endl;
+			}
+			else {
+				int amount;
+				cout << "amount: ";
+				cin >> amount;
+				if (amount >= fromPtr->getNumberOfSoldiers()) {
+					cout << "There has to be at least one soldier left in the city" << endl;
+				}
+				else {
+					fortify(player, fromPtr, toPtr, amount);
+				}
+			}
+		}
+	}
+
 }
 
 void GameManager::randomPlacement() {

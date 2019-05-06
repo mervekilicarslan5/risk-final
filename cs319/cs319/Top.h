@@ -88,6 +88,8 @@ public:
 	void setMoney(int _money);
 	void setBattlesWon(int _battlesWon);
 	void setBattlesLost(int _battlesLost);
+	void incBattlesWon();
+	void incBattlesLost();
 	void setName(string _name);
 	void setId(int _id);
 	void captureProvince(WorldMap* worldMap, Province* _province);
@@ -95,6 +97,7 @@ public:
 	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
 	bool hasProvince(WorldMap * worldMap, Province* _province);
 	bool buildCastle(Province* province);
+	int getNumberOfProvinces();
 private:
 	string name;
 	int money;
@@ -181,11 +184,15 @@ public:
 	void loadProvinces();
 	void startGame();
 	void startPlacementPhase(int id);
+	void startAttackingPhase(int id);
+	void startMarket(int id);
+	void startFortifyPhase(int id);
 	void randomPlacement();
 
 private:
 	vector<Player*> players;
 	WorldMap* worldMap;
 	Die* die;
+	bool gameOn;
 };
 

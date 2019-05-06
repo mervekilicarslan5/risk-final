@@ -9,8 +9,9 @@ int main() {
 
 	GameManager* GM = new GameManager();
 
-	GM->addPlayer("ahmet");
+	GM->addPlayer("rumeysa");
 	GM->addPlayer("serdar");
+	GM->addPlayer("geyOsman");
 
 	GM->startGame();
 
