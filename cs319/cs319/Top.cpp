@@ -1,5 +1,6 @@
 #include "Top.h"
 
+
 Die::Die()
 {
 	numberOfFaces = 6;

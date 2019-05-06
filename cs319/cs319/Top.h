@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <iostream>
 #include <vector>
@@ -12,7 +11,6 @@ class Castle;
 class Province;
 class Continent;
 class Player;
-class WorldMap;
 class WorldMap;
 
 class Die
@@ -193,4 +191,3 @@ private:
 	Die* die;
 	bool gameOn;
 };
-
