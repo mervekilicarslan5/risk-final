@@ -27,6 +27,7 @@ private:
 	int numberOfFaces;
 };
 
+
 class Castle
 {
 public:
@@ -149,6 +150,7 @@ private:
 	Player* owner;
 	string name;
 };
+
 
 class GameManager
 {
