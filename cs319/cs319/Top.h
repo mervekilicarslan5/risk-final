@@ -192,6 +192,8 @@ public:
 	void startMarket(int id);
 	void startFortifyPhase(int id);
 	void randomPlacement();
+	void sendAllProvincesFromHost(NetworkManager ** NM);
+	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
 
 private:
 	vector<Player*> players;
@@ -204,7 +206,7 @@ class NetworkManager {
 public:
 	void createNetwork(GameManager ** const GM);
 	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count);
-	void sendDataFromClientToHost(string _connectionType, int _id, int _count);
+	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count);
 	void buildNewtwork();
 	vector<string> split(std::string strToSplit, char delimeter);
 	string connectionType;

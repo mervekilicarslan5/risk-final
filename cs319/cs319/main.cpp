@@ -17,6 +17,7 @@ int main() {
 
 	GM->startGame(&NM);
 
+
 	/*NetworkManager * NM = new NetworkManager;
 	NM->createNetwork();
 	NM->sendDataFromHost("Ankara", 10); */

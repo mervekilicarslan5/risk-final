@@ -284,7 +284,7 @@ WorldMap::~WorldMap()
 void WorldMap::addProvince(Province * _province)
 {
 	provinceList.push_back(_province);
-	vector<int> empty;
+	vector <int> empty;
 	map.push_back(empty);
 	numberOfProvinces++;
 }
@@ -810,7 +810,7 @@ void GameManager::startTurn(int id) {
 		startMarket(id);
 		startFortifyPhase(id);
 	}
-	showWorldStatus();
+	//showWorldStatus();
 }
 
 void GameManager::loadProvinces() {
@@ -853,18 +853,63 @@ void GameManager::startGame(NetworkManager ** NM) {
 		
 	showWorldStatus();
 		
-	/*gameOn = true;
+	gameOn = true;
 
 	int turn = 0;
 	int numberOfPlayers = players.size();
 	int numberOfProvinces = worldMap->getNumberOfProvinces();
-
+	cout << endl << "==================================  " << endl;
 	while (gameOn) {
-		cout << endl <<  "==================================  " << players[turn]->getName() << "'s turn " << endl;
-		startTurn(turn);
+		
+		if ((*NM)->connectionType == "h" && turn == 0) {
+			cout << endl << "============		YOUR TURN		===============  " << endl;
+			startTurn(0);
+			sendAllProvincesFromHost(NM);
+			turn = 1;
+		}
+		else if ((*NM)->connectionType == "h" && turn == 1) {
+			cout << endl << "============		"<< players[1]->getName() <<" TURN		===============  " << endl;
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		" << players[2]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+			turn = 0;
+		}
 
-		turn = (turn + 1) % numberOfPlayers;
-	}*/
+
+		else if ((*NM)->connectionType == "c1" && turn == 0) {
+			cout << endl << "============		" << players[0]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		YOUR TURN		===============  " << endl;
+			startTurn(1);
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+			turn = 1;
+		}
+		else if ((*NM)->connectionType == "c1" && turn == 1) {
+			cout << endl << "============		" << players[2]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			turn = 0;
+		}
+
+
+
+		else if ((*NM)->connectionType == "c2" && turn == 0) {
+			cout << endl << "============		" << players[0]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		" << players[1]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		YOUR TURN		===============  " << endl;
+			startTurn(2);
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+		}
+		/*else if ((*NM)->connectionType == "c2" && turn == 1) {
+			cout << endl << "============		" << players[3]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+		}*/
+	}
 }
 
 void GameManager::startPlacementPhase(int id) {
@@ -1090,6 +1135,20 @@ void GameManager::randomPlacement() {
 	delete shuffledArray;
 }
 
+void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
+	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) 
+		(*NM)->sendDataFromHost(this, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+	showWorldStatus();
+}
+
+void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkManager ** NM) {
+	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) 
+		(*NM)->sendDataFromClientToHost(this, _connectionType, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+}
+
+
+
+
 
 void NetworkManager::createNetwork(GameManager ** const GM) {
 	ip = IpAddress::getLocalAddress();	
@@ -1131,7 +1190,6 @@ void NetworkManager::createNetwork(GameManager ** const GM) {
 		cout << "Enter your name(HOST): ";
 		cin >> name;
 		playersName += name + ",";
-		cout << playersName;
 		(*GM)->addPlayer(name);
 		do {
 			IpAddress rIP;
@@ -1249,9 +1307,10 @@ void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, i
 				int count = receivedCount;
 				Player * playerChanged = GM->getPlayerByID(pId, dummy);
 				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cId);
-				provinceChanged->setOwner(playerChanged);
+				//provinceChanged->setOwner(playerChanged);
+				
+				playerChanged->captureProvince(GM->getWorldMap(), provinceChanged);
 				provinceChanged->setNumberOfSoldiers(count);
-
 				break;
 			}
 
@@ -1259,37 +1318,46 @@ void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, i
 	}
 }
 
-void NetworkManager::sendDataFromClientToHost(string _connectionType, int _id , int _count) {
-	int idSend;
-	int intSend;
+void NetworkManager::sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count) {
+	int pID, cID, cou;
 	while (true) {
-		if (connectionType == _connectionType) {
-			Uint16 _id = _id;
+		if (_connectionType != "h") {
+			Uint16 playerID = _playerID;
+			Uint16 cityID = _cityID;
 			Uint16 count = _count;
 			Packet packet;
-			packet << _id << count;
+			packet << playerID << cityID << count;
 			cout << "!!!!!!!!!!!!!!!!!!" << endl;
 			IpAddress sendIP(sIP);
 			if (socket.send(packet, sendIP, 2000) == Socket::Done)
 				break;
 		}
-		else if (connectionType == "h") {
+		else if (_connectionType == "h") {
 			IpAddress tempId;
 			unsigned short tempPort;
+			Packet packet;
 			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {
-				Uint16 receivedID;
+				Uint16 receivedPlayerID;
+				Uint16 receivedCityID;
 				Uint16 receivedCount;
-				packet >> receivedID >> receivedCount;
-				cout << "Received Data from client: " << receivedID << receivedCount << endl;
-				idSend = receivedID;
-				intSend = receivedCount;
+				packet >> receivedPlayerID >> receivedCityID >> receivedCount;
+				cout << "Received Data from client: " << receivedPlayerID << receivedCityID << receivedCount << endl;
+				pID = receivedPlayerID;
+				cID = receivedCityID;
+				cou = receivedCount;
+
+				string dummy;
+				Player * playerChanged = GM->getPlayerByID(pID, dummy);
+				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cID);
+				//provinceChanged->setOwner(playerChanged);
+				playerChanged->captureProvince(GM->getWorldMap(), provinceChanged);
+				provinceChanged->setNumberOfSoldiers(receivedCount);
 				break;
 			}
 		}
 		else
 			break;
 	}
-	//sendDataFromHost(idSend,intSend);
 
 }
 
