@@ -268,10 +268,12 @@ WorldMap::~WorldMap()
 
 void WorldMap::addProvince(Province * _province)
 {
-	provinceList.push_back(_province);
-	vector<int> empty;
-	map.push_back(empty);
-	numberOfProvinces++;
+	if (find(provinceList.begin(), provinceList.end(), _province) == provinceList.end()) {
+		provinceList.push_back(_province);
+		vector<int> empty;
+		map.push_back(empty);
+		numberOfProvinces++;
+	}
 }
 
 void WorldMap::addEdge(int first, int second)
@@ -790,7 +792,8 @@ void GameManager::startTurn(int id) {
 }
 
 void GameManager::loadProvinces() {
-	createProvince("ankara", "");
+	cout << "Provinces are loading" << endl;
+	/*createProvince("ankara", "");
 	createProvince("istanbul", "");
 	createProvince("konya", "");
 	createProvince("antalya", "");
@@ -807,6 +810,20 @@ void GameManager::loadProvinces() {
 	createNeighbor("istanbul", "edirne");
 	createNeighbor("istanbul", "kocaeli");
 	createNeighbor("eskisehir", "kocaeli");
+*/
+	fstream file("assets/provinces.txt");
+
+	int color;
+	string cityName;
+	bool stepOne = false;
+	bool stepTwo = false;
+	while (!file.eof()) {
+		file >> cityName >> color;
+		createProvince(cityName, to_string(color));
+		colorLookUpTable.insert(pair<int, string> (color, cityName));
+		cout << cityName << " " << color << " loaded. " << endl;
+	}
+	file.close();
 }
 
 void GameManager::startGame() {
@@ -1063,22 +1080,44 @@ WindowManager::WindowManager()
 	leftMargin = screenWidth / 10;
 	rightMargin = (screenWidth * 9) / 10;
 	topMargin = screenHeight / 10;
-	bottomMargin = (screenHeight * 9) / 10;
+	bottomLowerMargin = (screenHeight * 7) / 10;
+	bottomUpperMargin = (screenHeight * 8) / 10;
 
-	if (!mapImg.loadFromFile("assets/map.jpeg")) {
+	if (!mapImg.loadFromFile("assets/dummyMap.jpeg")) {
 		cout << "Unable to open file" << endl;
+	}
+	if (!hoverImg.loadFromFile("assets/hover.jpeg")) {
+		cout << "Unable to open file" << endl;
+	}
+
+	font;
+	if (!font.loadFromFile("assets/font.ttf"))
+	{
+		// error...
 	}
 
 	mapTex.loadFromImage(mapImg);
 	mapSprite.setTexture(mapTex);
 	mainView.setSize(screenWidth, screenHeight);
+	/*mainView.setViewport(sf::FloatRect(0, 0, 1, 0.8f));*/
+
+	lowerPanel.setSize(sf::Vector2f(screenWidth, screenHeight - bottomUpperMargin));
+	lowerPanel.setPosition(0, bottomUpperMargin);
+	lowerPanel.setFillColor(sf::Color(0, 0, 255));
+
+	provinceNameTxt.setFont(font);
+	provinceNameTxt.setCharacterSize(50);
+	provinceNameTxt.setFillColor(sf::Color(255, 255, 255));
+
+	mapSprite.setPosition(0, 0);
+	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
 }
 
 WindowManager::~WindowManager() {
 
 }
 
-void WindowManager::createWindow() {
+void WindowManager::createWindow(GameManager* GM) {
 	window.setVerticalSyncEnabled(true);
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
@@ -1106,36 +1145,78 @@ void WindowManager::createWindow() {
 			{
 				if (event.mouseButton.button == sf::Mouse::Left)
 				{
+					float moveAmount = 20;
+					bool moved = false;
+					//cout << "x: " << mousePos.x << " y: " << mousePos.y << endl;
+					if (event.mouseButton.x < leftMargin) {
+						mainView.move(-moveAmount, 0);
+						cout << "Move Left" << endl;
+						moved = true;
+					}
+					else if (event.mouseButton.x > rightMargin) {
+						mainView.move(moveAmount, 0);
+						cout << "Move Right" << endl;
+						moved = true;
+					}
+					if (event.mouseButton.y < topMargin) {
+						mainView.move(0, -moveAmount);
+						cout << "Move Up" << endl;
+						moved = true;
+					}
+					else if (event.mouseButton.y > bottomLowerMargin && event.mouseButton.y < bottomUpperMargin) {
+						mainView.move(0, moveAmount);
+						cout << "Move Down" << endl;
+						moved = true;
+					}
+					if (!moved) {
+						int pixColor = getPixelColor();
+						cout << pixColor << endl;
+
+						/*if (pixColor == 1103981311) {
+							mapTex.loadFromFile("assets/hover.jpeg");
+						}
+						else {
+							mapTex.loadFromFile("assets/.jpeg");
+						}*/
+
+						provinceNameTxt.setPosition(lowerPanel.getPosition());
+						
+						provinceNameTxt.setString("City: " + GM->colorLookUpTable[pixColor]);
+
+					}
 				}
 			}
 			
 		}
-		sf::Vector2i mousePos = mouse.getPosition(window);
-		//cout << "x: " << mousePos.x << " y: " << mousePos.y << endl;
-		if (mousePos.x < leftMargin) {
-			mainView.move(-0.2, 0);
-			cout << "Move Left" << endl;
-		}
-		else if (mousePos.x > rightMargin) {
-			mainView.move(0.2, 0);
-			cout << "Move Right" << endl;
-		}
-		if (mousePos.y < topMargin) {
-			mainView.move(0, -0.2);
-			cout << "Move Up" << endl;
-		}
-		else if (mousePos.y > bottomMargin) {
-			mainView.move(0, 0.2);
-			cout << "Move Down" << endl;
-		}
-
+		
+		//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
+		//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
 		window.setView(mainView);
 
 		window.clear(sf::Color::Black);
 
 		window.draw(mapSprite);
 
+		
+
+		window.setView(window.getDefaultView());
+		window.draw(lowerPanel);
+
+		window.draw(provinceNameTxt);
+
+		
 		window.display();
 	}
 
+}
+
+string WindowManager::getProvinceByColor(int color) {
+
+}
+
+int WindowManager::getPixelColor() {
+	sf::Vector2i PixelPos = mouse.getPosition(window);
+	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
+	cout << MousePos.x << ", " << MousePos.y << endl;
+	return (int) mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
 }

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <fstream>
 #include <random>
 using namespace std;
 
@@ -190,6 +191,8 @@ public:
 	void startFortifyPhase(int id);
 	void randomPlacement();
 
+	map<int, string> colorLookUpTable;
+
 private:
 	vector<Player*> players;
 	WorldMap* worldMap;
@@ -202,17 +205,21 @@ public:
 	double zoom;
 	int screenWidth;
 	int screenHeight;
-	int leftMargin, rightMargin, topMargin, bottomMargin;
-	sf::Image mapImg;
+	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
+	sf::Image mapImg, hoverImg;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
 	sf::RenderWindow window;
 	sf::Mouse mouse;
+	sf::RectangleShape lowerPanel;
+	sf::Text provinceNameTxt;
+	sf::Font font;
 	
 
 	WindowManager();
 	~WindowManager();
-	void createWindow();
-
+	void createWindow(GameManager* GM);
+	string getProvinceByColor(int color);
+	int getPixelColor();
 };
