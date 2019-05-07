@@ -1083,7 +1083,7 @@ WindowManager::WindowManager()
 	bottomLowerMargin = (screenHeight * 7) / 10;
 	bottomUpperMargin = (screenHeight * 8) / 10;
 
-	if (!mapImg.loadFromFile("assets/dummyMap.jpeg")) {
+	if (!mapImg.loadFromFile("assets/mapp.png")) {
 		cout << "Unable to open file" << endl;
 	}
 	if (!hoverImg.loadFromFile("assets/hover.jpeg")) {
@@ -1111,6 +1111,18 @@ WindowManager::WindowManager()
 
 	mapSprite.setPosition(0, 0);
 	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
+
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+
+	buttons[0]->setPosition(100, 100);
+	buttons[0]->setSize(100, 100);
+	buttons[0]->setText("hello world");
+	buttons[0]->setTextSize(20);
+	buttons[0]->setTextColor(sf::Color::Blue);
+
 }
 
 WindowManager::~WindowManager() {
@@ -1118,9 +1130,12 @@ WindowManager::~WindowManager() {
 }
 
 void WindowManager::createWindow(GameManager* GM) {
-	window.setVerticalSyncEnabled(true);
+
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
+
+
+	int counter = 0;
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -1145,50 +1160,55 @@ void WindowManager::createWindow(GameManager* GM) {
 			{
 				if (event.mouseButton.button == sf::Mouse::Left)
 				{
+					checkButtons(event);
+					sf::Vector2i PixelPos = mouse.getPosition(window);
+					sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 					float moveAmount = 20;
 					bool moved = false;
-					//cout << "x: " << mousePos.x << " y: " << mousePos.y << endl;
-					if (event.mouseButton.x < leftMargin) {
-						mainView.move(-moveAmount, 0);
-						cout << "Move Left" << endl;
-						moved = true;
-					}
-					else if (event.mouseButton.x > rightMargin) {
-						mainView.move(moveAmount, 0);
-						cout << "Move Right" << endl;
-						moved = true;
-					}
-					if (event.mouseButton.y < topMargin) {
-						mainView.move(0, -moveAmount);
-						cout << "Move Up" << endl;
-						moved = true;
-					}
-					else if (event.mouseButton.y > bottomLowerMargin && event.mouseButton.y < bottomUpperMargin) {
-						mainView.move(0, moveAmount);
-						cout << "Move Down" << endl;
-						moved = true;
-					}
+					
 					if (!moved) {
-						int pixColor = getPixelColor();
+						int pixColor = getPixelColor(MousePos.x, MousePos.y);
 						cout << pixColor << endl;
-
-						/*if (pixColor == 1103981311) {
-							mapTex.loadFromFile("assets/hover.jpeg");
-						}
-						else {
-							mapTex.loadFromFile("assets/.jpeg");
-						}*/
 
 						provinceNameTxt.setPosition(lowerPanel.getPosition());
 						
 						provinceNameTxt.setString("City: " + GM->colorLookUpTable[pixColor]);
-
 					}
 				}
 			}
+
+			
 			
 		}
-		
+		int speed = 2;
+		if (counter > 10) {
+			sf::Vector2i mousePos = mouse.getPosition(window);
+
+
+			if (mousePos.x < leftMargin) {
+				if (mainView.getCenter().x >= mainView.getSize().x / 2) {
+					mainView.move(-zoom * speed, 0);
+				}
+			}
+			else if (mousePos.x > rightMargin) {
+				if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
+					mainView.move(zoom* speed, 0);
+				}
+			}
+			if (mousePos.y < topMargin) {
+				if (mainView.getCenter().y >= mainView.getSize().y / 2) {
+					mainView.move(0, -zoom * speed);
+				}
+			}
+			else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
+				if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
+					mainView.move(0, zoom * speed);
+				}
+			}
+			counter = 0;
+		}
+
+		counter++;
 		//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
 		//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
 		window.setView(mainView);
@@ -1197,26 +1217,81 @@ void WindowManager::createWindow(GameManager* GM) {
 
 		window.draw(mapSprite);
 
-		
 
 		window.setView(window.getDefaultView());
 		window.draw(lowerPanel);
 
 		window.draw(provinceNameTxt);
 
-		
+		buttons[0]->draw(window);
+
 		window.display();
 	}
 
 }
 
 string WindowManager::getProvinceByColor(int color) {
+	
+}
+
+int WindowManager::getPixelColor(int x, int y) {
+	cout << "Mouse : " << x << ", " << y << endl;
+	return (int) mapImg.getPixel(x, y).toInteger();
+}
+
+void WindowManager::checkButtons(sf::Event & e) {
+	int id = 0;
+	for (auto it = buttons.begin(); it != buttons.end(); it++) {
+		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
+			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
+			buttonClicked(id);
+			return;
+		}
+		id++;
+	}
+}
+
+void WindowManager::buttonClicked(int id) {
+	if (id == 0) {
+		cout << "Button clicked !" << endl;
+	}
+}
+
+Button::Button() {
+	
+}
+
+Button::Button(sf::Font & font) {
+	RectangleShape::RectangleShape();
+	text.setFont(font);
+}
+
+Button::~Button() {
 
 }
 
-int WindowManager::getPixelColor() {
-	sf::Vector2i PixelPos = mouse.getPosition(window);
-	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
-	cout << MousePos.x << ", " << MousePos.y << endl;
-	return (int) mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
+void Button::setText(string text) {
+	this->text.setString(text);
+}
+
+void Button::draw(sf::RenderWindow & window) {
+	window.draw(*this);
+	window.draw(text);
+}
+
+void Button::setPosition(float x, float y) {
+	sf::RectangleShape::setPosition(x, y);
+	text.setPosition(x, y);
+}
+
+void Button::setSize(int width, int height) {
+	sf::RectangleShape::setSize(sf::Vector2f(width, height));
+}
+
+void Button::setTextColor(sf::Color color) {
+	text.setFillColor(color);
+}
+
+void Button::setTextSize(int size) {
+	text.setCharacterSize(size);
 }

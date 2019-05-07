@@ -15,7 +15,8 @@ class Province;
 class Continent;
 class Player;
 class WorldMap;
-class WorldMap;
+class WindowManager;
+class Button;
 
 class Die
 {
@@ -202,6 +203,9 @@ private:
 
 class WindowManager {
 public: 
+
+	GameManager GM;
+
 	double zoom;
 	int screenWidth;
 	int screenHeight;
@@ -215,11 +219,31 @@ public:
 	sf::RectangleShape lowerPanel;
 	sf::Text provinceNameTxt;
 	sf::Font font;
+	vector<Button*> buttons;
 	
-
 	WindowManager();
 	~WindowManager();
 	void createWindow(GameManager* GM);
 	string getProvinceByColor(int color);
-	int getPixelColor();
+	int getPixelColor(int x, int y);
+	void provinceClicked(int id);
+	void checkButtons(sf::Event & e);
+	void buttonClicked(int id);
+};
+
+class Button : public sf::RectangleShape {
+public :
+	sf::Text text;
+	int id;
+
+	Button();
+	Button(sf::Font & font);
+	~Button();
+
+	void setText(string text);
+	void draw(sf::RenderWindow & window);
+	void setPosition(float x, float y);
+	void setTextColor(sf::Color color);
+	void setTextSize(int size);
+	void setSize(int width, int height);
 };
