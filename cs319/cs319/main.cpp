@@ -10,27 +10,26 @@ using namespace std;
 
 int main() {
 
-	//GameManager* GM = new GameManager();
+	GameManager* GM = new GameManager();
+	NetworkManager* NM = new NetworkManager();
 
-	//GM->addPlayer("rumeysa");
-	//GM->addPlayer("serdar");
-	//GM->addPlayer("geyOsman");
+	NM->createNetwork(&GM);
 
-	//GM->startGame();
+	GM->startGame(&NM);
 
-	NetworkManager * NM = new NetworkManager;
+	/*NetworkManager * NM = new NetworkManager;
 	NM->createNetwork();
-	NM->sendDataFromHost("BIR"); 
-	int count = 1;
-	string connectionType = "c1";
-	while (count != 10) {
-		NM->sendDataFromClientToHost(connectionType, "TRY");
-		if (connectionType== "c1")
-			connectionType = "c2";
-		else if (connectionType == "c2")
-			connectionType = "c1";
-		count++;
-	}
+	NM->sendDataFromHost("Ankara", 10); */
+	//int count = 1;
+	//string connectionType = "c1";
+	//while (count != 10) {
+	//	NM->sendDataFromClientToHost(connectionType, "TRY");
+	//	if (connectionType== "c1")
+	//		connectionType = "c2";
+	//	else if (connectionType == "c2")
+	//		connectionType = "c1";
+	//	count++;
+	//}
 	
 
 		

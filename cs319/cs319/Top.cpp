@@ -833,12 +833,27 @@ void GameManager::loadProvinces() {
 	createNeighbor("eskisehir", "kocaeli");
 }
 
-void GameManager::startGame() {
+void GameManager::startGame(NetworkManager ** NM) {
+
 	loadProvinces();
-	//startPlacement();
-	randomPlacement();
+	if ((*NM)->connectionType == "h") {
+		//startPlacement();
+		randomPlacement();
+		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+			(*NM)->sendDataFromHost(this, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+			//NM->sendDataFromHost(this, 1, i, 4);
+		}
+	}
+	else {
+		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+			//NM->sendDataFromHost(this, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+			(*NM)->sendDataFromHost(this, 0, 0, 0);
+		}
+	}
+		
 	showWorldStatus();
-	gameOn = true;
+		
+	/*gameOn = true;
 
 	int turn = 0;
 	int numberOfPlayers = players.size();
@@ -849,7 +864,7 @@ void GameManager::startGame() {
 		startTurn(turn);
 
 		turn = (turn + 1) % numberOfPlayers;
-	}
+	}*/
 }
 
 void GameManager::startPlacementPhase(int id) {
@@ -1076,21 +1091,21 @@ void GameManager::randomPlacement() {
 }
 
 
-void NetworkManager::createNetwork() {
+void NetworkManager::createNetwork(GameManager ** const GM) {
 	ip = IpAddress::getLocalAddress();	
 	string text = " ";
 	int playerCount = 0;
 	Packet packet;
-
-	cout << ip << endl;
 
 	cout << "(h) for server, (c) for client: ";
 	cin >> connectionType;
 
 	unsigned short port = 2000;
 
-	if (connectionType == "h")
+	if (connectionType == "h") {
 		port = 2000;
+	}
+		
 	else if (connectionType == "c1")
 		port = 2001;
 	else if (connectionType == "c2")
@@ -1111,17 +1126,34 @@ void NetworkManager::createNetwork() {
 	}
 
 	if (connectionType == "h") {
-
+		string name;
+		string playersName = "";
+		cout << "Enter your name(HOST): ";
+		cin >> name;
+		playersName += name + ",";
+		cout << playersName;
+		(*GM)->addPlayer(name);
 		do {
 			IpAddress rIP;
 			unsigned short port;
+;
 			if (socket.receive(packet, rIP, port) == Socket::Done) {
 				computerID[port] = rIP;
 				playerCount++;
-				if (port == 2001)
-					cout << "Client1 has joined the room." << endl;
-				if (port == 2002)
-					cout << "Client2 has joined the room." << endl;
+				
+				String name;
+				packet >> name;
+				string display = name;
+				if (port == 2001) {
+					cout << display << " has joined the room." << endl;
+					(*GM)->addPlayer(display);
+					playersName += name + ",";
+				}
+				if (port == 2002) {
+					cout << display << " has joined the room." << endl;
+					(*GM)->addPlayer(display);
+					playersName += name + ",";
+				}
 				//if (port == 2003)
 				//	cout << "Client3 has joined the room." << endl;
 				//if (port == 2004)
@@ -1132,13 +1164,18 @@ void NetworkManager::createNetwork() {
 			cout << "Player in the game (except host): " << playerCount << endl;
 		} while (playerCount != 2);
 
-		//string startgame = "no";
-		//do {
-		//	cout << "enter 'start' to create the game: ";
-		//	cin >> startgame;
-		//} while (startgame != "start");
+		string startgame = "no";
+		do {
+			cout << "enter 's' to create the game: ";
+			cin >> startgame;
+		} while (startgame != "s");
 
-		//packet << startgame;
+		String sendPlayersName;
+		sendPlayersName = "" + playersName;
+		Packet packet;
+		packet << sendPlayersName;
+		//string display = sendPlayersName;
+		//cout << display << endl;
 		map<unsigned short, IpAddress> ::iterator tempIterator;
 		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
 			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
@@ -1149,53 +1186,88 @@ void NetworkManager::createNetwork() {
 	else if (connectionType == "c1" || connectionType == "c2") {
 		//cout << "Enter server ip: ";
 		//cin >> sIp;
+		string name;
+		cout << "Enter your name: ";
+		cin >> name;
+		String playerName = name;
+		packet << playerName;
 		sIP = "139.179.210.187";
 		IpAddress sendIP(sIP);
 		if (socket.send(packet, sendIP, 2000) == Socket::Done)
 			cout << "You have joined the room." << endl;
-		cout << sIP << endl;
+		//cout << sIP << endl;
 
 		IpAddress tempId;
 		unsigned short tempPort;
-		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
-			string receivedText;
-			packet >> receivedText;
-			cout << "The Game is starting" << endl;
-		}
-
-	}
-}
-
-void NetworkManager::sendDataFromHost (String _send) {
-
-	if (connectionType == "h") {
-		string text = _send;
 		Packet packet;
-		packet << text;
-		map<unsigned short, IpAddress> ::iterator tempIterator;
-		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
-			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
-	}
-
-	else if (connectionType == "c1" || connectionType == "c2") {
-
-		IpAddress tempId;
-		unsigned short tempPort;
 		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
-			string receivedText;
-			packet >> receivedText;
-			cout << "Received Data from host: " << receivedText << endl;
+			String received;
+			packet >> received;
+			string str = received;
+			cout << "The Game is starting" << endl;
+			players = split(str, ',');
+
+			for (int i = 0; i< 3; i++) {
+				(*GM)->addPlayer(players[i]); 
+			}
+
+
+
+		}
+
+	}
+}
+
+void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count) {
+
+	while (true) {
+		if (connectionType == "h") {
+			Uint16 playerID = _playerID;
+			Uint16 cityID = _cityID;
+			Uint16 count = _count;
+			Packet packet;
+			packet << playerID << cityID << count;
+			map<unsigned short, IpAddress> ::iterator tempIterator;
+			for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+				if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
+			break;
+		}
+
+		else if (connectionType == "c1" || connectionType == "c2") {
+
+			IpAddress tempId;
+			unsigned short tempPort;
+			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+				Uint16 receivedPlayerID;
+				Uint16 receivedCityID;
+				Uint16 receivedCount;
+				packet >> receivedPlayerID >> receivedCityID >> receivedCount;
+				
+				string dummy;
+				int pId = receivedPlayerID;
+				int cId = receivedCityID;
+				int count = receivedCount;
+				Player * playerChanged = GM->getPlayerByID(pId, dummy);
+				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cId);
+				provinceChanged->setOwner(playerChanged);
+				provinceChanged->setNumberOfSoldiers(count);
+
+				break;
+			}
+
 		}
 	}
 }
 
-void NetworkManager::sendDataFromClientToHost(string _connectionType, String _send) {
-	String sentToEveryone;
+void NetworkManager::sendDataFromClientToHost(string _connectionType, int _id , int _count) {
+	int idSend;
+	int intSend;
 	while (true) {
 		if (connectionType == _connectionType) {
-			string text = _send;
+			Uint16 _id = _id;
+			Uint16 count = _count;
 			Packet packet;
-			packet << text;
+			packet << _id << count;
 			cout << "!!!!!!!!!!!!!!!!!!" << endl;
 			IpAddress sendIP(sIP);
 			if (socket.send(packet, sendIP, 2000) == Socket::Done)
@@ -1205,17 +1277,20 @@ void NetworkManager::sendDataFromClientToHost(string _connectionType, String _se
 			IpAddress tempId;
 			unsigned short tempPort;
 			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {
-				string receivedText;
-				packet >> receivedText;
-				cout << "Received Data from client: " << receivedText << endl;
-				sentToEveryone = receivedText;
+				Uint16 receivedID;
+				Uint16 receivedCount;
+				packet >> receivedID >> receivedCount;
+				cout << "Received Data from client: " << receivedID << receivedCount << endl;
+				idSend = receivedID;
+				intSend = receivedCount;
 				break;
 			}
 		}
 		else
 			break;
 	}
-	sendDataFromHost(sentToEveryone);
+	//sendDataFromHost(idSend,intSend);
+
 }
 
 void NetworkManager::buildNewtwork() {
@@ -1313,5 +1388,16 @@ void NetworkManager::buildNewtwork() {
 
 		}
 	}
+}
+
+vector<string> NetworkManager ::split( string strToSplit, char delimeter){
+	stringstream ss (strToSplit);
+	string item;
+	vector<string> splittedStrings;
+	while (getline(ss, item, delimeter))
+	{
+		splittedStrings.push_back(item);
+	}
+	return splittedStrings;
 }
 

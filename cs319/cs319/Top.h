@@ -8,7 +8,7 @@
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
 #include <map>
-#include <conio.h>
+#include <sstream>
 
 using namespace std;
 using namespace sf;
@@ -186,7 +186,7 @@ public:
 	void startPlacement();
 	void startTurn(int id);
 	void loadProvinces();
-	void startGame();
+	void startGame(NetworkManager ** NM);
 	void startPlacementPhase(int id);
 	void startAttackingPhase(int id);
 	void startMarket(int id);
@@ -202,16 +202,20 @@ private:
 
 class NetworkManager {
 public:
-	void createNetwork();
-	void sendDataFromHost(String _send);
-	void sendDataFromClientToHost(string _connectionType, String _send);
+	void createNetwork(GameManager ** const GM);
+	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count);
+	void sendDataFromClientToHost(string _connectionType, int _id, int _count);
 	void buildNewtwork();
+	vector<string> split(std::string strToSplit, char delimeter);
+	string connectionType;
+
 
 private:
 	IpAddress ip;
 	IpAddress sIP;
 	map<unsigned short, IpAddress> computerID;
 	UdpSocket socket;
-	string connectionType;
+	vector<string> players;
+	
 	Packet packet;
 };
