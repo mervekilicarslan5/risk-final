@@ -4,7 +4,14 @@
 #include <vector>
 #include <queue>
 #include <random>
+#include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
+#include <SFML/Audio.hpp>
+#include <map>
+#include <conio.h>
+
 using namespace std;
+using namespace sf;
 
 class Die;
 class Castle;
@@ -12,6 +19,7 @@ class Province;
 class Continent;
 class Player;
 class WorldMap;
+class NetworkManager;
 
 class Die
 {
@@ -190,4 +198,20 @@ private:
 	WorldMap* worldMap;
 	Die* die;
 	bool gameOn;
+};
+
+class NetworkManager {
+public:
+	void createNetwork();
+	void sendDataFromHost(String _send);
+	void sendDataFromClientToHost(string _connectionType, String _send);
+	void buildNewtwork();
+
+private:
+	IpAddress ip;
+	IpAddress sIP;
+	map<unsigned short, IpAddress> computerID;
+	UdpSocket socket;
+	string connectionType;
+	Packet packet;
 };

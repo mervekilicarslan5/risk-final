@@ -1076,5 +1076,242 @@ void GameManager::randomPlacement() {
 }
 
 
+void NetworkManager::createNetwork() {
+	ip = IpAddress::getLocalAddress();	
+	string text = " ";
+	int playerCount = 0;
+	Packet packet;
 
+	cout << ip << endl;
+
+	cout << "(h) for server, (c) for client: ";
+	cin >> connectionType;
+
+	unsigned short port = 2000;
+
+	if (connectionType == "h")
+		port = 2000;
+	else if (connectionType == "c1")
+		port = 2001;
+	else if (connectionType == "c2")
+		port = 2002;
+	//else if (connectionType == "c3")
+	//	port = 2003;
+	//else if (connectionType == "c4")
+	//	port = 2004;
+	//else if (connectionType == "c5")
+	//	port = 2005;
+
+
+	if (socket.bind(port) != Socket::Done) {
+		cout << "Couldnt binded. ";
+	}
+	else {
+		cout << "BINDED !! " << endl;
+	}
+
+	if (connectionType == "h") {
+
+		do {
+			IpAddress rIP;
+			unsigned short port;
+			if (socket.receive(packet, rIP, port) == Socket::Done) {
+				computerID[port] = rIP;
+				playerCount++;
+				if (port == 2001)
+					cout << "Client1 has joined the room." << endl;
+				if (port == 2002)
+					cout << "Client2 has joined the room." << endl;
+				//if (port == 2003)
+				//	cout << "Client3 has joined the room." << endl;
+				//if (port == 2004)
+				//	cout << "Client4 has joined the room." << endl;
+				//if (port == 2005)
+				//	cout << "Client5 has joined the room." << endl;
+			}
+			cout << "Player in the game (except host): " << playerCount << endl;
+		} while (playerCount != 2);
+
+		//string startgame = "no";
+		//do {
+		//	cout << "enter 'start' to create the game: ";
+		//	cin >> startgame;
+		//} while (startgame != "start");
+
+		//packet << startgame;
+		map<unsigned short, IpAddress> ::iterator tempIterator;
+		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
+
+
+	}
+
+	else if (connectionType == "c1" || connectionType == "c2") {
+		//cout << "Enter server ip: ";
+		//cin >> sIp;
+		sIP = "139.179.210.187";
+		IpAddress sendIP(sIP);
+		if (socket.send(packet, sendIP, 2000) == Socket::Done)
+			cout << "You have joined the room." << endl;
+		cout << sIP << endl;
+
+		IpAddress tempId;
+		unsigned short tempPort;
+		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+			string receivedText;
+			packet >> receivedText;
+			cout << "The Game is starting" << endl;
+		}
+
+	}
+}
+
+void NetworkManager::sendDataFromHost (String _send) {
+
+	if (connectionType == "h") {
+		string text = _send;
+		Packet packet;
+		packet << text;
+		map<unsigned short, IpAddress> ::iterator tempIterator;
+		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
+	}
+
+	else if (connectionType == "c1" || connectionType == "c2") {
+
+		IpAddress tempId;
+		unsigned short tempPort;
+		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+			string receivedText;
+			packet >> receivedText;
+			cout << "Received Data from host: " << receivedText << endl;
+		}
+	}
+}
+
+void NetworkManager::sendDataFromClientToHost(string _connectionType, String _send) {
+	String sentToEveryone;
+	while (true) {
+		if (connectionType == _connectionType) {
+			string text = _send;
+			Packet packet;
+			packet << text;
+			cout << "!!!!!!!!!!!!!!!!!!" << endl;
+			IpAddress sendIP(sIP);
+			if (socket.send(packet, sendIP, 2000) == Socket::Done)
+				break;
+		}
+		else if (connectionType == "h") {
+			IpAddress tempId;
+			unsigned short tempPort;
+			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {
+				string receivedText;
+				packet >> receivedText;
+				cout << "Received Data from client: " << receivedText << endl;
+				sentToEveryone = receivedText;
+				break;
+			}
+		}
+		else
+			break;
+	}
+	sendDataFromHost(sentToEveryone);
+}
+
+void NetworkManager::buildNewtwork() {
+	IpAddress ip = IpAddress::getLocalAddress();
+	UdpSocket socket;
+	string connectionType ;
+	string sIp;
+	int playerCount = 0;
+	map<unsigned short, IpAddress> computerID;
+	string text = " ";
+	Packet packet;
+
+	cout << ip << endl;
+
+	cout << "(h) for server, (c) for client: ";
+	cin >> connectionType;
+
+	unsigned short port;
+
+	cout << "Set port number: ";
+	cin >> port;
+
+	if (socket.bind(port) != Socket::Done) {
+		cout << "Couldnt binded. ";
+	}
+	else {
+		cout << "BINDED !! " << endl;
+	}
+
+	//socket.setBlocking(false);
+
+	// TO connect all players !! s is the host which will be the server in our game
+	if (connectionType == "h") {
+		string startGame = "no";
+		do {
+			IpAddress rIP;
+			unsigned short port;
+			if (socket.receive(packet, rIP, port) == Socket::Done) {
+				computerID[port] = rIP;
+			}
+			playerCount++;
+			cout << "Player in the game (except host): " << playerCount << endl;
+		} while (playerCount != 2);
+
+		do {
+			cout << "Enter 'start' to create the game: ";
+			cin >> startGame;
+		} while (startGame != "start" );
+		
+	}
+
+	// clients are the other player who joined the room
+	else if (connectionType == "c1") {
+		//cout << "Enter server ip: ";
+		//cin >> sIp;
+		sIp = "139.179.210.187";
+		IpAddress sendIP(sIp);
+		if (socket.send(packet, sendIP, 2000) == Socket::Done)
+			cout << "Client1 has joined the room." << endl;
+		cout << sIp << endl;
+	}
+
+	else if (connectionType == "c2") {
+		//cout << "Enter server ip: ";
+		//cin >> sIp;
+		sIp = "139.179.210.187";
+		IpAddress sendIP(sIp);
+		if (socket.send(packet, sendIP, 2000) == Socket::Done)
+			cout << "Client2 has joined the room." << endl;
+		cout << sIp << endl;
+	}
+
+
+	bool done = false;
+	while (!done) {
+		if (connectionType == "h") {
+			getline(cin, text);
+			Packet packet;
+			packet << text;
+			map<unsigned short, IpAddress> ::iterator tempIterator;
+			for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+				if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
+		}
+
+		else if (connectionType == "c1" || connectionType == "c2") {
+
+			IpAddress tempId;
+			unsigned short tempPort;
+			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+				string receivedText;
+				packet >> receivedText;
+				cout << "The Game Started" << receivedText << endl;
+			}
+
+
+		}
+	}
+}
 
