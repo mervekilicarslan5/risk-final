@@ -10,7 +10,12 @@ int main() {
 
 
 	GameManager* GM = new GameManager();
-	WindowManager* WM = new WindowManager();
+
+	for (auto it = GM->colorLookUpTable.begin(); it != GM->colorLookUpTable.end(); it++) {
+		cout << (*it).second << endl;
+	}
+
+	WindowManager* WM = new WindowManager(GM);
 
 	GM->loadProvinces();
 
@@ -18,7 +23,7 @@ int main() {
 	GM->addPlayer("serdar");
 	GM->addPlayer("geyOsman");
 
-	WM->createWindow(GM);
+	WM->createWindow();
 
 	//GM->startGame();
 

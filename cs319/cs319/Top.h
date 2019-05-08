@@ -17,6 +17,7 @@ class Player;
 class WorldMap;
 class WindowManager;
 class Button;
+class MyImage;
 
 class Die
 {
@@ -204,7 +205,7 @@ private:
 class WindowManager {
 public: 
 
-	GameManager GM;
+	GameManager* GM;
 
 	double zoom;
 	int screenWidth;
@@ -220,15 +221,20 @@ public:
 	sf::Text provinceNameTxt;
 	sf::Font font;
 	vector<Button*> buttons;
+	vector<MyImage*> images;
 	
 	WindowManager();
+	WindowManager(GameManager* GM);
 	~WindowManager();
-	void createWindow(GameManager* GM);
+	void createWindow();
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
+	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);
 	void provinceClicked(int id);
-	void checkButtons(sf::Event & e);
+	void checkClickEvents(sf::Event & e);
 	void buttonClicked(int id);
+	void imageClicked(int id);
+	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 };
 
 class Button : public sf::RectangleShape {
@@ -246,4 +252,19 @@ public :
 	void setTextColor(sf::Color color);
 	void setTextSize(int size);
 	void setSize(int width, int height);
+};
+
+class MyImage : public sf::Sprite {
+public :
+	sf::Image img;
+	sf::Texture tex;
+	bool inMove;
+	sf::Vector2f initialPosition;
+	
+	MyImage();
+	MyImage(string fileName);
+	~MyImage();
+	sf::Vector2f getSize();
+	void setInitialPosition(float x, float y);
+	sf::Vector2f getInitialPosition();
 };

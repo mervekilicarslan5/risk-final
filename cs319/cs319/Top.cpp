@@ -1068,8 +1068,13 @@ void GameManager::randomPlacement() {
 	delete shuffledArray;
 }
 
-WindowManager::WindowManager()
+WindowManager::WindowManager() {
+
+}
+
+WindowManager::WindowManager(GameManager* GM)
 {
+	this->GM = GM;
 	zoom = 1.0;
 
 	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
@@ -1103,7 +1108,7 @@ WindowManager::WindowManager()
 
 	lowerPanel.setSize(sf::Vector2f(screenWidth, screenHeight - bottomUpperMargin));
 	lowerPanel.setPosition(0, bottomUpperMargin);
-	lowerPanel.setFillColor(sf::Color(0, 0, 255));
+	lowerPanel.setFillColor(sf::Color(255, 255, 255));
 
 	provinceNameTxt.setFont(font);
 	provinceNameTxt.setCharacterSize(50);
@@ -1123,13 +1128,22 @@ WindowManager::WindowManager()
 	buttons[0]->setTextSize(20);
 	buttons[0]->setTextColor(sf::Color::Blue);
 
+	buttons[1]->setPosition(500, 500);
+	buttons[1]->setSize(100, 100);
+	buttons[1]->setText("hello world");
+	buttons[1]->setTextSize(20);
+	buttons[1]->setTextColor(sf::Color::Red);
+
+	images.push_back(new MyImage("soldier.png"));
+	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
+	images[0]->setPosition(images[0]->getInitialPosition());
 }
 
 WindowManager::~WindowManager() {
 
 }
 
-void WindowManager::createWindow(GameManager* GM) {
+void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
@@ -1160,37 +1174,23 @@ void WindowManager::createWindow(GameManager* GM) {
 			{
 				if (event.mouseButton.button == sf::Mouse::Left)
 				{
-					checkButtons(event);
-					sf::Vector2i PixelPos = mouse.getPosition(window);
-					sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
-					float moveAmount = 20;
-					bool moved = false;
-					
-					if (!moved) {
-						int pixColor = getPixelColor(MousePos.x, MousePos.y);
-						cout << pixColor << endl;
-
-						provinceNameTxt.setPosition(lowerPanel.getPosition());
-						
-						provinceNameTxt.setString("City: " + GM->colorLookUpTable[pixColor]);
-					}
+					checkClickEvents(event);
 				}
 			}
 
 			
 			
 		}
-		int speed = 2;
+		float speed = 3;
 		if (counter > 10) {
 			sf::Vector2i mousePos = mouse.getPosition(window);
 
-
-			if (mousePos.x < leftMargin) {
+			if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
 				if (mainView.getCenter().x >= mainView.getSize().x / 2) {
 					mainView.move(-zoom * speed, 0);
 				}
 			}
-			else if (mousePos.x > rightMargin) {
+			else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
 				if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
 					mainView.move(zoom* speed, 0);
 				}
@@ -1214,16 +1214,19 @@ void WindowManager::createWindow(GameManager* GM) {
 		window.setView(mainView);
 
 		window.clear(sf::Color::Black);
-
 		window.draw(mapSprite);
 
 
 		window.setView(window.getDefaultView());
 		window.draw(lowerPanel);
+		dragObject(window, event, 0);
+		window.draw(*images[0]);
 
 		window.draw(provinceNameTxt);
 
 		buttons[0]->draw(window);
+		buttons[1]->draw(window);
+
 
 		window.display();
 	}
@@ -1239,7 +1242,14 @@ int WindowManager::getPixelColor(int x, int y) {
 	return (int) mapImg.getPixel(x, y).toInteger();
 }
 
-void WindowManager::checkButtons(sf::Event & e) {
+string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) {
+	sf::Vector2i PixelPos = m.getPosition(window);
+	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
+	int colorInInt = (int) mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
+	return GM->colorLookUpTable[colorInInt];
+}
+
+void WindowManager::checkClickEvents(sf::Event & e) {
 	int id = 0;
 	for (auto it = buttons.begin(); it != buttons.end(); it++) {
 		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
@@ -1249,11 +1259,59 @@ void WindowManager::checkButtons(sf::Event & e) {
 		}
 		id++;
 	}
+	id = 0;
+	for (auto it = images.begin(); it != images.end(); it++) {
+		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
+			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
+			imageClicked(id);
+			return;
+		}
+		id++;
+	}
 }
 
 void WindowManager::buttonClicked(int id) {
 	if (id == 0) {
-		cout << "Button clicked !" << endl;
+		cout << "Blue Button clicked !" << endl;
+	}
+	else if (id == 1) {
+		cout << "Red Button clicked !" << endl;
+	}
+}
+
+void WindowManager::imageClicked(int id) {
+	if (id == 0) {
+		cout << "Image clicked" << endl;
+	}
+}
+
+void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
+	if (images[id]->inMove) {
+		images[id]->setScale(sf::Vector2f(0.5, 0.5));
+		images[id]->setPosition(sf::Vector2f(mouse.getPosition(window).x - 0.5*images[id]->getLocalBounds().width / 2, mouse.getPosition(window).y - 0.5*images[id]->getLocalBounds().height / 2));
+	}
+	if (mouse.isButtonPressed(sf::Mouse::Left) && event.key.code == mouse.Left && !images[id]->inMove) {
+		if (sf::IntRect(images[id]->getPosition().x, images[id]->getPosition().y, images[id]->getLocalBounds().width, images[id]->getLocalBounds().height).contains(mouse.getPosition(window))) {
+			images[id]->setPosition(sf::Vector2f(mouse.getPosition(window)));
+			images[id]->inMove = true;
+		}
+	}
+	else if (event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove) {
+		sf::Vector2i PixelPos = mouse.getPosition(window);
+		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
+		images[id]->inMove = false;
+		images[id]->setPosition(images[id]->getInitialPosition());
+		images[id]->setScale(sf::Vector2f(1, 1));
+		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
+		{
+			string provinceName = getProvinceName(window, mouse);
+			cout << provinceName << endl;
+			/*if (WorldMap.mapOfProvinces[provinceName].owner == currentPlayer) {
+				WorldMap.mapOfProvinces[provinceName].army.sizeOfArmy += 1;
+				listOfPlayers[currentPlayer].gold -= 10;
+			}*/
+		}
+
 	}
 }
 
@@ -1294,4 +1352,31 @@ void Button::setTextColor(sf::Color color) {
 
 void Button::setTextSize(int size) {
 	text.setCharacterSize(size);
+}
+
+MyImage::MyImage() {
+
+}
+
+MyImage::~MyImage() {
+	inMove = false;
+}
+
+MyImage::MyImage(string fileName) {
+	img.loadFromFile("assets/" + fileName);
+	tex.loadFromImage(img);
+	this->setTexture(tex);
+	inMove = false;
+}
+
+sf::Vector2f MyImage::getSize() {
+	return sf::Vector2f(this->getTextureRect().width, this->getTextureRect().height);
+}
+
+void MyImage::setInitialPosition(float x, float y) {
+	initialPosition = sf::Vector2f(x, y);
+}
+
+sf::Vector2f MyImage::getInitialPosition() {
+	return initialPosition;
 }
