@@ -229,12 +229,20 @@ void Player::setId(int _id)
 
 void Player::captureProvince(WorldMap* worldMap, Province * _province)
 {
-	provinces.push_back(worldMap->findIndex(_province));
-	_province->setOwner(this);
+	if (! (this->hasProvince(worldMap, _province))) {
+		if (_province->getOwner() != NULL) {
+			_province->getOwner()->loseProvince(worldMap, _province);
+		}
+		provinces.push_back(worldMap->findIndex(_province));
+		_province->setOwner(this);
+	}
+	
 }
 
 void Player::loseProvince(WorldMap* worldMap, Province* _province) {
-	provinces.erase(provinces.begin() + worldMap->findIndex(_province));
+	vector <int> :: iterator index = find(provinces.begin(), provinces.end(), worldMap->findIndex(_province));
+	if (index != provinces.end())
+		provinces.erase(index);
 }
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
@@ -905,6 +913,8 @@ void GameManager::startGame(NetworkManager ** NM) {
 			sendAllProvincesClientToHost((*NM)->connectionType, NM);
 			sendAllProvincesFromHost(NM);
 		}
+
+
 		/*else if ((*NM)->connectionType == "c2" && turn == 1) {
 			cout << endl << "============		" << players[3]->getName() << " TURN		===============  " << endl;
 			sendAllProvincesFromHost(NM);
