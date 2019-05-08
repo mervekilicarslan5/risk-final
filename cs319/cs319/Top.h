@@ -217,7 +217,7 @@ private:
 
 class NetworkManager {
 public:
-	void createNetwork(GameManager ** const GM, string _connectionType);
+	void createNetwork(GameManager ** const GM, string _connectionType, string name);
 	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count, int _castleLevel);
 	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
 	void buildNewtwork();

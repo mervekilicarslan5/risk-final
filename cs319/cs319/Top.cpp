@@ -1758,7 +1758,7 @@ sf::Vector2f MyImage::getInitialPosition() {
 }
 
 
-void NetworkManager::createNetwork(GameManager ** const GM , string _connectionType) {
+void NetworkManager::createNetwork(GameManager ** const GM , string _connectionType, string _name) {
 	ip = IpAddress::getLocalAddress();
 	string text = " ";
 	int playerCount = 0;
@@ -1772,11 +1772,10 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 	if (connectionType == "h") {
 		port = 2000;
 	}
-
-	else if (connectionType == "c1")
+	else if (connectionType != "h")
 		port = 2001;
-	else if (connectionType == "c2")
-		port = 2002;
+	/*else if (connectionType == "c2")
+		port = 2002;*/
 	//else if (connectionType == "c3")
 	//	port = 2003;
 	//else if (connectionType == "c4")
@@ -1787,6 +1786,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 
 	if (socket.bind(port) != Socket::Done) {
 		cout << "Couldnt binded. ";
+		port++;
 	}
 	else {
 		cout << "BINDED !! " << endl;
@@ -1796,7 +1796,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		string name;
 		string playersName = "";
 		cout << "Enter your name(HOST): ";
-		cin >> name;
+		name = _name;
 		playersName += name + ",";
 		(*GM)->addPlayer(name);
 		do {
@@ -1849,12 +1849,12 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 
 	}
 
-	else if (connectionType == "c1" || connectionType == "c2") {
+	else if (connectionType != "h") {
 		//cout << "Enter server ip: ";
 		//cin >> sIp;
 		string name;
 		cout << "Enter your name: ";
-		cin >> name;
+		name = _name;
 		String playerName = name;
 		packet << playerName;
 		sIP = "139.179.210.187";
@@ -1879,6 +1879,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		}
 	}
 }
+
 
 void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count, int _castleLevel) {
 
