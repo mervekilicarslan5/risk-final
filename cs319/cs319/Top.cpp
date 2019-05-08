@@ -64,8 +64,11 @@ void Castle::setLevel(int _level)
 
 void Castle::upgradeLevel()
 {
-	if (level == 0)
-		level = 1;
+	if (level == 1) {
+		level = 2;
+		price += 50;
+	}
+		
 }
 
 bool Castle::isBuilt() {
@@ -74,6 +77,7 @@ bool Castle::isBuilt() {
 
 void Castle::build() {
 	built = true;
+	level = 1;
 }
 
 void Castle::destroy() {
@@ -261,13 +265,27 @@ bool Player::hasProvince(WorldMap * worldMap, Province * _province)
 	return true;
 }
 
-bool Player::buildCastle(Province* province) {
-	if (province->getCastle()->getPrice() > money) {
-		cout << "Insufficient money to build castle!";
-		return false;
+int Player::buildCastle(Province* province) {
+	
+	if (province->getCastle()->isBuilt() == false) {
+		if (province->getCastle()->getPrice() > money) {
+			cout << "Insufficient money to build castle!";
+			return 0;
+		}
+		province->getCastle()->build();
+		money -= province->getCastle()->getPrice();
+		return 1;
 	}
-	province->getCastle()->build();
-	money -= province->getCastle()->getPrice();
+		
+	else if (province->getCastle()->getLevel() == 1) {
+		if (province->getCastle()->getPrice() > money) {
+			cout << "Insufficient money to upgrade castle!";
+			return false;
+		}
+		province->getCastle()->upgradeLevel();
+		money -= province->getCastle()->getPrice();
+		return 2;
+	}
 }
 
 int Player::getNumberOfProvinces() {
@@ -392,6 +410,13 @@ void WorldMap::showProvinceStatus(Province* p) {
 	else
 		cout << "Current Owner: " << p->getOwner()->getName() << endl;
 	cout << "Number of Soldiers: " << p->getNumberOfSoldiers() << endl;
+	cout << "Castle level: ";
+	if (p->getCastle()->getLevel() == 0)
+		cout << " 0 (is not buit) " << endl;
+	else if (p->getCastle()->getLevel() == 1)
+		cout << "1 " << endl;
+	else if (p->getCastle()->getLevel() == 2)
+		cout << "2 " << endl;
 }
 
 int WorldMap::getNumberOfProvinces() {
@@ -413,14 +438,13 @@ void WorldMap::showWorldStatus() {
 
 
 
-
 Province::Province()
 {
 	name = "";
 	color = "";
 	numberOfSoldiers = 0;
 	owner = NULL;
-	castle = new Castle(150);
+	castle = new Castle(50);
 }
 
 Province::Province(string _name, string _color)
@@ -429,7 +453,7 @@ Province::Province(string _name, string _color)
 	color = _color;
 	numberOfSoldiers = 0;
 	owner = NULL;
-	castle = new Castle(150);
+	castle = new Castle(50);
 }
 
 Province::~Province()
@@ -554,9 +578,18 @@ bool GameManager::buildCastle(Player* player, Province* province) {
 		cout << "This province does not belong to the player." << endl;
 		return false;
 	}
-	player->buildCastle(province);
-	cout << player->getName() << " built a castle in " << province->getName() << endl;
+	int done = player->buildCastle(province);
+
+	if (done == 1)
+		cout << player->getName() << " built a castle in " << province->getName() << endl;
+	else if (done == 2)
+		cout << player->getName() << " has upgraded castle in " << province->getName() << endl;
+	else
+		return false;
 	return true;
+
+	
+	
 }
 
 bool GameManager::buildCastle(int playerId, string provinceName) {
@@ -848,14 +881,15 @@ void GameManager::startGame(NetworkManager ** NM) {
 		//startPlacement();
 		randomPlacement();
 		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
-			(*NM)->sendDataFromHost(this, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+			Province * pro = worldMap->getProvinceByID(i);
+			(*NM)->sendDataFromHost(this, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(), pro->getCastle()->getLevel());
 			//NM->sendDataFromHost(this, 1, i, 4);
 		}
 	}
 	else {
 		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
 			//NM->sendDataFromHost(this, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
-			(*NM)->sendDataFromHost(this, 0, 0, 0);
+			(*NM)->sendDataFromHost(this, 0, 0, 0, 0);
 		}
 	}
 		
@@ -1067,6 +1101,34 @@ void GameManager::startMarket(int id) {
 			cout << "No such city" << endl;
 		}
 	}
+
+	string buyCastle;
+	cout << "Do you wanna buy castle (Build 50 gold, upgrade 100) (y / n): ";
+	cin >> buyCastle;
+	while (buyCastle == "y") {
+		while (true) {
+			cout << "city : ";
+			string cityName;
+			cin >> cityName;
+			Province* city;
+			worldMap->getProvinceByName(cityName, amount, city);
+
+			if (city != NULL) {
+				if (buildCastle(player->getId(), cityName)) {
+					break;
+				}
+			}
+			else {
+				cout << "No such city" << endl;
+			}
+						
+		}
+		cout << "Your money: " << player->getMoney() << endl;
+		cout << "Do you wanna buy castle (y / n): ";
+		cin >> buyCastle;
+	}
+
+
 }
 
 void GameManager::startFortifyPhase(int id) {
@@ -1146,14 +1208,19 @@ void GameManager::randomPlacement() {
 }
 
 void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
-	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) 
-		(*NM)->sendDataFromHost(this, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+		Province * pro = worldMap->getProvinceByID(i);
+		(*NM)->sendDataFromHost(this, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(), pro->getCastle()->getLevel());
+	}
 	showWorldStatus();
 }
 
 void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkManager ** NM) {
-	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) 
-		(*NM)->sendDataFromClientToHost(this, _connectionType, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+		Province * pro = worldMap->getProvinceByID(i);
+		(*NM)->sendDataFromClientToHost(this, _connectionType, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(),pro->getCastle()->getLevel());
+	}
+		
 }
 
 
@@ -1284,15 +1351,16 @@ void NetworkManager::createNetwork(GameManager ** const GM) {
 	}
 }
 
-void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count) {
+void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count, int _castleLevel) {
 
 	while (true) {
 		if (connectionType == "h") {
 			Uint16 playerID = _playerID;
 			Uint16 cityID = _cityID;
 			Uint16 count = _count;
+			Uint16 castleLevel = _castleLevel;
 			Packet packet;
-			packet << playerID << cityID << count;
+			packet << playerID << cityID << count << castleLevel;
 			map<unsigned short, IpAddress> ::iterator tempIterator;
 			for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
 				if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
@@ -1307,18 +1375,21 @@ void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, i
 				Uint16 receivedPlayerID;
 				Uint16 receivedCityID;
 				Uint16 receivedCount;
-				packet >> receivedPlayerID >> receivedCityID >> receivedCount;
+				Uint16 receivedcastleLevel;
+				packet >> receivedPlayerID >> receivedCityID >> receivedCount >> receivedcastleLevel;
 				
 				string dummy;
 				int pId = receivedPlayerID;
 				int cId = receivedCityID;
 				int count = receivedCount;
+				int casLev = receivedcastleLevel;
 				Player * playerChanged = GM->getPlayerByID(pId, dummy);
 				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cId);
 				//provinceChanged->setOwner(playerChanged);
 				
 				playerChanged->captureProvince(GM->getWorldMap(), provinceChanged);
 				provinceChanged->setNumberOfSoldiers(count);
+				provinceChanged->getCastle()->setLevel(casLev);
 				break;
 			}
 
@@ -1326,16 +1397,17 @@ void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, i
 	}
 }
 
-void NetworkManager::sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count) {
-	int pID, cID, cou;
+void NetworkManager::sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel) {
+	int pID, cID, cou, cast;
 	while (true) {
 		if (_connectionType != "h") {
 			Uint16 playerID = _playerID;
 			Uint16 cityID = _cityID;
 			Uint16 count = _count;
+			Uint16 castleLevel = _castleLevel;
 			Packet packet;
-			packet << playerID << cityID << count;
-			cout << "!!!!!!!!!!!!!!!!!!" << endl;
+			packet << playerID << cityID << count << castleLevel;
+			//cout << "!!!!!!!!!!!!!!!!!!" << endl;
 			IpAddress sendIP(sIP);
 			if (socket.send(packet, sendIP, 2000) == Socket::Done)
 				break;
@@ -1348,18 +1420,22 @@ void NetworkManager::sendDataFromClientToHost(GameManager * const GM, string _co
 				Uint16 receivedPlayerID;
 				Uint16 receivedCityID;
 				Uint16 receivedCount;
-				packet >> receivedPlayerID >> receivedCityID >> receivedCount;
-				cout << "Received Data from client: " << receivedPlayerID << receivedCityID << receivedCount << endl;
+				Uint16 receivedcastleLevel;
+				packet >> receivedPlayerID >> receivedCityID >> receivedCount >> receivedcastleLevel;
+				//cout << "Received Data from client: " << receivedPlayerID << receivedCityID << receivedCount << endl;
 				pID = receivedPlayerID;
 				cID = receivedCityID;
 				cou = receivedCount;
-
+				cast = receivedcastleLevel;
+				
 				string dummy;
 				Player * playerChanged = GM->getPlayerByID(pID, dummy);
 				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cID);
 				//provinceChanged->setOwner(playerChanged);
 				playerChanged->captureProvince(GM->getWorldMap(), provinceChanged);
 				provinceChanged->setNumberOfSoldiers(receivedCount);
+				provinceChanged->getCastle()->setLevel(cast);
+
 				break;
 			}
 		}

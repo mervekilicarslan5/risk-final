@@ -101,7 +101,7 @@ public:
 	void loseProvince(WorldMap* worldMap, Province* _province);
 	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
 	bool hasProvince(WorldMap * worldMap, Province* _province);
-	bool buildCastle(Province* province);
+	int buildCastle(Province* province);
 	int getNumberOfProvinces();
 private:
 	string name;
@@ -205,8 +205,8 @@ private:
 class NetworkManager {
 public:
 	void createNetwork(GameManager ** const GM);
-	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count);
-	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count);
+	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count, int _castleLevel);
+	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
 	void buildNewtwork();
 	vector<string> split(std::string strToSplit, char delimeter);
 	string connectionType;
