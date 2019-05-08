@@ -207,7 +207,6 @@ public:
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
-	NetworkManager * NM;
 
 private:
 	vector<Player*> players;
@@ -219,6 +218,8 @@ private:
 
 class NetworkManager {
 public:
+	WindowManager * WM;
+	NetworkManager(WindowManager * WM);
 	void createNetwork(GameManager ** const GM, string _connectionType, string name);
 	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count, int _castleLevel);
 	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
@@ -226,7 +227,6 @@ public:
 	vector<string> split(std::string strToSplit, char delimeter);
 	void startGame();
 	string connectionType;
-
 
 private:
 	IpAddress ip;
@@ -242,7 +242,7 @@ class WindowManager {
 public: 
 
 	GameManager* GM;
-
+	NetworkManager * NM;
 	double zoom;
 	int screenWidth;
 	int screenHeight;
@@ -288,8 +288,8 @@ public:
 	Province* second;
 	Province* currentProvince;
 	
+
 	WindowManager();
-	WindowManager(GameManager* GM);
 	~WindowManager();
 	void createWindow();
 	void menuScreen(RenderWindow & window, Event & e);

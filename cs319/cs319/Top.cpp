@@ -535,7 +535,6 @@ GameManager::GameManager()
 	worldMap = new WorldMap();
 	die = new Die(6);
 	currentPlayer = 0;
-	NM = new NetworkManager();
 }
 
 GameManager::~GameManager()
@@ -1274,13 +1273,14 @@ void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkM
 
 
 
-WindowManager::WindowManager() {
 
-}
 
-WindowManager::WindowManager(GameManager* GM)
+WindowManager::WindowManager()
 {
-	this->GM = GM;
+	
+	GM = new GameManager();
+	NM = new NetworkManager(this);
+
 	zoom = 1.0;
 
 	phase = INITIAL_PHASE;
@@ -1417,8 +1417,7 @@ WindowManager::WindowManager(GameManager* GM)
 	buttons[8]->setTextColor(sf::Color::White);
 	buttons[8]->setFillColor(sf::Color::Red);
 
-	
-	
+
 }
 
 WindowManager::~WindowManager() {
@@ -1549,7 +1548,8 @@ void WindowManager::createWindow() {
 		window.draw(infoText);
 
 		for (int i = 0; i < buttons.size(); i++) {
-			buttons[i]->draw(window);
+			if (i!=5 && i!=6 && i!=7 && i!=8)
+				buttons[i]->draw(window);
 		}
 
 		window.display();
@@ -1600,26 +1600,26 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 }
 
 void WindowManager::buttonClicked(int id) {
-	string dummy;
-	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
-
+	
 	if (page == MENU_SCREEN) {
 		if (id == 5) {
-			GM->NM->createNetwork(&GM,"h","host");
+			NM->createNetwork(&GM,"h","host");
 		}
 		else if (id == 6) {
-			GM->NM->createNetwork(&GM, "c1", "client1");
+			NM->createNetwork(&GM, "c1", "client1");
 		}
 		else if (id == 7) {
-			GM->NM->createNetwork(&GM, "c2", "client2");
+			NM->createNetwork(&GM, "c2", "client2");
 		}
 		else if (id == 8) {
-			GM->NM->startGame();
+			NM->startGame();
 			page = 1;
 		}
 		return;
 	}
 
+	string dummy;
+	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
 	if (id == NEXT_PHASE_BUTTON) {
 		if (phase == INITIAL_PHASE) {
 			player->setLeftSoldier(player->getNumberOfProvinces() / 3);
@@ -1860,6 +1860,10 @@ sf::Vector2f MyImage::getInitialPosition() {
 }
 
 
+NetworkManager::NetworkManager(WindowManager * WM) {
+	this->WM = WM;
+}
+
 void NetworkManager::createNetwork(GameManager ** const GM , string _connectionType, string _name) {
 	ip = IpAddress::getLocalAddress();
 	string text = " ";
@@ -1903,7 +1907,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		do {
 			IpAddress rIP;
 			unsigned short port;
-			;
+			Packet packet;
 			if (socket.receive(packet, rIP, port) == Socket::Done) {
 				computerID[port] = rIP;
 				playerCount++;
@@ -1916,7 +1920,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 					(*GM)->addPlayer(display);
 					playersName += name + ",";
 				}
-				if (port == 2002) {
+				else if (port == 2002) {
 					cout << display << " has joined the room." << endl;
 					(*GM)->addPlayer(display);
 					playersName += name + ",";
@@ -1930,7 +1934,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 				}
 			}
 			cout << "Player in the game (except host): " << playerCount << endl;
-		} while (playerCount < 3);
+		} while (playerCount < 2);
 
 	}
 
@@ -1961,20 +1965,33 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 			for (int i = 0; i < players.size(); i++) {
 				(*GM)->addPlayer(players[i]);
 			}
+			cout << "step5**************************" << endl;
+			if (WM != NULL) {
+				cout << "step12312123*******" << endl;
+				WM->page = WM->GAME_SCREEN;
+			}
+			cout << "step6**************************" << endl;
 		}
 	}
 }
 
 void NetworkManager::startGame() {
-	String sendPlayersName;
-	sendPlayersName = "" + playersName;
-	Packet packet;
-	packet << sendPlayersName;
-	//string display = sendPlayersName;
-	//cout << display << endl;
-	map<unsigned short, IpAddress> ::iterator tempIterator;
-	for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
-		if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
+
+	cout << "step1**************************" << endl;
+	if (connectionType == "h") {
+		String sendPlayersName;
+		sendPlayersName = "" + playersName;
+		cout << "step2**************************" << playersName << endl;
+		Packet packet;
+		packet << sendPlayersName;
+		//string display = sendPlayersName;
+		//cout << display << endl;
+		map<unsigned short, IpAddress> ::iterator tempIterator;
+		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {
+				cout << "step3**************************" << endl;
+			}
+	}
 }
 
 

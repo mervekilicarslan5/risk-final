@@ -10,15 +10,15 @@ using namespace std;
 
 
 int main() {
+	WindowManager* WM = new WindowManager();
+	//GameManager* GM = new GameManager();
+	//NetworkManager* NM = new NetworkManager(WM);
+	//WM = new WindowManager(GM,NM);
 
-	GameManager* GM = new GameManager();
-	NetworkManager* NM = new NetworkManager();
-	WindowManager* WM = new WindowManager(GM);
-
-	GM->addPlayer("ahmet");
-	GM->addPlayer("serdar");
+	//GM->addPlayer("ahmet");
+	//GM->addPlayer("serdar");
   
-    GM->loadProvinces();
+    WM->GM->loadProvinces();
 
 	//GM->randomPlacement();
   
