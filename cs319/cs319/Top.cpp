@@ -1158,8 +1158,6 @@ void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkM
 
 
 
-
-
 void NetworkManager::createNetwork(GameManager ** const GM) {
 	ip = IpAddress::getLocalAddress();	
 	string text = " ";
