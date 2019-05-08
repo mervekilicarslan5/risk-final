@@ -891,13 +891,21 @@ void GameManager::loadProvinces() {
 	}
 	file.close();
 	cout << "efsfsef" << endl;
-	createNeighbor("ankara", "konya");
-	createNeighbor("ankara", "eskisehir");
-	createNeighbor("konya", "antalya");
-	createNeighbor("istanbul", "edirne");
+	createNeighbor("kars", "balikesir");
+	createNeighbor("kars", "antalya");
+	createNeighbor("kars", "istanbul");
+	createNeighbor("istanbul", "eskisehir");
 	createNeighbor("istanbul", "kocaeli");
-	createNeighbor("eskisehir", "kocaeli");
-	createNeighbor("eskisehir", "istanbul");
+	createNeighbor("istanbul", "antalya");
+	createNeighbor("kocaeli", "ankara");
+	createNeighbor("kocaeli", "eskisehir");
+	createNeighbor("ankara", "afyon");
+	createNeighbor("kocaeli", "afyon");
+	createNeighbor("edirne", "afyon");
+	createNeighbor("nevsehir", "afyon");
+	createNeighbor("edirne", "konya");
+	createNeighbor("edirne", "ankara");
+	createNeighbor("konya", "antalya");
 	
 }
 
@@ -1229,7 +1237,7 @@ void GameManager::randomPlacement() {
 	int numberOfPlayers = players.size();
 	for (int i = 0; i < size; i++) {
 		Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
-		placeSoldier(players[t], curProvince->getName(), 1);
+		placeSoldier(players[t], curProvince->getName(), 3);
 		t = (t + 1) % numberOfPlayers;
 	}
 	cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
@@ -1253,127 +1261,7 @@ void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkM
 		
 }
 
-void NetworkManager::createNetwork(GameManager ** const GM) {
-	ip = IpAddress::getLocalAddress();
-	string text = " ";
-	int playerCount = 0;
-	Packet packet;
 
-	cout << "(h) for server, (c) for client: ";
-	cin >> connectionType;
-
-	unsigned short port = 2000;
-
-	if (connectionType == "h") {
-		port = 2000;
-	}
-
-	else if (connectionType == "c1")
-		port = 2001;
-	else if (connectionType == "c2")
-		port = 2002;
-	//else if (connectionType == "c3")
-	//	port = 2003;
-	//else if (connectionType == "c4")
-	//	port = 2004;
-	//else if (connectionType == "c5")
-	//	port = 2005;
-
-
-	if (socket.bind(port) != Socket::Done) {
-		cout << "Couldnt binded. ";
-	}
-	else {
-		cout << "BINDED !! " << endl;
-	}
-
-	if (connectionType == "h") {
-		string name;
-		string playersName = "";
-		cout << "Enter your name(HOST): ";
-		cin >> name;
-		playersName += name + ",";
-		(*GM)->addPlayer(name);
-		do {
-			IpAddress rIP;
-			unsigned short port;
-			;
-			if (socket.receive(packet, rIP, port) == Socket::Done) {
-				computerID[port] = rIP;
-				playerCount++;
-
-				String name;
-				packet >> name;
-				string display = name;
-				if (port == 2001) {
-					cout << display << " has joined the room." << endl;
-					(*GM)->addPlayer(display);
-					playersName += name + ",";
-				}
-				if (port == 2002) {
-					cout << display << " has joined the room." << endl;
-					(*GM)->addPlayer(display);
-					playersName += name + ",";
-				}
-				//if (port == 2003)
-				//	cout << "Client3 has joined the room." << endl;
-				//if (port == 2004)
-				//	cout << "Client4 has joined the room." << endl;
-				//if (port == 2005)
-				//	cout << "Client5 has joined the room." << endl;
-			}
-			cout << "Player in the game (except host): " << playerCount << endl;
-		} while (playerCount != 2);
-
-		string startgame = "no";
-		do {
-			cout << "enter 's' to create the game: ";
-			cin >> startgame;
-		} while (startgame != "s");
-
-		String sendPlayersName;
-		sendPlayersName = "" + playersName;
-		Packet packet;
-		packet << sendPlayersName;
-		//string display = sendPlayersName;
-		//cout << display << endl;
-		map<unsigned short, IpAddress> ::iterator tempIterator;
-		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
-			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
-
-
-	}
-
-	else if (connectionType == "c1" || connectionType == "c2") {
-		//cout << "Enter server ip: ";
-		//cin >> sIp;
-		string name;
-		cout << "Enter your name: ";
-		cin >> name;
-		String playerName = name;
-		packet << playerName;
-		sIP = "139.179.210.187";
-		IpAddress sendIP(sIP);
-		if (socket.send(packet, sendIP, 2000) == Socket::Done)
-			cout << "You have joined the room." << endl;
-		//cout << sIP << endl;
-
-		IpAddress tempId;
-		unsigned short tempPort;
-		Packet packet;
-		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
-			String received;
-			packet >> received;
-			string str = received;
-			cout << "The Game is starting" << endl;
-			players = split(str, ',');
-
-			for (int i = 0; i < 3; i++) {
-				(*GM)->addPlayer(players[i]);
-			}
-		}
-	}
-}
 
 WindowManager::WindowManager() {
 
@@ -1604,15 +1492,14 @@ void WindowManager::buttonClicked(int id) {
 	}
 	if (phase == ATTACKING_PHASE && id == ATTACK_BUTTON) {
 		if (isProvinceClicked == 2) {
-			if (GM->attack(player, second->getOwner(), first, second, 1)) {
+			if (GM->attack(player, second->getOwner(), first, second, 3)) {
 				phase = POST_ATTACK; //change phase 
+				buttons[ATTACK_BUTTON]->setText("Place");
+				provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
 			}
 		}
 	}
-	if (phase == POST_ATTACK && id == ATTACK_BUTTON && second->getNumberOfSoldiers() == 0) {
-		//player->captureProvince(GM->getWorldMap(),second);
-		buttons[ATTACK_BUTTON]->setText("Place");
-		provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
+	else if (phase == POST_ATTACK && id == ATTACK_BUTTON && second->getNumberOfSoldiers() == 0) {
 		GM->fortify(player, first, second, 1);
 		phase = FORTIFY_PHASE;
 	}
@@ -1747,6 +1634,133 @@ sf::Vector2f MyImage::getSize() {
 
 void MyImage::setInitialPosition(float x, float y) {
 	initialPosition = sf::Vector2f(x, y);
+}
+
+sf::Vector2f MyImage::getInitialPosition() {
+	return initialPosition;
+}
+
+
+void NetworkManager::createNetwork(GameManager ** const GM , string _connectionType) {
+	ip = IpAddress::getLocalAddress();
+	string text = " ";
+	int playerCount = 0;
+	Packet packet;
+
+	cout << "(h) for server, (c) for client: ";
+	connectionType = _connectionType;
+
+	unsigned short port = 2000;
+
+	if (connectionType == "h") {
+		port = 2000;
+	}
+
+	else if (connectionType == "c1")
+		port = 2001;
+	else if (connectionType == "c2")
+		port = 2002;
+	//else if (connectionType == "c3")
+	//	port = 2003;
+	//else if (connectionType == "c4")
+	//	port = 2004;
+	//else if (connectionType == "c5")
+	//	port = 2005;
+
+
+	if (socket.bind(port) != Socket::Done) {
+		cout << "Couldnt binded. ";
+	}
+	else {
+		cout << "BINDED !! " << endl;
+	}
+
+	if (connectionType == "h") {
+		string name;
+		string playersName = "";
+		cout << "Enter your name(HOST): ";
+		cin >> name;
+		playersName += name + ",";
+		(*GM)->addPlayer(name);
+		do {
+			IpAddress rIP;
+			unsigned short port;
+			;
+			if (socket.receive(packet, rIP, port) == Socket::Done) {
+				computerID[port] = rIP;
+				playerCount++;
+
+				String name;
+				packet >> name;
+				string display = name;
+				if (port == 2001) {
+					cout << display << " has joined the room." << endl;
+					(*GM)->addPlayer(display);
+					playersName += name + ",";
+				}
+				if (port == 2002) {
+					cout << display << " has joined the room." << endl;
+					(*GM)->addPlayer(display);
+					playersName += name + ",";
+				}
+				//if (port == 2003)
+				//	cout << "Client3 has joined the room." << endl;
+				//if (port == 2004)
+				//	cout << "Client4 has joined the room." << endl;
+				//if (port == 2005)
+				//	cout << "Client5 has joined the room." << endl;
+			}
+			cout << "Player in the game (except host): " << playerCount << endl;
+		} while (playerCount != 2);
+
+		string startgame = "no";
+		do {
+			cout << "enter 's' to create the game: ";
+			cin >> startgame;
+		} while (startgame != "s");
+
+		String sendPlayersName;
+		sendPlayersName = "" + playersName;
+		Packet packet;
+		packet << sendPlayersName;
+		//string display = sendPlayersName;
+		//cout << display << endl;
+		map<unsigned short, IpAddress> ::iterator tempIterator;
+		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
+
+
+	}
+
+	else if (connectionType == "c1" || connectionType == "c2") {
+		//cout << "Enter server ip: ";
+		//cin >> sIp;
+		string name;
+		cout << "Enter your name: ";
+		cin >> name;
+		String playerName = name;
+		packet << playerName;
+		sIP = "139.179.210.187";
+		IpAddress sendIP(sIP);
+		if (socket.send(packet, sendIP, 2000) == Socket::Done)
+			cout << "You have joined the room." << endl;
+		//cout << sIP << endl;
+
+		IpAddress tempId;
+		unsigned short tempPort;
+		Packet packet;
+		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+			String received;
+			packet >> received;
+			string str = received;
+			cout << "The Game is starting" << endl;
+			players = split(str, ',');
+
+			for (int i = 0; i < 3; i++) {
+				(*GM)->addPlayer(players[i]);
+			}
+		}
+	}
 }
 
 void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count, int _castleLevel) {
@@ -1951,6 +1965,3 @@ vector<string> NetworkManager ::split( string strToSplit, char delimeter){
 	return splittedStrings;
 }
 
-sf::Vector2f MyImage::getInitialPosition() {
-	return initialPosition;
-}
