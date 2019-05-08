@@ -13,7 +13,7 @@ int main() {
 
 	GameManager* GM = new GameManager();
 	NetworkManager* NM = new NetworkManager();
-  WindowManager* WM = new WindowManager(GM);
+	WindowManager* WM = new WindowManager(GM);
   
   //GM->loadProvinces();
   

@@ -1238,10 +1238,8 @@ void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkM
 		
 }
 
-
-
 void NetworkManager::createNetwork(GameManager ** const GM) {
-	ip = IpAddress::getLocalAddress();	
+	ip = IpAddress::getLocalAddress();
 	string text = " ";
 	int playerCount = 0;
 	Packet packet;
@@ -1254,7 +1252,7 @@ void NetworkManager::createNetwork(GameManager ** const GM) {
 	if (connectionType == "h") {
 		port = 2000;
 	}
-		
+
 	else if (connectionType == "c1")
 		port = 2001;
 	else if (connectionType == "c2")
@@ -1284,11 +1282,11 @@ void NetworkManager::createNetwork(GameManager ** const GM) {
 		do {
 			IpAddress rIP;
 			unsigned short port;
-;
+			;
 			if (socket.receive(packet, rIP, port) == Socket::Done) {
 				computerID[port] = rIP;
 				playerCount++;
-				
+
 				String name;
 				packet >> name;
 				string display = name;
@@ -1355,9 +1353,12 @@ void NetworkManager::createNetwork(GameManager ** const GM) {
 			cout << "The Game is starting" << endl;
 			players = split(str, ',');
 
-			for (int i = 0; i< 3; i++) {
-				(*GM)->addPlayer(players[i]); 
+			for (int i = 0; i < 3; i++) {
+				(*GM)->addPlayer(players[i]);
 			}
+		}
+	}
+}
 
 WindowManager::WindowManager() {
 

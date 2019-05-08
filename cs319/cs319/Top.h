@@ -227,8 +227,9 @@ private:
 	map<unsigned short, IpAddress> computerID;
 	UdpSocket socket;
 	vector<string> players;
-	
+
 	Packet packet;
+};
 
 class WindowManager {
 public: 
