@@ -143,6 +143,7 @@ void Continent::setProvinces(vector<int> _provinces)
 
 Player::Player()
 {
+	leftSoldier = 10;
 	name = "";
 	id = -1;
 	battlesLost = 0;
@@ -152,6 +153,7 @@ Player::Player()
 
 Player::Player(string _name, int _id)
 {
+	leftSoldier = 10;
 	name = _name;
 	id = _id;
 	battlesLost = 0;
@@ -251,9 +253,13 @@ void Player::loseProvince(WorldMap* worldMap, Province* _province) {
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 {
+	if (leftSoldier < amount)
+		return false;
 	if (!hasProvince(worldMap, _province))
 		return false;
 	_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
+	worldMap->showProvinceStatus(_province);
+	leftSoldier--;
 	return true;
 }
 
@@ -292,6 +298,13 @@ int Player::getNumberOfProvinces() {
 	return provinces.size();
 }
 
+void Player::setLeftSoldier(int n) {
+	leftSoldier = n;
+}
+
+int Player::getLeftSoldier() {
+	return leftSoldier;
+}
 
 WorldMap::WorldMap()
 {
@@ -507,13 +520,11 @@ void Province::setNumberOfSoldiers(int _numberOfSoldiers)
 
 
 
-
-
-
 GameManager::GameManager()
 {
 	worldMap = new WorldMap();
 	die = new Die(6);
+	currentPlayer = 0;
 }
 
 GameManager::~GameManager()
@@ -731,13 +742,6 @@ bool GameManager::attack(Player* attacker, Player* defender, Province* from, Pro
 	if (to->getNumberOfSoldiers() == 0) {
 		cout << attacker->getName() << " has captured the city " << to->getName() << endl;
 		attacker->captureProvince(worldMap, to);
-
-		int number = -1;
-		while (number <= 0 || number >= from->getNumberOfSoldiers()) {
-			cout << "Enter the number of soldiers you want to place on this city: ";
-			cin >> number;
-		}
-		fortify(attacker, from, to, number);
 		return true;
 	}
 	return false;
@@ -886,6 +890,15 @@ void GameManager::loadProvinces() {
 		cout << cityName << " " << color << " loaded. " << endl;
 	}
 	file.close();
+	cout << "efsfsef" << endl;
+	createNeighbor("ankara", "konya");
+	createNeighbor("ankara", "eskisehir");
+	createNeighbor("konya", "antalya");
+	createNeighbor("istanbul", "edirne");
+	createNeighbor("istanbul", "kocaeli");
+	createNeighbor("eskisehir", "kocaeli");
+	createNeighbor("eskisehir", "istanbul");
+	
 }
 
 void GameManager::startGame(NetworkManager ** NM) {
@@ -919,6 +932,7 @@ void GameManager::startGame(NetworkManager ** NM) {
 		
 		if ((*NM)->connectionType == "h" && turn == 0) {
 			cout << endl << "============		YOUR TURN		===============  " << endl;
+			currentPlayer = 0;
 			startTurn(0);
 			sendAllProvincesFromHost(NM);
 			turn = 1;
@@ -938,6 +952,7 @@ void GameManager::startGame(NetworkManager ** NM) {
 			cout << endl << "============		" << players[0]->getName() << " TURN		===============  " << endl;
 			sendAllProvincesFromHost(NM);
 			cout << endl << "============		YOUR TURN		===============  " << endl;
+			currentPlayer = 1;
 			startTurn(1);
 			sendAllProvincesClientToHost((*NM)->connectionType, NM);
 			sendAllProvincesFromHost(NM);
@@ -957,6 +972,7 @@ void GameManager::startGame(NetworkManager ** NM) {
 			cout << endl << "============		" << players[1]->getName() << " TURN		===============  " << endl;
 			sendAllProvincesFromHost(NM);
 			cout << endl << "============		YOUR TURN		===============  " << endl;
+			currentPlayer = 2;
 			startTurn(2);
 			sendAllProvincesClientToHost((*NM)->connectionType, NM);
 			sendAllProvincesFromHost(NM);
@@ -985,8 +1001,7 @@ void GameManager::startPlacementPhase(int id) {
 		Province* city;
 		worldMap->getProvinceByName(cityName, amount, city);
 		if (city != NULL) {
-			cout << "amount : ";
-			cin >> amount;
+			amount = 1;
 			if (amount <= n) {
 				if (placeSoldier(player, cityName, amount)) {
 					cout << amount << " soldiers have been placed to " << cityName << endl;
@@ -1369,6 +1384,8 @@ WindowManager::WindowManager(GameManager* GM)
 	this->GM = GM;
 	zoom = 1.0;
 
+	phase = INITAL_PHASE;
+
 	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
 	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
 
@@ -1404,7 +1421,8 @@ WindowManager::WindowManager(GameManager* GM)
 
 	provinceNameTxt.setFont(font);
 	provinceNameTxt.setCharacterSize(50);
-	provinceNameTxt.setFillColor(sf::Color(255, 255, 255));
+	provinceNameTxt.setFillColor(sf::Color(0, 0, 0));
+	provinceNameTxt.setPosition(600, bottomUpperMargin);
 
 	mapSprite.setPosition(0, 0);
 	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
@@ -1414,17 +1432,19 @@ WindowManager::WindowManager(GameManager* GM)
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 
-	buttons[0]->setPosition(100, 100);
-	buttons[0]->setSize(100, 100);
-	buttons[0]->setText("hello world");
+	buttons[0]->setPosition(400, bottomUpperMargin);
+	buttons[0]->setSize(100, 40);
+	buttons[0]->setText("Next Phase");
 	buttons[0]->setTextSize(20);
-	buttons[0]->setTextColor(sf::Color::Blue);
+	buttons[0]->setTextColor(sf::Color::White);
+	buttons[0]->setFillColor(sf::Color::Blue);
 
-	buttons[1]->setPosition(500, 500);
 	buttons[1]->setSize(100, 100);
-	buttons[1]->setText("hello world");
+	buttons[1]->setText("Attack");
+	buttons[1]->setPosition(400, screenHeight-buttons[1]->getSize().y);
 	buttons[1]->setTextSize(20);
-	buttons[1]->setTextColor(sf::Color::Red);
+	buttons[1]->setTextColor(sf::Color::White);
+	buttons[1]->setFillColor(sf::Color::Red);
 
 	images.push_back(new MyImage("soldier.png"));
 	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
@@ -1467,11 +1487,14 @@ void WindowManager::createWindow() {
 				if (event.mouseButton.button == sf::Mouse::Left)
 				{
 					checkClickEvents(event);
+					string provinceName = getProvinceName(window, mouse);
+					if (provinceName != "") {
+						int index = -1; Province* ptr;
+						GM->getWorldMap()->getProvinceByName(provinceName, index, ptr);
+						provinceClicked(index);
+					}
 				}
 			}
-
-			
-			
 		}
 		float speed = 3;
 		if (counter > 10) {
@@ -1508,7 +1531,6 @@ void WindowManager::createWindow() {
 		window.clear(sf::Color::Black);
 		window.draw(mapSprite);
 
-
 		window.setView(window.getDefaultView());
 		window.draw(lowerPanel);
 		dragObject(window, event, 0);
@@ -1526,19 +1548,24 @@ void WindowManager::createWindow() {
 }
 
 string WindowManager::getProvinceByColor(int color) {
-	
+
 }
 
 int WindowManager::getPixelColor(int x, int y) {
 	cout << "Mouse : " << x << ", " << y << endl;
-	return (int) mapImg.getPixel(x, y).toInteger();
+	return (int)mapImg.getPixel(x, y).toInteger();
 }
 
 string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) {
 	sf::Vector2i PixelPos = m.getPosition(window);
 	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
-	int colorInInt = (int) mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
-	return GM->colorLookUpTable[colorInInt];
+	if (MousePos.x <= mapImg.getSize().x && MousePos.y <= mapImg.getSize().y) {
+		int colorInInt = (int)mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
+		auto it = GM->colorLookUpTable.find(colorInInt);
+		if (it != GM->colorLookUpTable.end())
+			return GM->colorLookUpTable[colorInInt];
+	}
+	return "";
 }
 
 void WindowManager::checkClickEvents(sf::Event & e) {
@@ -1563,11 +1590,33 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 }
 
 void WindowManager::buttonClicked(int id) {
+	string dummy;
+	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
 	if (id == 0) {
-		cout << "Blue Button clicked !" << endl;
+		if (phase == INITAL_PHASE) {
+			player->setLeftSoldier(player->getNumberOfProvinces() / 3);
+			phase = PLACEMENT_PHASE;
+		}
+		else if (phase == PLACEMENT_PHASE) {
+			phase = ATTACKING_PHASE;
+		}
+		cout << "Phase: " << phase << endl;
 	}
-	else if (id == 1) {
-		cout << "Red Button clicked !" << endl;
+	if (phase == ATTACKING_PHASE && id == ATTACK_BUTTON) {
+		if (isProvinceClicked == 2) {
+			if (GM->attack(player, second->getOwner(), first, second, 1)) {
+				phase = POST_ATTACK; //change phase 
+			}
+		}
+	}
+	if (phase == POST_ATTACK && id == ATTACK_BUTTON && second->getNumberOfSoldiers() == 0) {
+		//player->captureProvince(GM->getWorldMap(),second);
+		buttons[ATTACK_BUTTON]->setText("Place");
+		provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
+		GM->fortify(player, first, second, 1);
+		phase = FORTIFY_PHASE;
+	}
+	if (phase == ATTACKING_PHASE && id == ATTACK_BUTTON) {
 	}
 }
 
@@ -1577,7 +1626,31 @@ void WindowManager::imageClicked(int id) {
 	}
 }
 
+void WindowManager::provinceClicked(int id) {
+	if (phase == ATTACKING_PHASE) {
+		if (isProvinceClicked == 0) {
+			first = GM->getWorldMap()->getProvinceByID(id);
+			second = NULL;
+			isProvinceClicked = 1;
+			provinceNameTxt.setString(first->getName());
+		}
+		else if (isProvinceClicked == 1) {
+			second = GM->getWorldMap()->getProvinceByID(id);
+			isProvinceClicked = 2;
+			provinceNameTxt.setString(first->getName() + " attacks to " +second->getName());
+		}
+		else if (isProvinceClicked == 2) {
+			second = NULL;
+			first = GM->getWorldMap()->getProvinceByID(id);
+			isProvinceClicked = 1;
+			provinceNameTxt.setString(first->getName());
+		}
+	}
+}
+
 void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
+	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITAL_PHASE))
+		return;
 	if (images[id]->inMove) {
 		images[id]->setScale(sf::Vector2f(0.5, 0.5));
 		images[id]->setPosition(sf::Vector2f(mouse.getPosition(window).x - 0.5*images[id]->getLocalBounds().width / 2, mouse.getPosition(window).y - 0.5*images[id]->getLocalBounds().height / 2));
@@ -1596,14 +1669,21 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 		images[id]->setScale(sf::Vector2f(1, 1));
 		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
 		{
-			string provinceName = getProvinceName(window, mouse);
-			cout << provinceName << endl;
-			/*if (WorldMap.mapOfProvinces[provinceName].owner == currentPlayer) {
-				WorldMap.mapOfProvinces[provinceName].army.sizeOfArmy += 1;
-				listOfPlayers[currentPlayer].gold -= 10;
-			}*/
+			if (id == 0) {
+				string provinceName = getProvinceName(window, mouse);
+				cout << provinceName << endl;
+				if (phase == PLACEMENT_PHASE) {
+					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
+						int dummy; Province* province;
+						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
+						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
+					}
+					else {
+						provinceNameTxt.setString("Senin deðil amk");
+					}			
+				}
+			}
 		}
-
 	}
 }
 

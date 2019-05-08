@@ -109,6 +109,8 @@ public:
 	bool hasProvince(WorldMap * worldMap, Province* _province);
 	int buildCastle(Province* province);
 	int getNumberOfProvinces();
+	void setLeftSoldier(int n);
+	int getLeftSoldier();
 private:
 	string name;
 	int money;
@@ -117,6 +119,7 @@ private:
 	int battlesLost;
 	vector<int> provinces;
 	vector<int> bonusCards;
+	int leftSoldier;
 };
 
 class WorldMap
@@ -202,6 +205,7 @@ public:
 	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
 
 	map<int, string> colorLookUpTable;
+	int currentPlayer;
 
 private:
 	vector<Player*> players;
@@ -251,6 +255,16 @@ public:
 	sf::Font font;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
+	int phase;
+	const int ATTACK_BUTTON = 1;
+	const int INITAL_PHASE = 0;
+	const int PLACEMENT_PHASE = 1;
+	const int ATTACKING_PHASE = 2;
+	const int POST_ATTACK = 3;
+	const int FORTIFY_PHASE = 4;
+	int isProvinceClicked = 0;
+	Province* first;
+	Province* second;
 	
 	WindowManager();
 	WindowManager(GameManager* GM);

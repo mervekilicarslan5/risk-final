@@ -14,15 +14,19 @@ int main() {
 	GameManager* GM = new GameManager();
 	NetworkManager* NM = new NetworkManager();
 	WindowManager* WM = new WindowManager(GM);
+
+	GM->addPlayer("ahmet");
+	GM->addPlayer("serdar");
   
-  //GM->loadProvinces();
+    GM->loadProvinces();
+
+	GM->randomPlacement();
   
-	NM->createNetwork(&GM);
+	//NM->createNetwork(&GM);
 
-	GM->startGame(&NM);
+	//GM->startGame(&NM);
 
-  WM->createWindow();
-
+    WM->createWindow();
 
 	//system("PAUSE");
 	return 0;
