@@ -1272,7 +1272,7 @@ WindowManager::WindowManager(GameManager* GM)
 	this->GM = GM;
 	zoom = 1.0;
 
-	phase = INITAL_PHASE;
+	phase = INITIAL_PHASE;
 
 	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
 	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
@@ -1308,9 +1308,14 @@ WindowManager::WindowManager(GameManager* GM)
 	lowerPanel.setFillColor(sf::Color(255, 255, 255));
 
 	provinceNameTxt.setFont(font);
-	provinceNameTxt.setCharacterSize(50);
+	provinceNameTxt.setCharacterSize(20);
 	provinceNameTxt.setFillColor(sf::Color(0, 0, 0));
 	provinceNameTxt.setPosition(600, bottomUpperMargin);
+
+	infoText.setFont(font);
+	infoText.setCharacterSize(20);
+	infoText.setFillColor(sf::Color::Black);
+	infoText.setPosition(600, 50 + bottomUpperMargin);
 
 	mapSprite.setPosition(0, 0);
 	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
@@ -1319,24 +1324,53 @@ WindowManager::WindowManager(GameManager* GM)
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
 
-	buttons[0]->setPosition(400, bottomUpperMargin);
+	
+	
+
+
+	images.push_back(new MyImage("soldier.png"));
+	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
+	images[0]->setPosition(images[0]->getInitialPosition());
+
+
+	int numberTextSize = 30;
+
+	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 40);
+	buttons[2]->setSize(numberTextSize, numberTextSize);
+	buttons[2]->setTextSize(numberTextSize);
+	buttons[2]->setTextColor(sf::Color::Black);
+	buttons[2]->setText("-");
+
+	buttons[4]->setPosition(buttons[2]->getPosition().x + buttons[2]->getSize().x, buttons[2]->getPosition().y);
+	buttons[4]->setSize(numberTextSize, numberTextSize);
+	buttons[4]->setTextSize(numberTextSize);
+	buttons[4]->setTextColor(sf::Color::Black);
+	buttons[4]->setText("1");
+
+	buttons[3]->setPosition(buttons[4]->getPosition().x + buttons[4]->getSize().x, buttons[2]->getPosition().y);
+	buttons[3]->setSize(numberTextSize, numberTextSize);
+	buttons[3]->setTextSize(numberTextSize);
+	buttons[3]->setTextColor(sf::Color::Black);
+	buttons[3]->setText("+");
+
 	buttons[0]->setSize(100, 40);
+	buttons[0]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - 10 - buttons[3]->getSize().y);
 	buttons[0]->setText("Next Phase");
 	buttons[0]->setTextSize(20);
 	buttons[0]->setTextColor(sf::Color::White);
 	buttons[0]->setFillColor(sf::Color::Blue);
 
-	buttons[1]->setSize(100, 100);
+	buttons[1]->setSize(100, 40);
 	buttons[1]->setText("Attack");
-	buttons[1]->setPosition(400, screenHeight-buttons[1]->getSize().y);
+	buttons[1]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
 	buttons[1]->setTextSize(20);
 	buttons[1]->setTextColor(sf::Color::White);
 	buttons[1]->setFillColor(sf::Color::Red);
 
-	images.push_back(new MyImage("soldier.png"));
-	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
-	images[0]->setPosition(images[0]->getInitialPosition());
+	
 }
 
 WindowManager::~WindowManager() {
@@ -1379,7 +1413,8 @@ void WindowManager::createWindow() {
 					if (provinceName != "") {
 						int index = -1; Province* ptr;
 						GM->getWorldMap()->getProvinceByName(provinceName, index, ptr);
-						provinceClicked(index);
+						if (event.mouseButton.y < bottomUpperMargin)
+							provinceClicked(index);
 					}
 				}
 			}
@@ -1425,10 +1460,11 @@ void WindowManager::createWindow() {
 		window.draw(*images[0]);
 
 		window.draw(provinceNameTxt);
+		window.draw(infoText);
 
-		buttons[0]->draw(window);
-		buttons[1]->draw(window);
-
+		for (int i = 0; i < buttons.size(); i++) {
+			buttons[i]->draw(window);
+		}
 
 		window.display();
 	}
@@ -1480,30 +1516,82 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 void WindowManager::buttonClicked(int id) {
 	string dummy;
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
-	if (id == 0) {
-		if (phase == INITAL_PHASE) {
+
+
+	if (id == NEXT_PHASE_BUTTON) {
+		if (phase == INITIAL_PHASE) {
 			player->setLeftSoldier(player->getNumberOfProvinces() / 3);
 			phase = PLACEMENT_PHASE;
 		}
 		else if (phase == PLACEMENT_PHASE) {
 			phase = ATTACKING_PHASE;
 		}
+		else if (phase == ATTACKING_PHASE) {
+			phase = FORTIFY_PHASE;
+			buttons[NEXT_PHASE_BUTTON]->setText("End Turn");
+			buttons[ATTACK_BUTTON]->setText("Fortify");
+		}
+		else if (phase == FORTIFY_PHASE) {
+			phase = END_TURN;
+		}
 		cout << "Phase: " << phase << endl;
 	}
-	if (phase == ATTACKING_PHASE && id == ATTACK_BUTTON) {
-		if (isProvinceClicked == 2) {
-			if (GM->attack(player, second->getOwner(), first, second, 3)) {
-				phase = POST_ATTACK; //change phase 
-				buttons[ATTACK_BUTTON]->setText("Place");
-				provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
+	else if (id == ATTACK_BUTTON) {
+		if (phase == ATTACKING_PHASE) {
+			if (isProvinceClicked == 2) {
+				if (GM->attack(player, second->getOwner(), first, second, soldierAmount)) {
+					phase = POST_ATTACK; //change phase 
+					buttons[ATTACK_BUTTON]->setText("Place");
+					provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
+				}
+				if (first->getNumberOfSoldiers() > 3)
+					soldierAmount = 3;
+				else
+					soldierAmount = first->getNumberOfSoldiers() - 1;
+				buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+				displayProvinceInfo(first);
+			}
+		}
+		else if (phase == POST_ATTACK && second->getNumberOfSoldiers() == 0) {
+			GM->fortify(player, first, second, soldierAmount);
+			buttons[ATTACK_BUTTON]->setText("Attack");
+			phase = ATTACKING_PHASE;
+			displayProvinceInfo(second);
+		}
+		else if (phase == FORTIFY_PHASE) {
+			if (GM->fortify(player, first, second, soldierAmount)) {
+				displayProvinceInfo(second);
 			}
 		}
 	}
-	else if (phase == POST_ATTACK && id == ATTACK_BUTTON && second->getNumberOfSoldiers() == 0) {
-		GM->fortify(player, first, second, 1);
-		phase = FORTIFY_PHASE;
+
+	else if (id == INC_BUTTON) {
+		if (phase == ATTACKING_PHASE) {
+			if (soldierAmount < 3) {
+				soldierAmount++;
+			}
+		}
+		else if (phase == POST_ATTACK || phase == FORTIFY_PHASE) {
+			if (first != NULL) {
+				if (soldierAmount < first->getNumberOfSoldiers() - 1 ) {
+					soldierAmount++;
+				}
+			}
+		}
+		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
-	if (phase == ATTACKING_PHASE && id == ATTACK_BUTTON) {
+	else if (id == DEC_BUTTON) {
+		if (phase == ATTACKING_PHASE) {
+			if (soldierAmount > 1) {
+				soldierAmount--;
+			}
+		}
+		else if (phase == POST_ATTACK || phase == FORTIFY_PHASE) {
+			if (soldierAmount > 1) {
+				soldierAmount--;
+			}
+		}
+		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 }
 
@@ -1514,29 +1602,47 @@ void WindowManager::imageClicked(int id) {
 }
 
 void WindowManager::provinceClicked(int id) {
-	if (phase == ATTACKING_PHASE) {
+	Province* city = GM->getWorldMap()->getProvinceByID(id);
+	if (phase == ATTACKING_PHASE || phase == FORTIFY_PHASE) {
 		if (isProvinceClicked == 0) {
-			first = GM->getWorldMap()->getProvinceByID(id);
+			first = city;
 			second = NULL;
 			isProvinceClicked = 1;
 			provinceNameTxt.setString(first->getName());
 		}
 		else if (isProvinceClicked == 1) {
-			second = GM->getWorldMap()->getProvinceByID(id);
+			second = city;
 			isProvinceClicked = 2;
-			provinceNameTxt.setString(first->getName() + " attacks to " +second->getName());
+			if (phase == ATTACKING_PHASE)
+				provinceNameTxt.setString(first->getName() + " attacks to " +second->getName());
+			else
+				provinceNameTxt.setString("From " + first->getName() + " to " + second->getName());
 		}
 		else if (isProvinceClicked == 2) {
 			second = NULL;
-			first = GM->getWorldMap()->getProvinceByID(id);
+			first = city;
 			isProvinceClicked = 1;
 			provinceNameTxt.setString(first->getName());
 		}
+		if (phase != FORTIFY_PHASE) {
+			if (first->getNumberOfSoldiers() > 3)
+				soldierAmount = 3;
+			else
+				soldierAmount = first->getNumberOfSoldiers() - 1;
+		}
+		else
+			soldierAmount = first->getNumberOfSoldiers() - 1;
+		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
+	else if (phase == POST_ATTACK) {
+		soldierAmount = first->getNumberOfSoldiers() - 1;
+		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+	}
+	displayProvinceInfo(city);
 }
 
 void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
-	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITAL_PHASE))
+	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITIAL_PHASE))
 		return;
 	if (images[id]->inMove) {
 		images[id]->setScale(sf::Vector2f(0.5, 0.5));
@@ -1559,7 +1665,12 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			if (id == 0) {
 				string provinceName = getProvinceName(window, mouse);
 				cout << provinceName << endl;
-				if (phase == PLACEMENT_PHASE) {
+				if (phase == INITIAL_PHASE) {
+					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
+						phase = END_TURN;
+					}
+				}
+				else if (phase == PLACEMENT_PHASE) {
 					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
 						int dummy; Province* province;
 						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
@@ -1572,6 +1683,10 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			}
 		}
 	}
+}
+
+void WindowManager::displayProvinceInfo(Province* province) {
+	infoText.setString("Name: " + province->getName() + "\nOwner: " + province->getOwner()->getName() + "\nSoldiers: " + to_string(province->getNumberOfSoldiers()));
 }
 
 Button::Button() {
@@ -1599,10 +1714,12 @@ void Button::draw(sf::RenderWindow & window) {
 void Button::setPosition(float x, float y) {
 	sf::RectangleShape::setPosition(x, y);
 	text.setPosition(x, y);
+	//text.setPosition(x + sf::RectangleShape().getPosition().x / 2, y + sf::RectangleShape().getPosition().y / 2);
 }
 
 void Button::setSize(int width, int height) {
 	sf::RectangleShape::setSize(sf::Vector2f(width, height));
+	//text.setOrigin(width/2, height/2);
 }
 
 void Button::setTextColor(sf::Color color) {

@@ -251,20 +251,30 @@ public:
 	sf::RenderWindow window;
 	sf::Mouse mouse;
 	sf::RectangleShape lowerPanel;
-	sf::Text provinceNameTxt;
+	sf::Text provinceNameTxt, infoText;
 	sf::Font font;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
 	int phase;
+	int soldierAmount = 1;
+
+	const int NEXT_PHASE_BUTTON = 0;
 	const int ATTACK_BUTTON = 1;
-	const int INITAL_PHASE = 0;
+	const int DEC_BUTTON = 2;
+	const int INC_BUTTON = 3;
+	const int NUMBER_TEXT = 4;
+
+	const int INITIAL_PHASE = 0;
 	const int PLACEMENT_PHASE = 1;
 	const int ATTACKING_PHASE = 2;
 	const int POST_ATTACK = 3;
 	const int FORTIFY_PHASE = 4;
+	const int END_TURN = 5;
+
 	int isProvinceClicked = 0;
 	Province* first;
 	Province* second;
+	Province* currentProvince;
 	
 	WindowManager();
 	WindowManager(GameManager* GM);
@@ -278,6 +288,7 @@ public:
 	void buttonClicked(int id);
 	void imageClicked(int id);
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
+	void displayProvinceInfo(Province * province);
 };
 
 class Button : public sf::RectangleShape {
