@@ -1,5 +1,6 @@
 #include "Top.h"
 
+
 Die::Die()
 {
 	numberOfFaces = 6;
@@ -9,7 +10,6 @@ Die::Die(int _numberOfFaces)
 {
 	numberOfFaces = _numberOfFaces;
 }
-
 
 Die::~Die()
 {
@@ -22,6 +22,9 @@ int Die::roll()
 	std::uniform_real_distribution<double> dist(1, numberOfFaces + 1);
 	return dist(mt);
 }
+
+
+
 
 
 Castle::Castle()
@@ -61,25 +64,34 @@ void Castle::setLevel(int _level)
 
 void Castle::upgradeLevel()
 {
-	if (level == 0)
-		level = 1;
+	if (level == 1) {
+		level = 2;
+		price += 50;
+	}
+		
 }
 
 bool Castle::isBuilt() {
 	return built;
 }
+
 void Castle::build() {
 	built = true;
+	level = 1;
 }
+
 void Castle::destroy() {
 	built = false;
 	level = 0;
 }
 
+
+
+
+
 Continent::Continent()
 {
 }
-
 
 Continent::~Continent()
 {
@@ -125,6 +137,10 @@ void Continent::setProvinces(vector<int> _provinces)
 	provinces = _provinces;
 }
 
+
+
+
+
 Player::Player()
 {
 	name = "";
@@ -142,7 +158,6 @@ Player::Player(string _name, int _id)
 	battlesWon = 0;
 	money = 200;
 }
-
 
 Player::~Player()
 {
@@ -218,12 +233,20 @@ void Player::setId(int _id)
 
 void Player::captureProvince(WorldMap* worldMap, Province * _province)
 {
-	provinces.push_back(worldMap->findIndex(_province));
-	_province->setOwner(this);
+	if (! (this->hasProvince(worldMap, _province))) {
+		if (_province->getOwner() != NULL) {
+			_province->getOwner()->loseProvince(worldMap, _province);
+		}
+		provinces.push_back(worldMap->findIndex(_province));
+		_province->setOwner(this);
+	}
+	
 }
 
 void Player::loseProvince(WorldMap* worldMap, Province* _province) {
-	provinces.erase(provinces.begin() + worldMap->findIndex(_province));
+	vector <int> :: iterator index = find(provinces.begin(), provinces.end(), worldMap->findIndex(_province));
+	if (index != provinces.end())
+		provinces.erase(index);
 }
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
@@ -242,18 +265,33 @@ bool Player::hasProvince(WorldMap * worldMap, Province * _province)
 	return true;
 }
 
-bool Player::buildCastle(Province* province) {
-	if (province->getCastle()->getPrice() > money) {
-		cout << "Insufficient money to build castle!";
-		return false;
+int Player::buildCastle(Province* province) {
+	
+	if (province->getCastle()->isBuilt() == false) {
+		if (province->getCastle()->getPrice() > money) {
+			cout << "Insufficient money to build castle!";
+			return 0;
+		}
+		province->getCastle()->build();
+		money -= province->getCastle()->getPrice();
+		return 1;
 	}
-	province->getCastle()->build();
-	money -= province->getCastle()->getPrice();
+		
+	else if (province->getCastle()->getLevel() == 1) {
+		if (province->getCastle()->getPrice() > money) {
+			cout << "Insufficient money to upgrade castle!";
+			return false;
+		}
+		province->getCastle()->upgradeLevel();
+		money -= province->getCastle()->getPrice();
+		return 2;
+	}
 }
 
 int Player::getNumberOfProvinces() {
 	return provinces.size();
 }
+
 
 WorldMap::WorldMap()
 {
@@ -268,10 +306,12 @@ WorldMap::~WorldMap()
 
 void WorldMap::addProvince(Province * _province)
 {
-	provinceList.push_back(_province);
-	vector<int> empty;
-	map.push_back(empty);
-	numberOfProvinces++;
+	if (find(provinceList.begin(), provinceList.end(), _province) == provinceList.end()) {
+		provinceList.push_back(_province);
+		vector<int> empty;
+		map.push_back(empty);
+		numberOfProvinces++;
+	}
 }
 
 void WorldMap::addEdge(int first, int second)
@@ -369,6 +409,13 @@ void WorldMap::showProvinceStatus(Province* p) {
 	else
 		cout << "Current Owner: " << p->getOwner()->getName() << endl;
 	cout << "Number of Soldiers: " << p->getNumberOfSoldiers() << endl;
+	cout << "Castle level: ";
+	if (p->getCastle()->getLevel() == 0)
+		cout << " 0 (is not buit) " << endl;
+	else if (p->getCastle()->getLevel() == 1)
+		cout << "1 " << endl;
+	else if (p->getCastle()->getLevel() == 2)
+		cout << "2 " << endl;
 }
 
 int WorldMap::getNumberOfProvinces() {
@@ -387,13 +434,16 @@ void WorldMap::showWorldStatus() {
 	}
 }
 
+
+
+
 Province::Province()
 {
 	name = "";
 	color = "";
 	numberOfSoldiers = 0;
 	owner = NULL;
-	castle = new Castle(150);
+	castle = new Castle(50);
 }
 
 Province::Province(string _name, string _color)
@@ -402,9 +452,8 @@ Province::Province(string _name, string _color)
 	color = _color;
 	numberOfSoldiers = 0;
 	owner = NULL;
-	castle = new Castle(150);
+	castle = new Castle(50);
 }
-
 
 Province::~Province()
 {
@@ -455,6 +504,11 @@ void Province::setNumberOfSoldiers(int _numberOfSoldiers)
 {
 	numberOfSoldiers = _numberOfSoldiers;
 }
+
+
+
+
+
 
 GameManager::GameManager()
 {
@@ -523,9 +577,18 @@ bool GameManager::buildCastle(Player* player, Province* province) {
 		cout << "This province does not belong to the player." << endl;
 		return false;
 	}
-	player->buildCastle(province);
-	cout << player->getName() << " built a castle in " << province->getName() << endl;
+	int done = player->buildCastle(province);
+
+	if (done == 1)
+		cout << player->getName() << " built a castle in " << province->getName() << endl;
+	else if (done == 2)
+		cout << player->getName() << " has upgraded castle in " << province->getName() << endl;
+	else
+		return false;
 	return true;
+
+	
+	
 }
 
 bool GameManager::buildCastle(int playerId, string provinceName) {
@@ -705,6 +768,7 @@ bool GameManager::attack(string attackerName, string defenderName, string fromSt
 void GameManager::showWorldStatus() {
 	worldMap->showWorldStatus();
 }
+
 void GameManager::showProvinceStatus(string name) {
 	int i; Province* ptr;
 	worldMap->getProvinceByName(name, i, ptr);
@@ -786,11 +850,12 @@ void GameManager::startTurn(int id) {
 		startMarket(id);
 		startFortifyPhase(id);
 	}
-	showWorldStatus();
+	//showWorldStatus();
 }
 
 void GameManager::loadProvinces() {
-	createProvince("ankara", "");
+	cout << "Provinces are loading" << endl;
+	/*createProvince("ankara", "");
 	createProvince("istanbul", "");
 	createProvince("konya", "");
 	createProvince("antalya", "");
@@ -807,24 +872,101 @@ void GameManager::loadProvinces() {
 	createNeighbor("istanbul", "edirne");
 	createNeighbor("istanbul", "kocaeli");
 	createNeighbor("eskisehir", "kocaeli");
+*/
+	fstream file("assets/provinces.txt");
+
+	int color;
+	string cityName;
+	bool stepOne = false;
+	bool stepTwo = false;
+	while (!file.eof()) {
+		file >> cityName >> color;
+		createProvince(cityName, to_string(color));
+		colorLookUpTable.insert(pair<int, string> (color, cityName));
+		cout << cityName << " " << color << " loaded. " << endl;
+	}
+	file.close();
 }
 
-void GameManager::startGame() {
+void GameManager::startGame(NetworkManager ** NM) {
+
 	loadProvinces();
-	//startPlacement();
-	randomPlacement();
+	if ((*NM)->connectionType == "h") {
+		//startPlacement();
+		randomPlacement();
+		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+			Province * pro = worldMap->getProvinceByID(i);
+			(*NM)->sendDataFromHost(this, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(), pro->getCastle()->getLevel());
+			//NM->sendDataFromHost(this, 1, i, 4);
+		}
+	}
+	else {
+		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+			//NM->sendDataFromHost(this, worldMap->getProvinceByID(i)->getOwner()->getId(), i, worldMap->getProvinceByID(i)->getNumberOfSoldiers());
+			(*NM)->sendDataFromHost(this, 0, 0, 0, 0);
+		}
+	}
+		
 	showWorldStatus();
+		
 	gameOn = true;
 
 	int turn = 0;
 	int numberOfPlayers = players.size();
 	int numberOfProvinces = worldMap->getNumberOfProvinces();
-
+	cout << endl << "==================================  " << endl;
 	while (gameOn) {
-		cout << endl <<  "==================================  " << players[turn]->getName() << "'s turn " << endl;
-		startTurn(turn);
+		
+		if ((*NM)->connectionType == "h" && turn == 0) {
+			cout << endl << "============		YOUR TURN		===============  " << endl;
+			startTurn(0);
+			sendAllProvincesFromHost(NM);
+			turn = 1;
+		}
+		else if ((*NM)->connectionType == "h" && turn == 1) {
+			cout << endl << "============		"<< players[1]->getName() <<" TURN		===============  " << endl;
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		" << players[2]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+			turn = 0;
+		}
 
-		turn = (turn + 1) % numberOfPlayers;
+
+		else if ((*NM)->connectionType == "c1" && turn == 0) {
+			cout << endl << "============		" << players[0]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		YOUR TURN		===============  " << endl;
+			startTurn(1);
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+			turn = 1;
+		}
+		else if ((*NM)->connectionType == "c1" && turn == 1) {
+			cout << endl << "============		" << players[2]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			turn = 0;
+		}
+
+
+
+		else if ((*NM)->connectionType == "c2" && turn == 0) {
+			cout << endl << "============		" << players[0]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		" << players[1]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+			cout << endl << "============		YOUR TURN		===============  " << endl;
+			startTurn(2);
+			sendAllProvincesClientToHost((*NM)->connectionType, NM);
+			sendAllProvincesFromHost(NM);
+		}
+
+
+		/*else if ((*NM)->connectionType == "c2" && turn == 1) {
+			cout << endl << "============		" << players[3]->getName() << " TURN		===============  " << endl;
+			sendAllProvincesFromHost(NM);
+		}*/
 	}
 }
 
@@ -973,6 +1115,34 @@ void GameManager::startMarket(int id) {
 			cout << "No such city" << endl;
 		}
 	}
+
+	string buyCastle;
+	cout << "Do you wanna buy castle (Build 50 gold, upgrade 100) (y / n): ";
+	cin >> buyCastle;
+	while (buyCastle == "y") {
+		while (true) {
+			cout << "city : ";
+			string cityName;
+			cin >> cityName;
+			Province* city;
+			worldMap->getProvinceByName(cityName, amount, city);
+
+			if (city != NULL) {
+				if (buildCastle(player->getId(), cityName)) {
+					break;
+				}
+			}
+			else {
+				cout << "No such city" << endl;
+			}
+						
+		}
+		cout << "Your money: " << player->getMoney() << endl;
+		cout << "Do you wanna buy castle (y / n): ";
+		cin >> buyCastle;
+	}
+
+
 }
 
 void GameManager::startFortifyPhase(int id) {
@@ -1052,5 +1222,655 @@ void GameManager::randomPlacement() {
 }
 
 
+void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
+	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+		Province * pro = worldMap->getProvinceByID(i);
+		(*NM)->sendDataFromHost(this, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(), pro->getCastle()->getLevel());
+	}
+	showWorldStatus();
+}
+
+void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkManager ** NM) {
+	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+		Province * pro = worldMap->getProvinceByID(i);
+		(*NM)->sendDataFromClientToHost(this, _connectionType, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(),pro->getCastle()->getLevel());
+	}
+		
+}
+
+void NetworkManager::createNetwork(GameManager ** const GM) {
+	ip = IpAddress::getLocalAddress();
+	string text = " ";
+	int playerCount = 0;
+	Packet packet;
+
+	cout << "(h) for server, (c) for client: ";
+	cin >> connectionType;
+
+	unsigned short port = 2000;
+
+	if (connectionType == "h") {
+		port = 2000;
+	}
+
+	else if (connectionType == "c1")
+		port = 2001;
+	else if (connectionType == "c2")
+		port = 2002;
+	//else if (connectionType == "c3")
+	//	port = 2003;
+	//else if (connectionType == "c4")
+	//	port = 2004;
+	//else if (connectionType == "c5")
+	//	port = 2005;
 
 
+	if (socket.bind(port) != Socket::Done) {
+		cout << "Couldnt binded. ";
+	}
+	else {
+		cout << "BINDED !! " << endl;
+	}
+
+	if (connectionType == "h") {
+		string name;
+		string playersName = "";
+		cout << "Enter your name(HOST): ";
+		cin >> name;
+		playersName += name + ",";
+		(*GM)->addPlayer(name);
+		do {
+			IpAddress rIP;
+			unsigned short port;
+			;
+			if (socket.receive(packet, rIP, port) == Socket::Done) {
+				computerID[port] = rIP;
+				playerCount++;
+
+				String name;
+				packet >> name;
+				string display = name;
+				if (port == 2001) {
+					cout << display << " has joined the room." << endl;
+					(*GM)->addPlayer(display);
+					playersName += name + ",";
+				}
+				if (port == 2002) {
+					cout << display << " has joined the room." << endl;
+					(*GM)->addPlayer(display);
+					playersName += name + ",";
+				}
+				//if (port == 2003)
+				//	cout << "Client3 has joined the room." << endl;
+				//if (port == 2004)
+				//	cout << "Client4 has joined the room." << endl;
+				//if (port == 2005)
+				//	cout << "Client5 has joined the room." << endl;
+			}
+			cout << "Player in the game (except host): " << playerCount << endl;
+		} while (playerCount != 2);
+
+		string startgame = "no";
+		do {
+			cout << "enter 's' to create the game: ";
+			cin >> startgame;
+		} while (startgame != "s");
+
+		String sendPlayersName;
+		sendPlayersName = "" + playersName;
+		Packet packet;
+		packet << sendPlayersName;
+		//string display = sendPlayersName;
+		//cout << display << endl;
+		map<unsigned short, IpAddress> ::iterator tempIterator;
+		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
+
+
+	}
+
+	else if (connectionType == "c1" || connectionType == "c2") {
+		//cout << "Enter server ip: ";
+		//cin >> sIp;
+		string name;
+		cout << "Enter your name: ";
+		cin >> name;
+		String playerName = name;
+		packet << playerName;
+		sIP = "139.179.210.187";
+		IpAddress sendIP(sIP);
+		if (socket.send(packet, sendIP, 2000) == Socket::Done)
+			cout << "You have joined the room." << endl;
+		//cout << sIP << endl;
+
+		IpAddress tempId;
+		unsigned short tempPort;
+		Packet packet;
+		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+			String received;
+			packet >> received;
+			string str = received;
+			cout << "The Game is starting" << endl;
+			players = split(str, ',');
+
+			for (int i = 0; i < 3; i++) {
+				(*GM)->addPlayer(players[i]);
+			}
+		}
+	}
+}
+
+WindowManager::WindowManager() {
+
+}
+
+WindowManager::WindowManager(GameManager* GM)
+{
+	this->GM = GM;
+	zoom = 1.0;
+
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
+
+	cout << screenHeight << ", " << screenWidth << endl;
+
+	leftMargin = screenWidth / 10;
+	rightMargin = (screenWidth * 9) / 10;
+	topMargin = screenHeight / 10;
+	bottomLowerMargin = (screenHeight * 7) / 10;
+	bottomUpperMargin = (screenHeight * 8) / 10;
+
+	if (!mapImg.loadFromFile("assets/mapp.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!hoverImg.loadFromFile("assets/hover.jpeg")) {
+		cout << "Unable to open file" << endl;
+	}
+
+	font;
+	if (!font.loadFromFile("assets/font.ttf"))
+	{
+		// error...
+	}
+
+	mapTex.loadFromImage(mapImg);
+	mapSprite.setTexture(mapTex);
+	mainView.setSize(screenWidth, screenHeight);
+	/*mainView.setViewport(sf::FloatRect(0, 0, 1, 0.8f));*/
+
+	lowerPanel.setSize(sf::Vector2f(screenWidth, screenHeight - bottomUpperMargin));
+	lowerPanel.setPosition(0, bottomUpperMargin);
+	lowerPanel.setFillColor(sf::Color(255, 255, 255));
+
+	provinceNameTxt.setFont(font);
+	provinceNameTxt.setCharacterSize(50);
+	provinceNameTxt.setFillColor(sf::Color(255, 255, 255));
+
+	mapSprite.setPosition(0, 0);
+	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
+
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+
+	buttons[0]->setPosition(100, 100);
+	buttons[0]->setSize(100, 100);
+	buttons[0]->setText("hello world");
+	buttons[0]->setTextSize(20);
+	buttons[0]->setTextColor(sf::Color::Blue);
+
+	buttons[1]->setPosition(500, 500);
+	buttons[1]->setSize(100, 100);
+	buttons[1]->setText("hello world");
+	buttons[1]->setTextSize(20);
+	buttons[1]->setTextColor(sf::Color::Red);
+
+	images.push_back(new MyImage("soldier.png"));
+	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
+	images[0]->setPosition(images[0]->getInitialPosition());
+}
+
+WindowManager::~WindowManager() {
+
+}
+
+void WindowManager::createWindow() {
+
+	window.setKeyRepeatEnabled(false);
+	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
+
+
+	int counter = 0;
+
+	while (window.isOpen()) {
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+			else if (event.type == sf::Event::MouseWheelScrolled)
+			{
+				if (zoom > 0.5 && event.mouseWheelScroll.delta > 0) {
+					mainView.zoom(0.80);
+					zoom *= 0.8;
+					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+				}
+				else if (zoom < 1 && event.mouseWheelScroll.delta < 0) {
+					mainView.zoom(1.25);
+					zoom *= 1.25;
+					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+				}
+			}
+			else if (event.type == sf::Event::MouseButtonPressed)
+			{
+				if (event.mouseButton.button == sf::Mouse::Left)
+				{
+					checkClickEvents(event);
+				}
+			}
+
+			
+			
+		}
+		float speed = 3;
+		if (counter > 10) {
+			sf::Vector2i mousePos = mouse.getPosition(window);
+
+			if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
+				if (mainView.getCenter().x >= mainView.getSize().x / 2) {
+					mainView.move(-zoom * speed, 0);
+				}
+			}
+			else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
+				if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
+					mainView.move(zoom* speed, 0);
+				}
+			}
+			if (mousePos.y < topMargin) {
+				if (mainView.getCenter().y >= mainView.getSize().y / 2) {
+					mainView.move(0, -zoom * speed);
+				}
+			}
+			else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
+				if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
+					mainView.move(0, zoom * speed);
+				}
+			}
+			counter = 0;
+		}
+
+		counter++;
+		//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
+		//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
+		window.setView(mainView);
+
+		window.clear(sf::Color::Black);
+		window.draw(mapSprite);
+
+
+		window.setView(window.getDefaultView());
+		window.draw(lowerPanel);
+		dragObject(window, event, 0);
+		window.draw(*images[0]);
+
+		window.draw(provinceNameTxt);
+
+		buttons[0]->draw(window);
+		buttons[1]->draw(window);
+
+
+		window.display();
+	}
+
+}
+
+string WindowManager::getProvinceByColor(int color) {
+	
+}
+
+int WindowManager::getPixelColor(int x, int y) {
+	cout << "Mouse : " << x << ", " << y << endl;
+	return (int) mapImg.getPixel(x, y).toInteger();
+}
+
+string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) {
+	sf::Vector2i PixelPos = m.getPosition(window);
+	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
+	int colorInInt = (int) mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
+	return GM->colorLookUpTable[colorInInt];
+}
+
+void WindowManager::checkClickEvents(sf::Event & e) {
+	int id = 0;
+	for (auto it = buttons.begin(); it != buttons.end(); it++) {
+		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
+			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
+			buttonClicked(id);
+			return;
+		}
+		id++;
+	}
+	id = 0;
+	for (auto it = images.begin(); it != images.end(); it++) {
+		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
+			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
+			imageClicked(id);
+			return;
+		}
+		id++;
+	}
+}
+
+void WindowManager::buttonClicked(int id) {
+	if (id == 0) {
+		cout << "Blue Button clicked !" << endl;
+	}
+	else if (id == 1) {
+		cout << "Red Button clicked !" << endl;
+	}
+}
+
+void WindowManager::imageClicked(int id) {
+	if (id == 0) {
+		cout << "Image clicked" << endl;
+	}
+}
+
+void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
+	if (images[id]->inMove) {
+		images[id]->setScale(sf::Vector2f(0.5, 0.5));
+		images[id]->setPosition(sf::Vector2f(mouse.getPosition(window).x - 0.5*images[id]->getLocalBounds().width / 2, mouse.getPosition(window).y - 0.5*images[id]->getLocalBounds().height / 2));
+	}
+	if (mouse.isButtonPressed(sf::Mouse::Left) && event.key.code == mouse.Left && !images[id]->inMove) {
+		if (sf::IntRect(images[id]->getPosition().x, images[id]->getPosition().y, images[id]->getLocalBounds().width, images[id]->getLocalBounds().height).contains(mouse.getPosition(window))) {
+			images[id]->setPosition(sf::Vector2f(mouse.getPosition(window)));
+			images[id]->inMove = true;
+		}
+	}
+	else if (event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove) {
+		sf::Vector2i PixelPos = mouse.getPosition(window);
+		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
+		images[id]->inMove = false;
+		images[id]->setPosition(images[id]->getInitialPosition());
+		images[id]->setScale(sf::Vector2f(1, 1));
+		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
+		{
+			string provinceName = getProvinceName(window, mouse);
+			cout << provinceName << endl;
+			/*if (WorldMap.mapOfProvinces[provinceName].owner == currentPlayer) {
+				WorldMap.mapOfProvinces[provinceName].army.sizeOfArmy += 1;
+				listOfPlayers[currentPlayer].gold -= 10;
+			}*/
+		}
+
+	}
+}
+
+Button::Button() {
+	
+}
+
+Button::Button(sf::Font & font) {
+	RectangleShape::RectangleShape();
+	text.setFont(font);
+}
+
+Button::~Button() {
+
+}
+
+void Button::setText(string text) {
+	this->text.setString(text);
+}
+
+void Button::draw(sf::RenderWindow & window) {
+	window.draw(*this);
+	window.draw(text);
+}
+
+void Button::setPosition(float x, float y) {
+	sf::RectangleShape::setPosition(x, y);
+	text.setPosition(x, y);
+}
+
+void Button::setSize(int width, int height) {
+	sf::RectangleShape::setSize(sf::Vector2f(width, height));
+}
+
+void Button::setTextColor(sf::Color color) {
+	text.setFillColor(color);
+}
+
+void Button::setTextSize(int size) {
+	text.setCharacterSize(size);
+}
+
+MyImage::MyImage() {
+
+}
+
+MyImage::~MyImage() {
+	inMove = false;
+}
+
+MyImage::MyImage(string fileName) {
+	img.loadFromFile("assets/" + fileName);
+	tex.loadFromImage(img);
+	this->setTexture(tex);
+	inMove = false;
+}
+
+sf::Vector2f MyImage::getSize() {
+	return sf::Vector2f(this->getTextureRect().width, this->getTextureRect().height);
+}
+
+void MyImage::setInitialPosition(float x, float y) {
+	initialPosition = sf::Vector2f(x, y);
+}
+
+void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count, int _castleLevel) {
+
+	while (true) {
+		if (connectionType == "h") {
+			Uint16 playerID = _playerID;
+			Uint16 cityID = _cityID;
+			Uint16 count = _count;
+			Uint16 castleLevel = _castleLevel;
+			Packet packet;
+			packet << playerID << cityID << count << castleLevel;
+			map<unsigned short, IpAddress> ::iterator tempIterator;
+			for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+				if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
+			break;
+		}
+
+		else if (connectionType == "c1" || connectionType == "c2") {
+
+			IpAddress tempId;
+			unsigned short tempPort;
+			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+				Uint16 receivedPlayerID;
+				Uint16 receivedCityID;
+				Uint16 receivedCount;
+				Uint16 receivedcastleLevel;
+				packet >> receivedPlayerID >> receivedCityID >> receivedCount >> receivedcastleLevel;
+				
+				string dummy;
+				int pId = receivedPlayerID;
+				int cId = receivedCityID;
+				int count = receivedCount;
+				int casLev = receivedcastleLevel;
+				Player * playerChanged = GM->getPlayerByID(pId, dummy);
+				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cId);
+				//provinceChanged->setOwner(playerChanged);
+				
+				playerChanged->captureProvince(GM->getWorldMap(), provinceChanged);
+				provinceChanged->setNumberOfSoldiers(count);
+				provinceChanged->getCastle()->setLevel(casLev);
+				break;
+			}
+
+		}
+	}
+}
+
+void NetworkManager::sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel) {
+	int pID, cID, cou, cast;
+	while (true) {
+		if (_connectionType != "h") {
+			Uint16 playerID = _playerID;
+			Uint16 cityID = _cityID;
+			Uint16 count = _count;
+			Uint16 castleLevel = _castleLevel;
+			Packet packet;
+			packet << playerID << cityID << count << castleLevel;
+			//cout << "!!!!!!!!!!!!!!!!!!" << endl;
+			IpAddress sendIP(sIP);
+			if (socket.send(packet, sendIP, 2000) == Socket::Done)
+				break;
+		}
+		else if (_connectionType == "h") {
+			IpAddress tempId;
+			unsigned short tempPort;
+			Packet packet;
+			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {
+				Uint16 receivedPlayerID;
+				Uint16 receivedCityID;
+				Uint16 receivedCount;
+				Uint16 receivedcastleLevel;
+				packet >> receivedPlayerID >> receivedCityID >> receivedCount >> receivedcastleLevel;
+				//cout << "Received Data from client: " << receivedPlayerID << receivedCityID << receivedCount << endl;
+				pID = receivedPlayerID;
+				cID = receivedCityID;
+				cou = receivedCount;
+				cast = receivedcastleLevel;
+				
+				string dummy;
+				Player * playerChanged = GM->getPlayerByID(pID, dummy);
+				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cID);
+				//provinceChanged->setOwner(playerChanged);
+				playerChanged->captureProvince(GM->getWorldMap(), provinceChanged);
+				provinceChanged->setNumberOfSoldiers(receivedCount);
+				provinceChanged->getCastle()->setLevel(cast);
+
+				break;
+			}
+		}
+		else
+			break;
+	}
+
+}
+
+void NetworkManager::buildNewtwork() {
+	IpAddress ip = IpAddress::getLocalAddress();
+	UdpSocket socket;
+	string connectionType ;
+	string sIp;
+	int playerCount = 0;
+	map<unsigned short, IpAddress> computerID;
+	string text = " ";
+	Packet packet;
+
+	cout << ip << endl;
+
+	cout << "(h) for server, (c) for client: ";
+	cin >> connectionType;
+
+	unsigned short port;
+
+	cout << "Set port number: ";
+	cin >> port;
+
+	if (socket.bind(port) != Socket::Done) {
+		cout << "Couldnt binded. ";
+	}
+	else {
+		cout << "BINDED !! " << endl;
+	}
+
+	//socket.setBlocking(false);
+
+	// TO connect all players !! s is the host which will be the server in our game
+	if (connectionType == "h") {
+		string startGame = "no";
+		do {
+			IpAddress rIP;
+			unsigned short port;
+			if (socket.receive(packet, rIP, port) == Socket::Done) {
+				computerID[port] = rIP;
+			}
+			playerCount++;
+			cout << "Player in the game (except host): " << playerCount << endl;
+		} while (playerCount != 2);
+
+		do {
+			cout << "Enter 'start' to create the game: ";
+			cin >> startGame;
+		} while (startGame != "start" );
+		
+	}
+
+	// clients are the other player who joined the room
+	else if (connectionType == "c1") {
+		//cout << "Enter server ip: ";
+		//cin >> sIp;
+		sIp = "139.179.210.187";
+		IpAddress sendIP(sIp);
+		if (socket.send(packet, sendIP, 2000) == Socket::Done)
+			cout << "Client1 has joined the room." << endl;
+		cout << sIp << endl;
+	}
+
+	else if (connectionType == "c2") {
+		//cout << "Enter server ip: ";
+		//cin >> sIp;
+		sIp = "139.179.210.187";
+		IpAddress sendIP(sIp);
+		if (socket.send(packet, sendIP, 2000) == Socket::Done)
+			cout << "Client2 has joined the room." << endl;
+		cout << sIp << endl;
+	}
+
+
+	bool done = false;
+	while (!done) {
+		if (connectionType == "h") {
+			getline(cin, text);
+			Packet packet;
+			packet << text;
+			map<unsigned short, IpAddress> ::iterator tempIterator;
+			for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+				if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
+		}
+
+		else if (connectionType == "c1" || connectionType == "c2") {
+
+			IpAddress tempId;
+			unsigned short tempPort;
+			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+				string receivedText;
+				packet >> receivedText;
+				cout << "The Game Started" << receivedText << endl;
+			}
+
+
+		}
+	}
+}
+
+vector<string> NetworkManager ::split( string strToSplit, char delimeter){
+	stringstream ss (strToSplit);
+	string item;
+	vector<string> splittedStrings;
+	while (getline(ss, item, delimeter))
+	{
+		splittedStrings.push_back(item);
+	}
+	return splittedStrings;
+}
+
+sf::Vector2f MyImage::getInitialPosition() {
+	return initialPosition;
+}
