@@ -1,13 +1,19 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <Windows.h>
 #include <string>
 #include <iostream>
 #include <vector>
 #include <queue>
 #include <fstream>
 #include <random>
+#include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
+#include <SFML/Audio.hpp>
+#include <Windows.h>
+#include <map>
+#include <sstream>
+
 using namespace std;
+using namespace sf;
 
 class Die;
 class Castle;
@@ -15,9 +21,11 @@ class Province;
 class Continent;
 class Player;
 class WorldMap;
+class NetworkManager;
 class WindowManager;
 class Button;
 class MyImage;
+
 
 class Die
 {
@@ -30,7 +38,6 @@ public:
 private:
 	int numberOfFaces;
 };
-
 
 class Castle
 {
@@ -100,7 +107,7 @@ public:
 	void loseProvince(WorldMap* worldMap, Province* _province);
 	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
 	bool hasProvince(WorldMap * worldMap, Province* _province);
-	bool buildCastle(Province* province);
+	int buildCastle(Province* province);
 	int getNumberOfProvinces();
 private:
 	string name;
@@ -155,7 +162,6 @@ private:
 	string name;
 };
 
-
 class GameManager
 {
 public:
@@ -186,12 +192,14 @@ public:
 	void startPlacement();
 	void startTurn(int id);
 	void loadProvinces();
-	void startGame();
+	void startGame(NetworkManager ** NM);
 	void startPlacementPhase(int id);
 	void startAttackingPhase(int id);
 	void startMarket(int id);
 	void startFortifyPhase(int id);
 	void randomPlacement();
+	void sendAllProvincesFromHost(NetworkManager ** NM);
+	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
 
 	map<int, string> colorLookUpTable;
 
@@ -201,6 +209,26 @@ private:
 	Die* die;
 	bool gameOn;
 };
+
+
+class NetworkManager {
+public:
+	void createNetwork(GameManager ** const GM);
+	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count, int _castleLevel);
+	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
+	void buildNewtwork();
+	vector<string> split(std::string strToSplit, char delimeter);
+	string connectionType;
+
+
+private:
+	IpAddress ip;
+	IpAddress sIP;
+	map<unsigned short, IpAddress> computerID;
+	UdpSocket socket;
+	vector<string> players;
+	
+	Packet packet;
 
 class WindowManager {
 public: 

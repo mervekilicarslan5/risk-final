@@ -4,28 +4,25 @@
 
 #include <iostream>
 #include <string>
+
 using namespace std;
+
+
 
 int main() {
 
-
 	GameManager* GM = new GameManager();
+	NetworkManager* NM = new NetworkManager();
+  WindowManager* WM = new WindowManager(GM);
+  
+  //GM->loadProvinces();
+  
+	NM->createNetwork(&GM);
 
-	for (auto it = GM->colorLookUpTable.begin(); it != GM->colorLookUpTable.end(); it++) {
-		cout << (*it).second << endl;
-	}
+	GM->startGame(&NM);
 
-	WindowManager* WM = new WindowManager(GM);
+  WM->createWindow();
 
-	GM->loadProvinces();
-
-	GM->addPlayer("rumeysa");
-	GM->addPlayer("serdar");
-	GM->addPlayer("geyOsman");
-
-	WM->createWindow();
-
-	//GM->startGame();
 
 	//system("PAUSE");
 	return 0;
