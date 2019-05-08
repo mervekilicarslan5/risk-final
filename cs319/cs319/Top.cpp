@@ -447,6 +447,16 @@ void WorldMap::showWorldStatus() {
 	}
 }
 
+int WorldMap::ownerCount() {
+	int count = 0;
+	for (auto it = provinceList.begin(); it != provinceList.end(); it++) {
+		if ((*it)->getOwner() != NULL) {
+			count++;
+		}
+	}
+	return count;
+}
+
 
 
 
@@ -525,6 +535,7 @@ GameManager::GameManager()
 	worldMap = new WorldMap();
 	die = new Die(6);
 	currentPlayer = 0;
+	NM = new NetworkManager();
 }
 
 GameManager::~GameManager()
@@ -1326,6 +1337,10 @@ WindowManager::WindowManager(GameManager* GM)
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
 
 	
 	
@@ -1370,6 +1385,39 @@ WindowManager::WindowManager(GameManager* GM)
 	buttons[1]->setTextColor(sf::Color::White);
 	buttons[1]->setFillColor(sf::Color::Red);
 
+	buttons[5]->setSize(100, 40);
+	buttons[5]->setText("Host");
+	buttons[5]->setOrigin(50, 20);
+	buttons[5]->setPosition(screenWidth / 2, screenHeight / 2);
+	buttons[5]->setTextSize(20);
+	buttons[5]->setTextColor(sf::Color::White);
+	buttons[5]->setFillColor(sf::Color::Red);
+
+	buttons[6]->setSize(100, 40);
+	buttons[6]->setText("C1");
+	buttons[6]->setOrigin(50, 20);
+	buttons[6]->setPosition(screenWidth / 2 + 120, screenHeight / 2);
+	buttons[6]->setTextSize(20);
+	buttons[6]->setTextColor(sf::Color::White);
+	buttons[6]->setFillColor(sf::Color::Red);
+
+	buttons[7]->setSize(100, 40);
+	buttons[7]->setText("C2");
+	buttons[7]->setOrigin(50, 20);
+	buttons[7]->setPosition(screenWidth / 2 + 120, screenHeight / 2 + 60);
+	buttons[7]->setTextSize(20);
+	buttons[7]->setTextColor(sf::Color::White);
+	buttons[7]->setFillColor(sf::Color::Red);
+
+	buttons[8]->setSize(100, 40);
+	buttons[8]->setText("Start");
+	buttons[8]->setOrigin(50, 20);
+	buttons[8]->setPosition(screenWidth / 2, screenHeight / 2 + 60);
+	buttons[8]->setTextSize(20);
+	buttons[8]->setTextColor(sf::Color::White);
+	buttons[8]->setFillColor(sf::Color::Red);
+
+	
 	
 }
 
@@ -1377,18 +1425,55 @@ WindowManager::~WindowManager() {
 
 }
 
+void WindowManager::menuScreen(RenderWindow & window, Event & event) {
+
+	while (window.pollEvent(event)) {
+		if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+			else if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				checkClickEvents(event);
+			}
+		}
+	}
+
+	window.setView(mainView);
+
+	window.clear(sf::Color::Black);
+	
+
+	window.setView(window.getDefaultView());
+	
+	buttons[5]->draw(window);
+	buttons[6]->draw(window);
+	buttons[7]->draw(window);
+	buttons[8]->draw(window);
+
+	window.display();
+}
+
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
 
-
 	int counter = 0;
 
 	while (window.isOpen()) {
 		sf::Event event;
+
+
+
+		if (page == 0) {
+			menuScreen(window, event);
+			continue;
+		}
+
 		while (window.pollEvent(event))
 		{
+			
 			if (event.type == sf::Event::Closed)
 				window.close();
 			else if (event.type == sf::Event::MouseWheelScrolled)
@@ -1419,6 +1504,9 @@ void WindowManager::createWindow() {
 				}
 			}
 		}
+
+
+		
 		float speed = 3;
 		if (counter > 10) {
 			sf::Vector2i mousePos = mouse.getPosition(window);
@@ -1517,6 +1605,22 @@ void WindowManager::buttonClicked(int id) {
 	string dummy;
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
 
+	if (page == MENU_SCREEN) {
+		if (id == 5) {
+			GM->NM->createNetwork(&GM,"h","host");
+		}
+		else if (id == 6) {
+			GM->NM->createNetwork(&GM, "c1", "client1");
+		}
+		else if (id == 7) {
+			GM->NM->createNetwork(&GM, "c2", "client2");
+		}
+		else if (id == 8) {
+			GM->NM->startGame();
+			page = 1;
+		}
+		return;
+	}
 
 	if (id == NEXT_PHASE_BUTTON) {
 		if (phase == INITIAL_PHASE) {
@@ -1794,7 +1898,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 
 	if (connectionType == "h") {
 		string name;
-		string playersName = "";
+		playersName = "";
 		cout << "Enter your name(HOST): ";
 		name = _name;
 		playersName += name + ",";
@@ -1810,16 +1914,16 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 				String name;
 				packet >> name;
 				string display = name;
-				if (port == 2001) {
+				if (port != 2000) {
 					cout << display << " has joined the room." << endl;
 					(*GM)->addPlayer(display);
 					playersName += name + ",";
 				}
-				if (port == 2002) {
+				/*if (port == 2002) {
 					cout << display << " has joined the room." << endl;
 					(*GM)->addPlayer(display);
 					playersName += name + ",";
-				}
+				}*/
 				//if (port == 2003)
 				//	cout << "Client3 has joined the room." << endl;
 				//if (port == 2004)
@@ -1828,24 +1932,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 				//	cout << "Client5 has joined the room." << endl;
 			}
 			cout << "Player in the game (except host): " << playerCount << endl;
-		} while (playerCount != 2);
-
-		string startgame = "no";
-		do {
-			cout << "enter 's' to create the game: ";
-			cin >> startgame;
-		} while (startgame != "s");
-
-		String sendPlayersName;
-		sendPlayersName = "" + playersName;
-		Packet packet;
-		packet << sendPlayersName;
-		//string display = sendPlayersName;
-		//cout << display << endl;
-		map<unsigned short, IpAddress> ::iterator tempIterator;
-		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
-			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
-
+		} while (playerCount < 3);
 
 	}
 
@@ -1873,11 +1960,23 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 			cout << "The Game is starting" << endl;
 			players = split(str, ',');
 
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < players.size(); i++) {
 				(*GM)->addPlayer(players[i]);
 			}
 		}
 	}
+}
+
+void NetworkManager::startGame() {
+	String sendPlayersName;
+	sendPlayersName = "" + playersName;
+	Packet packet;
+	packet << sendPlayersName;
+	//string display = sendPlayersName;
+	//cout << display << endl;
+	map<unsigned short, IpAddress> ::iterator tempIterator;
+	for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+		if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
 }
 
 

@@ -138,6 +138,7 @@ public:
 	void showProvinceStatus(Province* p);
 	int getNumberOfProvinces();
 	Province* getProvinceByID(int id);
+	int ownerCount();
 private:
 	int numberOfProvinces;
 	vector< Province* > provinceList;
@@ -206,6 +207,7 @@ public:
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
+	NetworkManager * NM;
 
 private:
 	vector<Player*> players;
@@ -222,6 +224,7 @@ public:
 	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
 	void buildNewtwork();
 	vector<string> split(std::string strToSplit, char delimeter);
+	void startGame();
 	string connectionType;
 
 
@@ -231,7 +234,7 @@ private:
 	map<unsigned short, IpAddress> computerID;
 	UdpSocket socket;
 	vector<string> players;
-
+	string playersName;
 	Packet packet;
 };
 
@@ -256,7 +259,11 @@ public:
 	vector<Button*> buttons;
 	vector<MyImage*> images;
 	int phase;
+	int page = 0;
 	int soldierAmount = 1;
+
+	const int MENU_SCREEN = 0;
+	const int GAME_SCREEN = 1;
 
 	const int NEXT_PHASE_BUTTON = 0;
 	const int ATTACK_BUTTON = 1;
@@ -271,6 +278,11 @@ public:
 	const int FORTIFY_PHASE = 4;
 	const int END_TURN = 5;
 
+	const int host = 5;
+	const int c1 = 6;
+	const int c2 = 7;
+	const int start = 8;
+
 	int isProvinceClicked = 0;
 	Province* first;
 	Province* second;
@@ -280,6 +292,7 @@ public:
 	WindowManager(GameManager* GM);
 	~WindowManager();
 	void createWindow();
+	void menuScreen(RenderWindow & window, Event & e);
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
 	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);

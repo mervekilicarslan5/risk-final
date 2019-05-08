@@ -20,7 +20,7 @@ int main() {
   
     GM->loadProvinces();
 
-	GM->randomPlacement();
+	//GM->randomPlacement();
   
 	//NM->createNetwork(&GM);
 
