@@ -1428,11 +1428,11 @@ WindowManager::~WindowManager() {
 void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 
 	while (window.pollEvent(event)) {
-		if (event.type == sf::Event::MouseButtonPressed)
+		if (event.type == sf::Event::Closed)
+			window.close();
+		else if (event.type == sf::Event::MouseButtonPressed)
 		{
-			if (event.type == sf::Event::Closed)
-				window.close();
-			else if (event.mouseButton.button == sf::Mouse::Left)
+			if (event.mouseButton.button == sf::Mouse::Left)
 			{
 				checkClickEvents(event);
 			}
@@ -1463,8 +1463,6 @@ void WindowManager::createWindow() {
 
 	while (window.isOpen()) {
 		sf::Event event;
-
-
 
 		if (page == 0) {
 			menuScreen(window, event);
@@ -1876,10 +1874,10 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 	if (connectionType == "h") {
 		port = 2000;
 	}
-	else if (connectionType != "h")
+	else if (connectionType == "c1")
 		port = 2001;
-	/*else if (connectionType == "c2")
-		port = 2002;*/
+	else if (connectionType == "c2")
+		port = 2002;
 	//else if (connectionType == "c3")
 	//	port = 2003;
 	//else if (connectionType == "c4")
@@ -1890,7 +1888,6 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 
 	if (socket.bind(port) != Socket::Done) {
 		cout << "Couldnt binded. ";
-		port++;
 	}
 	else {
 		cout << "BINDED !! " << endl;
@@ -1914,29 +1911,30 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 				String name;
 				packet >> name;
 				string display = name;
-				if (port != 2000) {
+				if (port == 2001) {
 					cout << display << " has joined the room." << endl;
 					(*GM)->addPlayer(display);
 					playersName += name + ",";
 				}
-				/*if (port == 2002) {
+				if (port == 2002) {
 					cout << display << " has joined the room." << endl;
 					(*GM)->addPlayer(display);
 					playersName += name + ",";
-				}*/
-				//if (port == 2003)
-				//	cout << "Client3 has joined the room." << endl;
-				//if (port == 2004)
-				//	cout << "Client4 has joined the room." << endl;
-				//if (port == 2005)
-				//	cout << "Client5 has joined the room." << endl;
+
+					//if (port == 2003)
+					//	cout << "Client3 has joined the room." << endl;
+					//if (port == 2004)
+					//	cout << "Client4 has joined the room." << endl;
+					//if (port == 2005)
+					//	cout << "Client5 has joined the room." << endl;
+				}
 			}
 			cout << "Player in the game (except host): " << playerCount << endl;
 		} while (playerCount < 3);
 
 	}
 
-	else if (connectionType != "h") {
+	else if (connectionType == "c1" || connectionType == "c2") {
 		//cout << "Enter server ip: ";
 		//cin >> sIp;
 		string name;
