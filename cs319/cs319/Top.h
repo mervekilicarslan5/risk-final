@@ -3,10 +3,12 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <fstream>
 #include <random>
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
+#include <Windows.h>
 #include <map>
 #include <sstream>
 
@@ -20,6 +22,10 @@ class Continent;
 class Player;
 class WorldMap;
 class NetworkManager;
+class WindowManager;
+class Button;
+class MyImage;
+
 
 class Die
 {
@@ -195,12 +201,15 @@ public:
 	void sendAllProvincesFromHost(NetworkManager ** NM);
 	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
 
+	map<int, string> colorLookUpTable;
+
 private:
 	vector<Player*> players;
 	WorldMap* worldMap;
 	Die* die;
 	bool gameOn;
 };
+
 
 class NetworkManager {
 public:
@@ -220,4 +229,70 @@ private:
 	vector<string> players;
 	
 	Packet packet;
+
+class WindowManager {
+public: 
+
+	GameManager* GM;
+
+	double zoom;
+	int screenWidth;
+	int screenHeight;
+	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
+	sf::Image mapImg, hoverImg;
+	sf::Texture mapTex;
+	sf::View mainView;
+	sf::Sprite mapSprite;
+	sf::RenderWindow window;
+	sf::Mouse mouse;
+	sf::RectangleShape lowerPanel;
+	sf::Text provinceNameTxt;
+	sf::Font font;
+	vector<Button*> buttons;
+	vector<MyImage*> images;
+	
+	WindowManager();
+	WindowManager(GameManager* GM);
+	~WindowManager();
+	void createWindow();
+	string getProvinceByColor(int color);
+	int getPixelColor(int x, int y);
+	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);
+	void provinceClicked(int id);
+	void checkClickEvents(sf::Event & e);
+	void buttonClicked(int id);
+	void imageClicked(int id);
+	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
+};
+
+class Button : public sf::RectangleShape {
+public :
+	sf::Text text;
+	int id;
+
+	Button();
+	Button(sf::Font & font);
+	~Button();
+
+	void setText(string text);
+	void draw(sf::RenderWindow & window);
+	void setPosition(float x, float y);
+	void setTextColor(sf::Color color);
+	void setTextSize(int size);
+	void setSize(int width, int height);
+};
+
+class MyImage : public sf::Sprite {
+public :
+	sf::Image img;
+	sf::Texture tex;
+	bool inMove;
+	sf::Vector2f initialPosition;
+	
+	MyImage();
+	MyImage(string fileName);
+	~MyImage();
+	sf::Vector2f getSize();
+	void setInitialPosition(float x, float y);
+	sf::Vector2f getInitialPosition();
 };
