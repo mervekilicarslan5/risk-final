@@ -1886,6 +1886,7 @@ void WindowManager::buttonClicked(int id) {
 					soldierAmount = first->getNumberOfSoldiers() - 1;
 				buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 				displayProvinceInfo(first);
+				
 			}
 		}
 		else if (phase == POST_ATTACK && second->getNumberOfSoldiers() == 0) {
@@ -2051,7 +2052,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
 					}
 					else {
-						provinceNameTxt.setString("Senin deðil amk");
+						provinceNameTxt.setString("It is not your city");
 					}			
 				}
 			}
@@ -2061,9 +2062,10 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 
 void WindowManager::displayProvinceInfo(Province* province) {
 	if (province->getOwner()!= NULL)
-		infoText.setString("Name: " + province->getName() + "\nOwner: " + province->getOwner()->getName() + "\nSoldiers: " + to_string(province->getNumberOfSoldiers()));
+	
+		infoText.setString("Name: " + province->getName() + "\nOwner: " + province->getOwner()->getName() + "\nSoldiers: " + to_string(province->getNumberOfSoldiers())+ "     Castle: "+ (to_string(province->getCastle()->getLevel())));
 	else 
-		infoText.setString("Name: " + province->getName() + "\nOwner: " + "None" + "\nSoldiers: " + to_string(province->getNumberOfSoldiers()));
+		infoText.setString("Name: " + province->getName() + "\nOwner: " + "None" + "\nSoldiers: " + to_string(province->getNumberOfSoldiers())+ "     Castle: " + (to_string(province->getCastle()->getLevel())));
 }
 
 Button::Button() {
@@ -2184,6 +2186,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 			IpAddress rIP;
 			unsigned short port;
 			Packet packet;
+
 			if (socket.receive(packet, rIP, port) == Socket::Done) {
 				computerID[port] = rIP;
 				playerCount++;
@@ -2213,7 +2216,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		} while (playerCount != 3);
 
 	}
-
+	
 	else if (connectionType == "c1" || connectionType == "c2") {
 		//cout << "Enter server ip: ";
 		//cin >> sIp;
@@ -2231,6 +2234,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		IpAddress tempId;
 		unsigned short tempPort;
 		Packet packet;
+
 		if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
 			String received;
 			packet >> received;
