@@ -1561,10 +1561,15 @@ WindowManager::WindowManager()
 	images.push_back(new MyImage("soldier.png"));
 	images.push_back(new MyImage("wheel.png"));
 	images.push_back(new MyImage("triangle.png"));
+	images.push_back(new MyImage("castle-icon.png"));
 
+	images[3]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[3]->getTextureRect().height / 2);
+	images[3]->setPosition(images[3]->getInitialPosition());
+	images[3]->setScale(0.8, 0.8);
 
-	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
+	images[0]->setInitialPosition(images[3]->getInitialPosition().x + images[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
 	images[0]->setPosition(images[0]->getInitialPosition());
+	
 
 
 	images[1]->setInitialPosition(screenWidth / 2, bottomUpperMargin / 2);
@@ -1779,13 +1784,17 @@ void WindowManager::createWindow() {
 
 		window.clear(sf::Color(224,253,255));
 		window.draw(mapSprite);
+		if (castle)
+			window.draw(*images[4]);
 
 		window.setView(window.getDefaultView());
 		window.draw(lowerPanel);
-		dragObject(window, event, 0);
+		dragObject(window, event, 3);
 		window.draw(*images[0]);
-		window.draw(*images[1]);
-		window.draw(*images[2]);
+		//window.draw(*images[1]);
+		//window.draw(*images[2]);
+		window.draw(*images[3]);
+		
 
 		window.draw(provinceNameTxt);
 		window.draw(infoText);
@@ -2102,6 +2111,13 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 						provinceNameTxt.setString("Senin deðil amk");
 					}			
 				}
+			}
+			else if (id == 3) {
+				castle = true;
+				string provinceName = getProvinceName(window, mouse);
+				int index = images.size();
+				images.push_back(new MyImage("castle.png"));
+				images[index]->setPosition(2190, 828);
 			}
 		}
 	}

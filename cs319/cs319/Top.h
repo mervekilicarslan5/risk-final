@@ -299,6 +299,7 @@ public:
 	int userTurn;
 	int turn = 0;
 	bool _randomPlacement = true;
+	bool castle = false;
 	float rotateAmount = 22.5;
 
 	WindowManager();
