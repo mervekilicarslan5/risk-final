@@ -269,6 +269,7 @@ public:
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
+	const int COMPUTER_GAME_SCREEN = 2;
 
 	const int NEXT_PHASE_BUTTON = 0;
 	const int ATTACK_BUTTON = 1;
@@ -288,6 +289,8 @@ public:
 	const int c2 = 7;
 	const int start = 8;
 
+	int playerCount = 0;
+
 	int isProvinceClicked = 0;
 	Province* first;
 	Province* second;
@@ -298,10 +301,14 @@ public:
 	int turn = 0;
 	bool _randomPlacement = true;
 
+	int counter = 0;
+
 	WindowManager();
 	~WindowManager();
 	void createWindow();
 	void menuScreen(RenderWindow & window, Event & e);
+	void multGameLan(RenderWindow & window, Event & event);
+	void multGameComp(RenderWindow & window, Event & event);
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
 	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);

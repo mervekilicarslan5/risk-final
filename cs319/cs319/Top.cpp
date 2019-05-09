@@ -1657,12 +1657,190 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	window.display();
 }
 
+void WindowManager::multGameLan(RenderWindow & window, Event & event) {
+	while (window.pollEvent(event))
+	{
+
+		if (event.type == sf::Event::Closed)
+			window.close();
+		else if (event.type == sf::Event::MouseWheelScrolled)
+		{
+			if (zoom > 0.5 && event.mouseWheelScroll.delta > 0) {
+				mainView.zoom(0.80);
+				zoom *= 0.8;
+				//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+			}
+			else if (zoom < 2 && event.mouseWheelScroll.delta < 0) {
+				mainView.zoom(1.25);
+				zoom *= 1.25;
+				//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+			}
+		}
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				checkClickEvents(event);
+				string provinceName = getProvinceName(window, mouse);
+				if (provinceName != "") {
+					int index = -1; Province* ptr;
+					GM->getWorldMap()->getProvinceByName(provinceName, index, ptr);
+					if (event.mouseButton.y < bottomUpperMargin)
+						provinceClicked(index);
+				}
+			}
+		}
+	}
+
+
+
+	float speed = 3;
+	if (counter > 10) {
+		sf::Vector2i mousePos = mouse.getPosition(window);
+
+		if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().x >= mainView.getSize().x / 2) {
+				mainView.move(-zoom * speed, 0);
+			}
+		}
+		else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
+				mainView.move(zoom* speed, 0);
+			}
+		}
+		if (mousePos.y < topMargin) {
+			if (mainView.getCenter().y >= mainView.getSize().y / 2) {
+				mainView.move(0, -zoom * speed);
+			}
+		}
+		else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
+				mainView.move(0, zoom * speed);
+			}
+		}
+		counter = 0;
+	}
+
+
+	counter++;
+	//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
+	//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
+	window.setView(mainView);
+
+	window.clear(sf::Color(224, 253, 255));
+	window.draw(mapSprite);
+
+	window.setView(window.getDefaultView());
+	window.draw(lowerPanel);
+	dragObject(window, event, 0);
+	window.draw(*images[0]);
+
+	window.draw(provinceNameTxt);
+	window.draw(infoText);
+
+	for (int i = 0; i < buttons.size(); i++) {
+		if (i != 5 && i != 6 && i != 7 && i != 8)
+			buttons[i]->draw(window);
+	}
+
+	window.display();
+
+}
+
+void WindowManager::multGameComp(RenderWindow & window, Event & event) {
+	while (window.pollEvent(event))
+	{
+
+		if (event.type == sf::Event::Closed)
+			window.close();
+		else if (event.type == sf::Event::MouseWheelScrolled)
+		{
+			if (zoom > 0.5 && event.mouseWheelScroll.delta > 0) {
+				mainView.zoom(0.80);
+				zoom *= 0.8;
+				//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+			}
+			else if (zoom < 2 && event.mouseWheelScroll.delta < 0) {
+				mainView.zoom(1.25);
+				zoom *= 1.25;
+				//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+			}
+		}
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				checkClickEvents(event);
+				string provinceName = getProvinceName(window, mouse);
+				if (provinceName != "") {
+					int index = -1; Province* ptr;
+					GM->getWorldMap()->getProvinceByName(provinceName, index, ptr);
+					if (event.mouseButton.y < bottomUpperMargin)
+						provinceClicked(index);
+				}
+			}
+		}
+	}
+
+
+
+	float speed = 3;
+	if (counter > 10) {
+		sf::Vector2i mousePos = mouse.getPosition(window);
+
+		if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().x >= mainView.getSize().x / 2) {
+				mainView.move(-zoom * speed, 0);
+			}
+		}
+		else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
+				mainView.move(zoom* speed, 0);
+			}
+		}
+		if (mousePos.y < topMargin) {
+			if (mainView.getCenter().y >= mainView.getSize().y / 2) {
+				mainView.move(0, -zoom * speed);
+			}
+		}
+		else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
+				mainView.move(0, zoom * speed);
+			}
+		}
+		counter = 0;
+	}
+
+
+	counter++;
+	//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
+	//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
+	window.setView(mainView);
+
+	window.clear(sf::Color(224, 253, 255));
+	window.draw(mapSprite);
+
+	window.setView(window.getDefaultView());
+	window.draw(lowerPanel);
+	dragObject(window, event, 0);
+	window.draw(*images[0]);
+
+	window.draw(provinceNameTxt);
+	window.draw(infoText);
+
+	for (int i = 0; i < buttons.size(); i++) {
+		if (i != 5 && i != 6 && i != 7 && i != 8)
+			buttons[i]->draw(window);
+	}
+
+	window.display();
+}
+
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
 
-	int counter = 0;
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -1672,94 +1850,16 @@ void WindowManager::createWindow() {
 			continue;
 		}
 
-		while (window.pollEvent(event))
-		{
-			
-			if (event.type == sf::Event::Closed)
-				window.close();
-			else if (event.type == sf::Event::MouseWheelScrolled)
-			{
-				if (zoom > 0.5 && event.mouseWheelScroll.delta > 0) {
-					mainView.zoom(0.80);
-					zoom *= 0.8;
-					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
-				}
-				else if (zoom < 2 && event.mouseWheelScroll.delta < 0) {
-					mainView.zoom(1.25);
-					zoom *= 1.25;
-					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
-				}
-			}
-			else if (event.type == sf::Event::MouseButtonPressed)
-			{
-				if (event.mouseButton.button == sf::Mouse::Left)
-				{
-					checkClickEvents(event);
-					string provinceName = getProvinceName(window, mouse);
-					if (provinceName != "") {
-						int index = -1; Province* ptr;
-						GM->getWorldMap()->getProvinceByName(provinceName, index, ptr);
-						if (event.mouseButton.y < bottomUpperMargin)
-							provinceClicked(index);
-					}
-				}
-			}
+		else if (page == 1) {
+			multGameLan(window, event);
+			continue;
 		}
 
-
-		
-		float speed = 3;
-		if (counter > 10) {
-			sf::Vector2i mousePos = mouse.getPosition(window);
-
-			if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
-				if (mainView.getCenter().x >= mainView.getSize().x / 2) {
-					mainView.move(-zoom * speed, 0);
-				}
-			}
-			else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
-				if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
-					mainView.move(zoom* speed, 0);
-				}
-			}
-			if (mousePos.y < topMargin) {
-				if (mainView.getCenter().y >= mainView.getSize().y / 2) {
-					mainView.move(0, -zoom * speed);
-				}
-			}
-			else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
-				if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
-					mainView.move(0, zoom * speed);
-				}
-			}
-			counter = 0;
+		else if (page == 2) {
+			multGameComp(window, event);
+			continue;
 		}
-
-
-		counter++;
-		//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
-		//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
-		window.setView(mainView);
-
-		window.clear(sf::Color(224,253,255));
-		window.draw(mapSprite);
-
-		window.setView(window.getDefaultView());
-		window.draw(lowerPanel);
-		dragObject(window, event, 0);
-		window.draw(*images[0]);
-
-		window.draw(provinceNameTxt);
-		window.draw(infoText);
-
-		for (int i = 0; i < buttons.size(); i++) {
-			if (i!=5 && i!=6 && i!=7 && i!=8)
-				buttons[i]->draw(window);
-		}
-
-		window.display();
 	}
-
 }
 
 string WindowManager::getProvinceByColor(int color) {
@@ -1767,6 +1867,7 @@ string WindowManager::getProvinceByColor(int color) {
 }
 
 int WindowManager::getPixelColor(int x, int y) {
+	cout << "Mouse : " << x << ", " << y << endl;
 	cout << "Mouse : " << x << ", " << y << endl;
 	return (int)mapImg.getPixel(x, y).toInteger();
 }
@@ -1810,8 +1911,17 @@ void WindowManager::buttonClicked(int id) {
 	
 	if (page == MENU_SCREEN) {
 		if (id == 5) {
-			userName = "host";
-			NM->createNetwork(&GM,"h", userName);
+			//userName = "host";
+			//NM->createNetwork(&GM,"h", userName);
+			
+			playerCount = 3; // will be taken from user
+			const string name = "player";
+			for (int i = 0; i < playerCount; i++) {
+				this->GM->addPlayer( name  + to_string(i+1));
+			}
+			GM->randomPlacement();
+			turn = 0;
+			page = COMPUTER_GAME_SCREEN;
 		}
 		else if (id == 6) {
 			userName = "client1";
@@ -1854,19 +1964,23 @@ void WindowManager::buttonClicked(int id) {
 			buttons[ATTACK_BUTTON]->setText("Fortify");
 		}
 		else if (phase == FORTIFY_PHASE) {
-			if (turn=0)
-				this->GM->sendAllProvincesFromHostString(&NM);
-			else {
-				this->GM->sendAllProvincesClientToHostString(&NM);
-				this->GM->sendAllProvincesFromHostString(&NM);
+			if (page == 1) {
+				if (turn = 0)
+					this->GM->sendAllProvincesFromHostString(&NM);
+				else {
+					this->GM->sendAllProvincesClientToHostString(&NM);
+					this->GM->sendAllProvincesFromHostString(&NM);
+				}
 			}
 			turn++;
 			if (turn = 3)
 				turn = 0;
+			cout << "Player"  << turn+1 << " 's turn!!" << endl;
 			phase = END_TURN;
 		}
 		else if (phase == END_TURN) {
-			
+			if (page == 2)
+				phase = INITIAL_PHASE;
 		}
 
 		cout << "Phase: " << phase << endl;
@@ -1901,16 +2015,18 @@ void WindowManager::buttonClicked(int id) {
 			}
 		}
 		else if (phase == END_TURN) {
-	
-			if (turn == 0)
-				this->GM->sendAllProvincesFromHostString(&NM);
-			else {
-				if (userTurn == 0) {
-					this->GM->sendAllProvincesClientToHostString(&NM);
+			if (page == 1) {
+				if (turn == 0)
 					this->GM->sendAllProvincesFromHostString(&NM);
+				else {
+
+					if (userTurn == 0) {
+						this->GM->sendAllProvincesClientToHostString(&NM);
+						this->GM->sendAllProvincesFromHostString(&NM);
+					}
+					else
+						this->GM->sendAllProvincesFromHostString(&NM);
 				}
-				else 
-					this->GM->sendAllProvincesFromHostString(&NM);
 			}
 			turn++;
 			if (turn = 3)
@@ -1971,7 +2087,8 @@ void WindowManager::provinceClicked(int id) {
 			first = city;
 			second = NULL;
 			isProvinceClicked = 1;
-			provinceNameTxt.setString(first->getName());
+			if (page == 1)
+				provinceNameTxt.setString(first->getName());
 		}
 		else if (isProvinceClicked == 1) {
 			second = city;
@@ -2030,12 +2147,13 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				cout << provinceName << endl;
 				if (phase == INITIAL_PHASE) {
 					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
-						
-						if (turn = 0)
-							this->GM->sendAllProvincesFromHostString(&NM);
-						else {
-							this->GM->sendAllProvincesClientToHostString(&NM);
-							this->GM->sendAllProvincesFromHostString(&NM);
+						if (page == 1) {
+							if (turn = 0)
+								this->GM->sendAllProvincesFromHostString(&NM);
+							else {
+								this->GM->sendAllProvincesClientToHostString(&NM);
+								this->GM->sendAllProvincesFromHostString(&NM);
+							}
 						}
 						turn++; 
 						if (turn = 3)
