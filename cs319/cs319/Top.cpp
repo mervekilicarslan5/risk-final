@@ -1255,6 +1255,43 @@ void GameManager::randomPlacement() {
 }
 
 
+void GameManager::sendAllProvincesFromHostString(NetworkManager ** NM) {
+	string _provinces = "";
+	
+	if ((*NM)->connectionType == "h") {
+		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+			Province * pro = worldMap->getProvinceByID(i);
+			_provinces += to_string(pro->getOwner()->getId());
+			_provinces += "," + to_string(i);
+			_provinces += "," + to_string(pro->getNumberOfSoldiers());
+			_provinces += "," + to_string(pro->getCastle()->getLevel()) + ",";
+		}
+		(*NM)->sendStringFromHost(_provinces);
+	}
+	else {
+		string received = (*NM)->sendStringFromHost(_provinces);
+		vector<string> data = (*NM)->split(received,',');
+		for (int i = 0; i < data.size(); i += 4) {
+
+			string dummy;
+			int pId = stoi (data[i]);
+			int cId = stoi(data[i+1]);
+			int count = stoi(data[i+2]);
+			int casLev= stoi(data[i+3]);
+			
+			Player * playerChanged = this->getPlayerByID(pId, dummy);
+			Province * provinceChanged = this->getWorldMap()->getProvinceByID(cId);
+			//provinceChanged->setOwner(playerChanged);
+			playerChanged->captureProvince(this->getWorldMap(), provinceChanged);
+			provinceChanged->setNumberOfSoldiers(count);
+			provinceChanged->getCastle()->setLevel(casLev);
+	
+		}
+	}
+	
+	showWorldStatus();
+}
+
 void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
 	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
 		Province * pro = worldMap->getProvinceByID(i);
@@ -1262,6 +1299,7 @@ void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
 	}
 	showWorldStatus();
 }
+
 
 void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkManager ** NM) {
 	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
@@ -1613,6 +1651,8 @@ void WindowManager::buttonClicked(int id) {
 		}
 		else if (id == 8) {
 			NM->startGame();
+			GM->randomPlacement();
+			GM->sendAllProvincesFromHostString(&NM);
 			page = 1;
 		}
 		return;
@@ -1682,6 +1722,7 @@ void WindowManager::buttonClicked(int id) {
 		}
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
+
 	else if (id == DEC_BUTTON) {
 		if (phase == ATTACKING_PHASE) {
 			if (soldierAmount > 1) {
@@ -1965,23 +2006,21 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 			for (int i = 0; i < players.size(); i++) {
 				(*GM)->addPlayer(players[i]);
 			}
-			cout << "step5**************************" << endl;
 			if (WM != NULL) {
-				cout << "step12312123*******" << endl;
 				WM->page = WM->GAME_SCREEN;
+				cout << "step12312123*******" << endl;
+				WM->GM->sendAllProvincesFromHostString(&(WM->NM));
+				//GM->sendAllProvincesFromHost(this);
 			}
-			cout << "step6**************************" << endl;
 		}
 	}
 }
 
 void NetworkManager::startGame() {
 
-	cout << "step1**************************" << endl;
 	if (connectionType == "h") {
 		String sendPlayersName;
 		sendPlayersName = "" + playersName;
-		cout << "step2**************************" << playersName << endl;
 		Packet packet;
 		packet << sendPlayersName;
 		//string display = sendPlayersName;
@@ -1989,11 +2028,44 @@ void NetworkManager::startGame() {
 		map<unsigned short, IpAddress> ::iterator tempIterator;
 		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
 			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {
-				cout << "step3**************************" << endl;
 			}
+	}
+	else {
+		cout << "You cannot start the game " << endl;
+		return;
 	}
 }
 
+string NetworkManager::sendStringFromHost(string _sendText) {
+	while (true) {
+		if (connectionType == "h") {
+			String sentText = _sendText;
+			cout << _sendText << "send string :::::::::" << endl;
+			Packet packet;
+			packet << sentText;
+			map<unsigned short, IpAddress> ::iterator tempIterator;
+			for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
+				if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {} // the socket send or not 
+			return "" ;
+		}
+
+		else if (connectionType == "c1" || connectionType == "c2") {
+
+			IpAddress tempId;
+			unsigned short tempPort;
+			Packet packet;
+
+			if (socket.receive(packet, tempId, tempPort) == Socket::Done) {			// The socket received or not 
+				String receivedString;
+				packet >> receivedString;
+				string stringRec = receivedString;
+				cout << "The received string : ************ " << stringRec << endl;
+				return stringRec;
+			}
+
+		}
+	}
+}
 
 void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count, int _castleLevel) {
 
@@ -2019,6 +2091,7 @@ void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, i
 				Uint16 receivedPlayerID;
 				Uint16 receivedCityID;
 				Uint16 receivedCount;
+
 				Uint16 receivedcastleLevel;
 				packet >> receivedPlayerID >> receivedCityID >> receivedCount >> receivedcastleLevel;
 				
@@ -2030,7 +2103,6 @@ void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, i
 				Player * playerChanged = GM->getPlayerByID(pId, dummy);
 				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cId);
 				//provinceChanged->setOwner(playerChanged);
-				
 				playerChanged->captureProvince(GM->getWorldMap(), provinceChanged);
 				provinceChanged->setNumberOfSoldiers(count);
 				provinceChanged->getCastle()->setLevel(casLev);

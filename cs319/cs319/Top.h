@@ -203,6 +203,7 @@ public:
 	void startFortifyPhase(int id);
 	void randomPlacement();
 	void sendAllProvincesFromHost(NetworkManager ** NM);
+	void sendAllProvincesFromHostString(NetworkManager ** NM);
 	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
 
 	map<int, string> colorLookUpTable;
@@ -221,6 +222,7 @@ public:
 	WindowManager * WM;
 	NetworkManager(WindowManager * WM);
 	void createNetwork(GameManager ** const GM, string _connectionType, string name);
+	string sendStringFromHost(string _sendText);
 	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count, int _castleLevel);
 	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
 	void buildNewtwork();
