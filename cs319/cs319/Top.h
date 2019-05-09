@@ -263,6 +263,7 @@ public:
 	sf::Font font;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
+	vector<string> wheelStr;
 	int phase;
 	int page = 1;
 	int soldierAmount = 1;
@@ -298,6 +299,7 @@ public:
 	int userTurn;
 	int turn = 0;
 	bool _randomPlacement = true;
+	float rotateAmount = 22.5;
 
 	WindowManager();
 	~WindowManager();
