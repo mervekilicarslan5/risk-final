@@ -2222,7 +2222,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		name = _name;
 		String playerName = name;
 		packet << playerName;
-		sIP = "139.179.210.187";
+		sIP = "139.179.211.24";
 		IpAddress sendIP(sIP);
 		if (socket.send(packet, sendIP, 2000) == Socket::Done)
 			cout << "You have joined the room." << endl;
