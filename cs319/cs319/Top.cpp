@@ -1735,6 +1735,7 @@ void WindowManager::createWindow() {
 			counter = 0;
 		}
 
+
 		counter++;
 		//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
 		//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
@@ -1774,7 +1775,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 	sf::Vector2i PixelPos = m.getPosition(window);
 	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 	if (MousePos.x <= mapImg.getSize().x && MousePos.y <= mapImg.getSize().y) {
-		cout << "XXX   "<< MousePos.x << "      YYY"<< MousePos.y << endl;
+		cout << "XXX   "<< MousePos.x << "      YYY "<< MousePos.y << endl;
 		int colorInInt = (int)mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
 		cout << colorInInt << "**********************" << endl;
 		auto it = GM->colorLookUpTable.find(colorInInt);
@@ -1914,7 +1915,7 @@ void WindowManager::buttonClicked(int id) {
 			if (turn = 3)
 				turn = 0;
 			if (turn == userTurn) {
-				if (GM->getWorldMap()->ownerCount() != 42)
+				if (GM->getWorldMap()->ownerCount() < 42)
 					phase = INITIAL_PHASE;
 				else {
 					player->setLeftSoldier(player->getNumberOfProvinces() / 3);
@@ -2208,8 +2209,8 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 					//	cout << "Client5 has joined the room." << endl;
 				}
 			}
-			cout << "Player in the game (except host): " << playerCount << endl;
-		} while (playerCount != 2);
+			cout << "Player in the game: " << playerCount << endl;
+		} while (playerCount != 3);
 
 	}
 
