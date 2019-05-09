@@ -1452,16 +1452,44 @@ WindowManager::WindowManager()
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
 
 	
-	
+	wheelStr.push_back("250 Gold");
+	wheelStr.push_back("Pass");
+	wheelStr.push_back("Build castle");
+	wheelStr.push_back("Take somebody's province");
+	wheelStr.push_back("Province Lost");
+	wheelStr.push_back("Take 3 soldiers");
+	wheelStr.push_back("Draw bonus card");
+	wheelStr.push_back("Pass");
 
 
 	images.push_back(new MyImage("soldier.png"));
-	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
+	images.push_back(new MyImage("wheel.png"));
+	images.push_back(new MyImage("triangle.png"));
+	images.push_back(new MyImage("castle-icon.png"));
+
+	images[3]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[3]->getTextureRect().height / 2);
+	images[3]->setPosition(images[3]->getInitialPosition());
+	images[3]->setScale(0.8, 0.8);
+
+	images[0]->setInitialPosition(images[3]->getInitialPosition().x + images[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
 	images[0]->setPosition(images[0]->getInitialPosition());
+	
 
 
+	images[1]->setInitialPosition(screenWidth / 2, bottomUpperMargin / 2);
+	images[1]->setOrigin(images[1]->getSize().x / 2, images[1]->getSize().y / 2);
+	images[1]->setPosition(images[1]->getInitialPosition());
+	images[1]->setScale(0.7, 0.7);
+
+	images[2]->rotate(90);
+	images[2]->setOrigin(images[2]->getSize().x / 2, images[2]->getSize().y / 2);
+	images[2]->setInitialPosition(images[1]->getInitialPosition().x + 280, images[1]->getInitialPosition().y);
+	//images[2]->setInitialPosition(screenWidth / 2, bottomUpperMargin / 2);
+	images[2]->setPosition(images[2]->getInitialPosition());
+	images[2]->setScale(0.3, 0.3);
 	int numberTextSize = 30;
 
 	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 40);
@@ -1528,7 +1556,12 @@ WindowManager::WindowManager()
 	buttons[8]->setTextColor(sf::Color::White);
 	buttons[8]->setFillColor(sf::Color::Red);
 
-
+	buttons[9]->setSize(120, 40);
+	buttons[9]->setText("Turn Wheel");
+	buttons[9]->setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
+	buttons[9]->setTextSize(20);
+	buttons[9]->setTextColor(sf::Color::White);
+	buttons[9]->setFillColor(sf::Color::Green);
 }
 
 WindowManager::~WindowManager() {
@@ -1615,10 +1648,19 @@ void WindowManager::createWindow() {
 
 
 		
-		float speed = 3;
-		if (counter > 10) {
-			sf::Vector2i mousePos = mouse.getPosition(window);
 
+		float speed = 3;
+
+		if (counter > 10) {
+
+			if (turnWheel) {
+				images[1]->rotate(2.5);
+				rotateAmount = rotateAmount + 2.5;
+				if (rotateAmount == 360)
+					rotateAmount = 0;
+			}
+
+			sf::Vector2i mousePos = mouse.getPosition(window);
 			if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
 				if (mainView.getCenter().x >= mainView.getSize().x / 2) {
 					mainView.move(-zoom * speed, 0);
@@ -1649,11 +1691,17 @@ void WindowManager::createWindow() {
 
 		window.clear(sf::Color(224,253,255));
 		window.draw(mapSprite);
+		if (castle)
+			window.draw(*images[4]);
 
 		window.setView(window.getDefaultView());
 		window.draw(lowerPanel);
-		dragObject(window, event, 0);
+		dragObject(window, event, 3);
 		window.draw(*images[0]);
+		//window.draw(*images[1]);
+		//window.draw(*images[2]);
+		window.draw(*images[3]);
+		
 
 		window.draw(provinceNameTxt);
 		window.draw(infoText);
@@ -1692,15 +1740,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 
 void WindowManager::checkClickEvents(sf::Event & e) {
 	int id = 0;
-	for (auto it = buttons.begin(); it != buttons.end(); it++) {
-		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
-			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
-			buttonClicked(id);
-			return;
-		}
-		id++;
-	}
-	id = 0;
+	
 	for (auto it = images.begin(); it != images.end(); it++) {
 		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
 			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
@@ -1709,6 +1749,16 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 		}
 		id++;
 	}
+	id = 0;
+	for (auto it = buttons.begin(); it != buttons.end(); it++) {
+		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
+			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
+			buttonClicked(id);
+			return;
+		}
+		id++;
+	}
+	
 }
 
 void WindowManager::buttonClicked(int id) {
@@ -1842,12 +1892,20 @@ void WindowManager::buttonClicked(int id) {
 		}
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
+	else if (id == 9) {
+		if (turnWheel) {
+			turnWheel = false;
+			int index =((int)(rotateAmount / 45) + 2) % 8;
+			cout << wheelStr[index] << endl;
+		}
+		else {
+			turnWheel = true;
+		}
+	}
 }
 
 void WindowManager::imageClicked(int id) {
-	if (id == 0) {
-		cout << "Image clicked" << endl;
-	}
+	
 }
 
 void WindowManager::provinceClicked(int id) {
@@ -1929,6 +1987,13 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 						provinceNameTxt.setString("Senin deðil amk");
 					}			
 				}
+			}
+			else if (id == 3) {
+				castle = true;
+				string provinceName = getProvinceName(window, mouse);
+				int index = images.size();
+				images.push_back(new MyImage("castle.png"));
+				images[index]->setPosition(2190, 828);
 			}
 		}
 	}
