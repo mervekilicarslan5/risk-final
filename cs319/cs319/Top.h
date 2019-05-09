@@ -264,8 +264,9 @@ public:
 	vector<Button*> buttons;
 	vector<MyImage*> images;
 	int phase;
-	int page = 0;
+	int page = 1;
 	int soldierAmount = 1;
+	bool turnWheel = true;
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
