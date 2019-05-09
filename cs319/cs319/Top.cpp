@@ -893,14 +893,21 @@ void GameManager::loadProvinces() {
 	string cityName;
 	bool stepOne = false;
 	bool stepTwo = false;
-	while (!file.eof()) {
-		file >> cityName >> color;
-		createProvince(cityName, to_string(color));
-		colorLookUpTable.insert(pair<int, string> (color, cityName));
-		cout << cityName << " " << color << " loaded. " << endl;
+	string line;
+	ifstream myfile("assets/provinces.txt");
+	if (myfile.is_open()) {
+		while (getline(myfile,line)) {
+			vector<string> prov = split(line, ';');
+			cityName = prov[0];
+			color = stoi(prov[1]);
+			createProvince(cityName, to_string(color));
+			colorLookUpTable.insert(pair<int, string>(color, cityName));
+			cout << cityName << " " << color << " loaded. " << endl;
+		}
+		myfile.close();
 	}
-	file.close();
-	cout << "efsfsef" << endl;
+
+	/*
 	createNeighbor("kars", "balikesir");
 	createNeighbor("kars", "antalya");
 	createNeighbor("kars", "istanbul");
@@ -915,7 +922,9 @@ void GameManager::loadProvinces() {
 	createNeighbor("nevsehir", "afyon");
 	createNeighbor("edirne", "konya");
 	createNeighbor("edirne", "ankara");
-	createNeighbor("konya", "antalya");
+	createNeighbor("konya", "antalya");*/
+
+	//cout << "efsfsef" << endl;
 	
 }
 
@@ -1254,6 +1263,17 @@ void GameManager::randomPlacement() {
 	delete shuffledArray;
 }
 
+int GameManager::getPlayerTurn(string _name) {
+	int dummy;
+	Player * user = getPlayerByName(_name,dummy);
+	int index;
+	for (int i = 0; i < players.size(); i++) {
+		if (players[i] == user)
+			index = i;
+	}
+	return index;
+	
+}
 
 void GameManager::sendAllProvincesFromHostString(NetworkManager ** NM) {
 	string _provinces = "";
@@ -1292,6 +1312,48 @@ void GameManager::sendAllProvincesFromHostString(NetworkManager ** NM) {
 	showWorldStatus();
 }
 
+void GameManager::sendAllProvincesClientToHostString(NetworkManager ** NM) {
+	string _provinces = "";
+	while (true) {
+		if ((*NM)->connectionType != "h") {
+			for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
+				Province * pro = worldMap->getProvinceByID(i);
+				_provinces += to_string(pro->getOwner()->getId());
+				_provinces += "," + to_string(i);
+				_provinces += "," + to_string(pro->getNumberOfSoldiers());
+				_provinces += "," + to_string(pro->getCastle()->getLevel()) + ",";
+			}
+			if ((*NM)->sendStringFromHost(_provinces) == "") {
+				break;
+			}
+			//cout << "!!!!!!!!!!!!!!!!!!" << endl;
+		}
+		else if ((*NM)->connectionType == "h") {
+			string received = (*NM)->sendStringFromHost(_provinces);
+			vector<string> data = (*NM)->split(received, ',');
+			for (int i = 0; i < data.size(); i += 4) {
+
+				string dummy;
+				int pId = stoi(data[i]);
+				int cId = stoi(data[i + 1]);
+				int count = stoi(data[i + 2]);
+				int casLev = stoi(data[i + 3]);
+
+				Player * playerChanged = this->getPlayerByID(pId, dummy);
+				Province * provinceChanged = this->getWorldMap()->getProvinceByID(cId);
+				//provinceChanged->setOwner(playerChanged);
+				playerChanged->captureProvince(this->getWorldMap(), provinceChanged);
+				provinceChanged->setNumberOfSoldiers(count);
+				provinceChanged->getCastle()->setLevel(casLev);
+				
+			}
+			break;
+		}
+		else
+			break;
+	}
+}
+
 void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
 	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
 		Province * pro = worldMap->getProvinceByID(i);
@@ -1300,7 +1362,6 @@ void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
 	showWorldStatus();
 }
 
-
 void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkManager ** NM) {
 	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
 		Province * pro = worldMap->getProvinceByID(i);
@@ -1308,6 +1369,18 @@ void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkM
 	}
 		
 }
+
+vector<string> GameManager::split(string strToSplit, char delimeter) {
+	stringstream ss(strToSplit);
+	string item;
+	vector<string> splittedStrings;
+	while (getline(ss, item, delimeter))
+	{
+		splittedStrings.push_back(item);
+	}
+	return splittedStrings;
+}
+
 
 
 
@@ -1323,8 +1396,8 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2 ;
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2 ;
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1518,7 +1591,7 @@ void WindowManager::createWindow() {
 					zoom *= 0.8;
 					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
 				}
-				else if (zoom < 1 && event.mouseWheelScroll.delta < 0) {
+				else if (zoom < 2 && event.mouseWheelScroll.delta < 0) {
 					mainView.zoom(1.25);
 					zoom *= 1.25;
 					//mainView.setCenter(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
@@ -1574,7 +1647,7 @@ void WindowManager::createWindow() {
 		//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
 		window.setView(mainView);
 
-		window.clear(sf::Color::Black);
+		window.clear(sf::Color(224,253,255));
 		window.draw(mapSprite);
 
 		window.setView(window.getDefaultView());
@@ -1609,6 +1682,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 	if (MousePos.x <= mapImg.getSize().x && MousePos.y <= mapImg.getSize().y) {
 		int colorInInt = (int)mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
+		cout << colorInInt << "**********************" << endl;
 		auto it = GM->colorLookUpTable.find(colorInInt);
 		if (it != GM->colorLookUpTable.end())
 			return GM->colorLookUpTable[colorInInt];
@@ -1641,18 +1715,24 @@ void WindowManager::buttonClicked(int id) {
 	
 	if (page == MENU_SCREEN) {
 		if (id == 5) {
-			NM->createNetwork(&GM,"h","host");
+			userName = "host";
+			NM->createNetwork(&GM,"h", userName);
 		}
 		else if (id == 6) {
-			NM->createNetwork(&GM, "c1", "client1");
+			userName = "client1";
+			NM->createNetwork(&GM, "c1", userName);
 		}
 		else if (id == 7) {
-			NM->createNetwork(&GM, "c2", "client2");
+			userName = "client2";
+			NM->createNetwork(&GM, "c2", userName);
 		}
 		else if (id == 8) {
 			NM->startGame();
+			userTurn = GM->getPlayerTurn(userName);
+			cout << "MY TURN " << userTurn << endl;
 			GM->randomPlacement();
 			GM->sendAllProvincesFromHostString(&NM);
+			phase = INITIAL_PHASE;
 			page = 1;
 		}
 		return;
@@ -1674,8 +1754,21 @@ void WindowManager::buttonClicked(int id) {
 			buttons[ATTACK_BUTTON]->setText("Fortify");
 		}
 		else if (phase == FORTIFY_PHASE) {
+			turn++;
+			if (turn = 3)
+				turn = 0;
+			if (turn=0)
+				this->GM->sendAllProvincesFromHostString(&NM);
+			else {
+				this->GM->sendAllProvincesClientToHostString(&NM);
+				this->GM->sendAllProvincesFromHostString(&NM);
+			}
 			phase = END_TURN;
 		}
+		else if (phase == END_TURN) {
+			
+		}
+
 		cout << "Phase: " << phase << endl;
 	}
 	else if (id == ATTACK_BUTTON) {
@@ -1704,6 +1797,19 @@ void WindowManager::buttonClicked(int id) {
 			if (GM->fortify(player, first, second, soldierAmount)) {
 				displayProvinceInfo(second);
 			}
+		}
+		else if (phase == END_TURN) {
+			turn++;
+			if (turn = 3)
+				turn = 0;
+			if (turn == 0)
+				this->GM->sendAllProvincesFromHostString(&NM);
+			else {
+				this->GM->sendAllProvincesClientToHostString(&NM);
+				this->GM->sendAllProvincesFromHostString(&NM);
+			}
+			if (turn == userTurn)
+				phase = INITIAL_PHASE;
 		}
 	}
 
@@ -2008,8 +2114,11 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 			}
 			if (WM != NULL) {
 				WM->page = WM->GAME_SCREEN;
-				cout << "step12312123*******" << endl;
+				WM->userTurn = WM->GM->getPlayerTurn(WM->userName);
+				cout << "MY TURN " << WM->userTurn << endl;
 				WM->GM->sendAllProvincesFromHostString(&(WM->NM));
+				WM->phase = WM->END_TURN;
+				cout << "MY PHAAASSEEE " << WM->phase << endl;
 				//GM->sendAllProvincesFromHost(this);
 			}
 		}

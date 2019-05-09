@@ -204,7 +204,10 @@ public:
 	void randomPlacement();
 	void sendAllProvincesFromHost(NetworkManager ** NM);
 	void sendAllProvincesFromHostString(NetworkManager ** NM);
+	void sendAllProvincesClientToHostString(NetworkManager ** NM);
 	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
+	int getPlayerTurn(string _name);
+	vector<string> split(std::string strToSplit, char delimeter);
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
@@ -290,6 +293,9 @@ public:
 	Province* second;
 	Province* currentProvince;
 	
+	string userName;
+	int userTurn;
+	int turn = 0;
 
 	WindowManager();
 	~WindowManager();
