@@ -265,7 +265,7 @@ public:
 	vector<MyImage*> images;
 	vector<string> wheelStr;
 	int phase;
-	int page = 1;
+	int page = 0;
 	int soldierAmount = 1;
 	bool turnWheel = true;
 
@@ -298,9 +298,11 @@ public:
 	string userName;
 	int userTurn;
 	int turn = 0;
+
 	bool _randomPlacement = true;
 	bool castle = false;
 	float rotateAmount = 22.5;
+
 
 	WindowManager();
 	~WindowManager();
