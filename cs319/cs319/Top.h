@@ -296,7 +296,6 @@ public:
 	string userName;
 	int userTurn;
 	int turn = 0;
-	bool _randomPlacement = true;
 
 	WindowManager();
 	~WindowManager();
