@@ -1554,15 +1554,23 @@ WindowManager::WindowManager()
 	images.push_back(new MyImage("soldier.png"));
 	images.push_back(new MyImage("wheel.png"));
 	images.push_back(new MyImage("triangle.png"));
+
+
 	images[0]->setInitialPosition(lowerPanel.getPosition().x + 30, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
 	images[0]->setPosition(images[0]->getInitialPosition());
+
 
 	images[1]->setInitialPosition(screenWidth / 2, bottomUpperMargin / 2);
 	images[1]->setOrigin(images[1]->getSize().x / 2, images[1]->getSize().y / 2);
 	images[1]->setPosition(images[1]->getInitialPosition());
 	images[1]->setScale(0.7, 0.7);
 
-
+	images[2]->rotate(90);
+	images[2]->setOrigin(images[2]->getSize().x / 2, images[2]->getSize().y / 2);
+	images[2]->setInitialPosition(images[1]->getInitialPosition().x + 280, images[1]->getInitialPosition().y);
+	//images[2]->setInitialPosition(screenWidth / 2, bottomUpperMargin / 2);
+	images[2]->setPosition(images[2]->getInitialPosition());
+	images[2]->setScale(0.3, 0.3);
 	int numberTextSize = 30;
 
 	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 40);
@@ -1765,6 +1773,7 @@ void WindowManager::createWindow() {
 		dragObject(window, event, 0);
 		window.draw(*images[0]);
 		window.draw(*images[1]);
+		window.draw(*images[2]);
 
 		window.draw(provinceNameTxt);
 		window.draw(infoText);
