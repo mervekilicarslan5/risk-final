@@ -1,0 +1,84 @@
+"Alaska", 150.074, 434.259
+"Alaska", 235.523, 417.169
+"North West", 729.768, 458.673
+"North Wesr", 822.541, 448.907
+"Alberta", 519.807, 558.77
+"Alberta", 629.67, 556.329
+"Ontario", 763.948, 578.302
+"Ontario", 829.866, 575.86
+"Quebec", 1086.21, 595.391
+"Quebec", 1152.13, 605.157
+"Western United States", 651.643, 746.759
+"Western United States", 717.561, 744.317
+"Eastern United States", 1012.97, 815.118
+"Eastern United States", 1012.97, 866.388
+"Central America", 768.83, 1029.96
+"Central America", 803.01, 1078.79
+"Greenland", 1276.64, 158.38
+"Greenland", 1398.71, 158.38
+"Venezuela", 1052.03, 1298.52
+"Venezuela", 1105.74, 1291.19
+"Peru", 1017.85, 1371.76
+"Peru", 1074.01, 1388.85
+"Argentina", 1149.69, 1650.08
+"Argentina", 1122.83, 1711.11
+"Brazil", 1264.44, 1318.05
+"Brazil", 1366.97, 1318.05
+"Iceland", 1774.69, 370.782
+"Iceland", 1833.28, 368.341
+"England", 1720.98, 649.102
+"England", 1786.9, 610.04
+"Western Europe", 1799.1, 824.884
+"Western Europe", 1867.46, 800.469
+"Northern Europe", 1940.71, 673.516
+"Northern Europe", 1982.21, 666.192
+"Southern Europe", 1987.09, 763.848
+"Southern Europe", 2028.6, 768.731
+"Scandinavia", 1977.33, 446.446
+"Scandinavia", 2018.83, 412.286
+"Russia", 2299.59, 500.177
+"Russia", 2387.48, 502.618
+"North Africa", 1789.34, 966.485
+"North Africa", 1884.55, 968.927
+"Egypt", 2087.19, 934.747
+"Egypt", 2148.22, 942.071
+"East Africa",2209.26, 1103.2
+"East Africa", 2177.52, 1169.12
+"Congo", 2001.74, 1247.25
+"Congo", 2077.42, 1244.81
+"South Africa", 2038.36, 1464.53
+"South Africa", 2121.37, 1469.41
+"Madagascar", 2370.39, 1510.92
+"Madagascar", 2397.25, 1454.77
+"Middle East", 2299.59, 961.602
+"Middle East", 2326.45, 1039.73
+"Afghanistan", 2441.19, 717.462
+"Afghanistan", 2526.64, 727.227
+"India", 2585.24, 956.72
+"India", 2670.69, 951.837
+"Siam", 2856.23, 1020.2
+"Siam", 2907.5, 1115.41
+"China", 2929.48, 920.098
+"China", 3014.92, 946.954
+"Mongolia", 3144.32, 707.696
+"Mongolia", 3139.44, 790.704
+"Ural", 2590.12, 539.239
+"Ural", 2663.36, 539.239
+"Siberia", 2829.38, 341.485
+"Siberia", 2927.03, 341.485
+"Irkutsk", 3144.32, 546.563
+"Irkutsk", 3146.76, 612.481
+"Yakutsk", 3241.98, 348.809
+"Yakutsk", 3310.33, 358.575
+"Kamchatka", 3461.7, 400.079
+"Kamchatka", 3657.01, 412.286
+"Japan", 3388.46, 873.712
+"Japan", 3442.17, 888.36
+"Indonesia", 3019.81, 1340.02
+"Indonesia", 2985.63, 1418.15
+"New Guinea", 3410.43, 1310.72
+"New Guinea", 3469.03, 1357.11
+"Eastern Australia", 3354.28, 1571.95
+"Eastern Australia", 3451.94, 1586.6
+"Western Australia", 3290.8, 1662.29
+"Western Australia", 3364.05, 1662.29

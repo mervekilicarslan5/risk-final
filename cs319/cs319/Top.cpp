@@ -1565,13 +1565,14 @@ WindowManager::WindowManager()
 
 	images[0]->setInitialPosition(images[3]->getInitialPosition().x + images[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - images[0]->getTextureRect().height / 2);
 	images[0]->setPosition(images[0]->getInitialPosition());
-	
+
 
 
 	images[1]->setInitialPosition(screenWidth / 2, bottomUpperMargin / 2);
 	images[1]->setOrigin(images[1]->getSize().x / 2, images[1]->getSize().y / 2);
 	images[1]->setPosition(images[1]->getInitialPosition());
 	images[1]->setScale(0.7, 0.7);
+
 
 	images[2]->rotate(90);
 	images[2]->setOrigin(images[2]->getSize().x / 2, images[2]->getSize().y / 2);
@@ -1658,8 +1659,9 @@ WindowManager::~WindowManager() {
 }
 
 void WindowManager::menuScreen(RenderWindow & window, Event & event) {
-
+	static int x = 0;
 	while (window.pollEvent(event)) {
+		cout << "we are checking" <<x++<< endl;
 		if (event.type == sf::Event::Closed)
 			window.close();
 		else if (event.type == sf::Event::MouseButtonPressed)
@@ -1979,6 +1981,7 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 void WindowManager::buttonClicked(int id) {
 	
 	if (page == MENU_SCREEN) {
+		cout << "clickked weghwioefng" << endl;
 		if (id == 5) {
 			//userName = "host";
 			//NM->createNetwork(&GM,"h", userName);
