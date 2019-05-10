@@ -1392,6 +1392,7 @@ WindowManager::WindowManager()
 	GM = new GameManager();
 	NM = new NetworkManager(this);
 
+
 	zoom = 1.0;
 
 	phase = INITIAL_PHASE;
@@ -1424,10 +1425,10 @@ WindowManager::WindowManager()
 	mapSprite.setTexture(mapTex);
 	mainView.setSize(screenWidth, screenHeight);
 	/*mainView.setViewport(sf::FloatRect(0, 0, 1, 0.8f));*/
-
 	lowerPanel.setSize(sf::Vector2f(screenWidth, screenHeight - bottomUpperMargin));
 	lowerPanel.setPosition(0, bottomUpperMargin);
 	lowerPanel.setFillColor(sf::Color(255, 255, 255));
+	miniMap = MiniMap(mapTex);
 
 	provinceNameTxt.setFont(font);
 	provinceNameTxt.setCharacterSize(20);
@@ -1565,7 +1566,6 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 }
 
 void WindowManager::createWindow() {
-
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
 
@@ -1650,9 +1650,20 @@ void WindowManager::createWindow() {
 		window.clear(sf::Color(224,253,255));
 		window.draw(mapSprite);
 
+
+
+
 		window.setView(window.getDefaultView());
 		window.draw(lowerPanel);
 		dragObject(window, event, 0);
+
+
+
+
+
+
+
+
 		window.draw(*images[0]);
 
 		window.draw(provinceNameTxt);
@@ -1663,13 +1674,33 @@ void WindowManager::createWindow() {
 				buttons[i]->draw(window);
 		}
 
+
+		//miniMap Staff
+		window.setView(miniMap);
+		miniMap.update(mainView);
+		miniMap.draw(window);
+
+		/*window.setView(miniMap);
+		miniMap.setCenter(mapTex.getSize().x / 2, mapTex.getSize().y / 2);
+		mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
+		RectangleShape miniMapRectangle;
+		miniMapRectangle.setFillColor(Color::Transparent);
+		miniMapRectangle.setOutlineThickness(20);
+		miniMapRectangle.setOutlineColor(Color::Black);
+		miniMapRectangle.setSize(mainView.getSize());
+		miniMapRectangle.setPosition(mainView.getCenter().x - mainView.getSize().x / 2, mainView.getCenter().y - mainView.getSize().y / 2);
+		miniMap.setViewport(FloatRect(float(0.8), float(0.8), 0.2, 0.2));
+		window.draw(mapSprite);
+		window.draw(miniMapRectangle);
+*/
+
 		window.display();
 	}
 
 }
 
 string WindowManager::getProvinceByColor(int color) {
-
+	return "";
 }
 
 int WindowManager::getPixelColor(int x, int y) {
@@ -2093,7 +2124,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		name = _name;
 		String playerName = name;
 		packet << playerName;
-		sIP = "139.179.210.187";
+		sIP = "139.179.202.124";
 		IpAddress sendIP(sIP);
 		if (socket.send(packet, sendIP, 2000) == Socket::Done)
 			cout << "You have joined the room." << endl;
@@ -2323,7 +2354,7 @@ void NetworkManager::buildNewtwork() {
 	else if (connectionType == "c1") {
 		//cout << "Enter server ip: ";
 		//cin >> sIp;
-		sIp = "139.179.210.187";
+		sIp = "139.179.202.124";
 		IpAddress sendIP(sIp);
 		if (socket.send(packet, sendIP, 2000) == Socket::Done)
 			cout << "Client1 has joined the room." << endl;
@@ -2333,7 +2364,7 @@ void NetworkManager::buildNewtwork() {
 	else if (connectionType == "c2") {
 		//cout << "Enter server ip: ";
 		//cin >> sIp;
-		sIp = "139.179.210.187";
+		sIp = "139.179.202.124";
 		IpAddress sendIP(sIp);
 		if (socket.send(packet, sendIP, 2000) == Socket::Done)
 			cout << "Client2 has joined the room." << endl;
@@ -2378,3 +2409,34 @@ vector<string> NetworkManager ::split( string strToSplit, char delimeter){
 	return splittedStrings;
 }
 
+
+MiniMap::MiniMap(sf::Texture  mapTexture) {
+	sf::View::View();
+	this->setSize(GetSystemMetrics(SM_CXSCREEN) / 5, GetSystemMetrics(SM_CYSCREEN) / 5);
+	this->zoom(10);
+	mapTex = mapTexture;
+	mapSprite.setTexture(mapTex);
+	mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
+}
+MiniMap::MiniMap() {
+	sf::View::View();
+}
+
+void MiniMap::update(sf::View & mainView) {
+	this->setCenter(mapTex.getSize().x / 2, mapTex.getSize().y / 2);
+	mapSprite.setTexture(mapTex);
+	mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
+	miniMapRectangle.setFillColor(Color::Transparent);
+	miniMapRectangle.setOutlineThickness(20);
+	miniMapRectangle.setOutlineColor(Color::Black);
+	miniMapRectangle.setSize(mainView.getSize());
+	miniMapRectangle.setPosition(mainView.getCenter().x - mainView.getSize().x / 2, mainView.getCenter().y - mainView.getSize().y / 2);
+	this->setViewport(FloatRect(float(0.8), float(0.8), 0.2, 0.2));
+
+}
+void MiniMap::draw(sf::RenderWindow & window) {
+	window.draw(mapSprite);
+	window.draw(miniMapRectangle);
+
+
+}
