@@ -25,6 +25,7 @@ class NetworkManager;
 class WindowManager;
 class Button;
 class MyImage;
+class MiniMap;
 
 
 class Die
@@ -39,6 +40,18 @@ private:
 	int numberOfFaces;
 };
 
+class MiniMap : public sf::View {
+public:
+	sf::Texture mapTex;
+	sf::Sprite mapSprite;////////////////lol
+	sf::RectangleShape miniMapRectangle;
+	MiniMap(sf::Texture mapTexture);
+	MiniMap();
+	void update(sf::View & mainView);
+	void draw(sf::RenderWindow & window);
+
+
+};
 class Castle
 {
 public:
@@ -261,11 +274,14 @@ public:
 	sf::RectangleShape lowerPanel;
 	sf::Text provinceNameTxt, infoText;
 	sf::Font font;
+	MiniMap miniMap;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
+	vector<string> wheelStr;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
+	bool turnWheel = true;
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
@@ -299,7 +315,11 @@ public:
 	string userName;
 	int userTurn;
 	int turn = 0;
+
 	bool _randomPlacement = true;
+	bool castle = false;
+	float rotateAmount = 22.5;
+
 
 	int counter = 0;
 
@@ -351,3 +371,4 @@ public :
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
+
