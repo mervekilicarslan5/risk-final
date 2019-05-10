@@ -277,9 +277,11 @@ public:
 	MiniMap miniMap;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
+	vector<string> wheelStr;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
+	bool turnWheel = true;
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
@@ -310,6 +312,11 @@ public:
 	string userName;
 	int userTurn;
 	int turn = 0;
+
+	bool _randomPlacement = true;
+	bool castle = false;
+	float rotateAmount = 22.5;
+
 
 	WindowManager();
 	~WindowManager();
