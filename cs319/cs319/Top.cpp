@@ -1,5 +1,5 @@
 #include "Top.h"
-
+using namespace std;
 
 Die::Die()
 {
@@ -1610,13 +1610,12 @@ WindowManager::WindowManager()
 	buttons[1]->setSize(100, 40);
 	buttons[1]->setText("Attack");
 	buttons[1]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
-	buttons[1]->setTextSize(20);
+	buttons[1]->setTextSize(30);
 	buttons[1]->setTextColor(sf::Color::White);
 	buttons[1]->setFillColor(sf::Color::Red);
 
 	buttons[5]->setSize(100, 40);
 	buttons[5]->setText("Host");
-	buttons[5]->setOrigin(50, 20);
 	buttons[5]->setPosition(screenWidth / 2, screenHeight / 2);
 	buttons[5]->setTextSize(20);
 	buttons[5]->setTextColor(sf::Color::White);
@@ -1624,7 +1623,6 @@ WindowManager::WindowManager()
 
 	buttons[6]->setSize(100, 40);
 	buttons[6]->setText("C1");
-	buttons[6]->setOrigin(50, 20);
 	buttons[6]->setPosition(screenWidth / 2 + 120, screenHeight / 2);
 	buttons[6]->setTextSize(20);
 	buttons[6]->setTextColor(sf::Color::White);
@@ -1632,15 +1630,13 @@ WindowManager::WindowManager()
 
 	buttons[7]->setSize(100, 40);
 	buttons[7]->setText("C2");
-	buttons[7]->setOrigin(50, 20);
-	buttons[7]->setPosition(screenWidth / 2 + 120, screenHeight / 2 + 60);
 	buttons[7]->setTextSize(20);
+	buttons[7]->setPosition(screenWidth / 2 + 120, screenHeight / 2 + 60);
 	buttons[7]->setTextColor(sf::Color::White);
 	buttons[7]->setFillColor(sf::Color::Red);
 
 	buttons[8]->setSize(100, 40);
 	buttons[8]->setText("Start");
-	buttons[8]->setOrigin(50, 20);
 	buttons[8]->setPosition(screenWidth / 2, screenHeight / 2 + 60);
 	buttons[8]->setTextSize(20);
 	buttons[8]->setTextColor(sf::Color::White);
@@ -1666,6 +1662,7 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 			window.close();
 		else if (event.type == sf::Event::MouseButtonPressed)
 		{
+
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
 				checkClickEvents(event);
@@ -1765,6 +1762,7 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 	window.draw(lowerPanel);
 	dragObject(window, event, 0);
 	window.draw(*images[0]);
+
 
 	window.draw(provinceNameTxt);
 	window.draw(infoText);
@@ -1958,15 +1956,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 void WindowManager::checkClickEvents(sf::Event & e) {
 	int id = 0;
 	
-	for (auto it = images.begin(); it != images.end(); it++) {
-		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
-			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
-			imageClicked(id);
-			return;
-		}
-		id++;
-	}
-	id = 0;
+
 	for (auto it = buttons.begin(); it != buttons.end(); it++) {
 		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
 			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
@@ -1975,11 +1965,21 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 		}
 		id++;
 	}
+	id = 0;
+	for (auto it = images.begin(); it != images.end(); it++) {
+		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
+			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
+			imageClicked(id);
+			return;
+		}
+		id++;
+	}
+
 	
 }
 
 void WindowManager::buttonClicked(int id) {
-	
+	cout<<"button clicked"<<endl;
 	if (page == MENU_SCREEN) {
 		cout << "clickked weghwioefng" << endl;
 		if (id == 5) {
@@ -2292,12 +2292,14 @@ void Button::draw(sf::RenderWindow & window) {
 
 void Button::setPosition(float x, float y) {
 	sf::RectangleShape::setPosition(x, y);
-	text.setPosition(x, y);
+	text.setPosition(x + this->getSize().x/2 - text.getGlobalBounds().width /2 , y + this->getSize().y/2 - text.getGlobalBounds().height /2 );
+	cout << "size:" << text.getCharacterSize() << endl;
 	//text.setPosition(x + sf::RectangleShape().getPosition().x / 2, y + sf::RectangleShape().getPosition().y / 2);
 }
 
 void Button::setSize(int width, int height) {
 	sf::RectangleShape::setSize(sf::Vector2f(width, height));
+	
 	//text.setOrigin(width/2, height/2);
 }
 
@@ -2307,6 +2309,7 @@ void Button::setTextColor(sf::Color color) {
 
 void Button::setTextSize(int size) {
 	text.setCharacterSize(size);
+	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getSize().y / 2 - text.getGlobalBounds().height / 2);
 }
 
 MyImage::MyImage() {
