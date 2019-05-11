@@ -37,6 +37,6 @@ Yakutsk;-189431809
 Kamchatka;-189497089
 Japan;-172785665
 Indonesia;-1901330433
-New Guniea;-1901395969
+New Guinea;-1901395969
 Western Australia;-1901396225
 Eastern Australia;-1918107649

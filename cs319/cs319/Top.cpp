@@ -565,7 +565,7 @@ void GameManager::addPlayer(string _name)
 {
 	int numberOfPlayers = players.size();
 	if (numberOfPlayers < 6) {
-		players.push_back(new Player(_name, numberOfPlayers));
+		players.push_back(new Player(_name, players.size()));
 	}
 }
 
@@ -981,9 +981,9 @@ void GameManager::loadProvinces() {
 	createNeighbor("Irkutsk", "Siberia");
 	createNeighbor("Siberia", "Ural");
 	createNeighbor("Japan", "Kamchatka");
-	createNeighbor("Indonesia", "New Guniea");
-	createNeighbor("New Guniea", "Western Australia");
-	createNeighbor("New Guniea", "Eastern Australia");
+	createNeighbor("Indonesia", "New Guinea");
+	createNeighbor("New Guinea", "Western Australia");
+	createNeighbor("New Guinea", "Eastern Australia");
 	createNeighbor("Western Australia", "Eastern Australia");
 
 
@@ -1476,17 +1476,18 @@ vector<string> GameManager::split(string strToSplit, char delimeter) {
 
 WindowManager::WindowManager()
 {
-	
+
 	GM = new GameManager();
 	NM = new NetworkManager(this);
+
 
 
 	zoom = 1.0;
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2 ;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2 ;
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1501,6 +1502,12 @@ WindowManager::WindowManager()
 	}
 	if (!hoverImg.loadFromFile("assets/hover.jpeg")) {
 		cout << "Unable to open file" << endl;
+	}
+	if (!roundedSquare.loadFromFile("assets/roundedSquare.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	else {
+		cout << "wiiiiiiii" << endl;
 	}
 
 	font;
@@ -1530,6 +1537,38 @@ WindowManager::WindowManager()
 
 	mapSprite.setPosition(0, 0);
 	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
+
+	fstream file("assets/coordinates.txt");
+
+	int color;
+	string cityName;
+	bool stepOne = false;
+	bool stepTwo = false;
+	string line;
+	ifstream myfile("assets/coordinates.txt");
+
+
+
+
+	if (myfile.is_open()) {
+		while (getline(myfile, line)) {
+			
+			vector<string> temp  = GM->split( line, ',');
+			listOfArmyBage.push_back(new ArmyBage(roundedSquare,stoi(temp[1]), stoi(temp[2]), temp[0],font));
+
+			//listOfArmyBage.push_back(ArmyBage(temp));
+			//cityName = prov[0];
+			//color = stoi(prov[1]);
+			//createProvince(cityName, to_string(color));
+			//colorLookUpTable.insert(pair<int, string>(color, cityName));
+			//cout << cityName << " " << color << " loaded. " << endl;
+		}
+
+
+		myfile.close();
+	}
+
+
 
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
@@ -1857,8 +1896,11 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 		window.clear(sf::Color(224,253,255));
 		window.draw(mapSprite);
+		drawAllArmies(window, event);
 		if (castle)
 			window.draw(*images[4]);
+
+	
 
 
 
@@ -2258,6 +2300,32 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			}
 		}
 	}
+}
+
+void WindowManager::drawAllArmies(RenderWindow & window, Event & e) {
+	for (int i = 0; i < listOfArmyBage.size(); i++) {
+		Province* ptr;
+		WorldMap* wmPtr = GM->getWorldMap();
+		int temp;
+		int playerId;
+		wmPtr->getProvinceByName(listOfArmyBage[i]->nameOfProvince, temp, ptr);
+		if (ptr != NULL) {
+			int sizeOfArmy = ptr->getNumberOfSoldiers();
+			if (sizeOfArmy < 100 && sizeOfArmy >= 0)
+				listOfArmyBage[i]->setSizeOfArmy(sizeOfArmy);
+			playerId = ptr->getOwner()->getId();
+			if (playerId == 0)
+				listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
+			if (playerId == 1)
+				listOfArmyBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
+			if (playerId == 2)
+				listOfArmyBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
+			(listOfArmyBage[i])->draw(window);
+		}
+	}
+
+	
+	
 }
 
 void WindowManager::displayProvinceInfo(Province* province) {
@@ -2748,4 +2816,48 @@ void MiniMap::draw(sf::RenderWindow & window) {
 	window.draw(miniMapRectangle);
 
 
+}
+
+
+ArmyBage::ArmyBage(Image img, int x,int y, string nameOfProvince,Font &font) {
+	this->nameOfProvince = nameOfProvince;
+	this->text.setFont(font);
+	this->img = img;
+	tex.loadFromImage(img);
+	this->setTexture(tex);
+	this->setScale(1,1) ;
+	sizeOfArmy = 10;
+	string temp = to_string(sizeOfArmy);
+	text.setCharacterSize(20);
+	text.setString(String(temp));
+
+	this->setPosition(x- this->getGlobalBounds().width / 2, y- this->getGlobalBounds().height / 2);
+	text.setPosition(this->getPosition().x + this->getGlobalBounds().width / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getGlobalBounds().height / 2 - text.getGlobalBounds().height);
+}
+
+ArmyBage::ArmyBage() {
+	
+}
+
+void ArmyBage::setSizeOfArmy(int size) {
+	sizeOfArmy = size;
+	string temp = to_string(sizeOfArmy);
+	text.setString(String(temp));
+	text.setPosition(this->getPosition().x + this->getGlobalBounds().width/2- text.getGlobalBounds().width/2 , this->getPosition().y+ this->getGlobalBounds().height / 2 - text.getGlobalBounds().height);
+}
+
+void ArmyBage::setBageColor(Color color) {
+	this->setColor(color);
+	this->color = color;
+}
+
+void ArmyBage::draw(sf::RenderWindow & window) {
+	this->setTexture(tex);
+	this->text.setString(String(to_string(sizeOfArmy)));
+	text.setCharacterSize(20);
+	this->setColor(this->color);
+
+	text.setFillColor(Color(255, 255, 255,255));
+	window.draw(*this);
+	window.draw(this->text);
 }

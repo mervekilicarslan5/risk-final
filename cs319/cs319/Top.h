@@ -26,6 +26,26 @@ class WindowManager;
 class Button;
 class MyImage;
 class MiniMap;
+class ArmyBage;
+
+
+class ArmyBage : public sf::Sprite {
+public:
+	Image img ;
+	Texture tex;
+	int sizeOfArmy;
+	Text text;
+	Color color;
+	string nameOfProvince;
+
+
+	ArmyBage();
+	ArmyBage(Image img, int x, int y, string nameOfProvince,Font &font);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window);
+
+};
 
 
 class Die
@@ -265,7 +285,7 @@ public:
 	int screenWidth;
 	int screenHeight;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
-	sf::Image mapImg, hoverImg;
+	sf::Image mapImg, hoverImg,roundedSquare;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -278,6 +298,7 @@ public:
 	vector<Button*> buttons;
 	vector<MyImage*> images;
 	vector<string> wheelStr;
+	vector<ArmyBage*> listOfArmyBage;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
@@ -338,6 +359,7 @@ public:
 	void imageClicked(int id);
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
+	void drawAllArmies(RenderWindow & window, Event & e);
 };
 
 class Button : public sf::RectangleShape {
@@ -371,4 +393,9 @@ public :
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
+
+
+
+
+
 
