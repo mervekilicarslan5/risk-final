@@ -8,7 +8,7 @@ Western United States;901427711
 Eastern United States;834318847
 Central America;867807487
 Venezuela;-72401921
-Brazil;-72401921
+Brazil;-89244929
 Peru;-72467457
 Argentina;-72532993
 Iceland;1786484991
@@ -27,7 +27,7 @@ Madagascar;-1471708161
 Middle East;-189432065
 Afghanistan;-189497089
 Ural;-189497345
-China;-172720129
+China;-189563137
 India;-189497601
 Siam;-206209025
 Mongolia;-206340097

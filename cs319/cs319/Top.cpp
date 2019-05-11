@@ -1319,28 +1319,69 @@ void GameManager::startFortifyPhase(int id) {
 
 void GameManager::randomPlacement() {
 	
+	//int size = worldMap->getNumberOfProvinces();
+	//Die die(size);
+	//int* shuffledArray = new int[size];
+	//for (int i = 0; i < size; i++) {
+	//	shuffledArray[i] = i;
+	//}
+	//for (int i = 0; i < size; i++) {
+	//	int r = die.roll() - 1;
+	//	int temp;
+	//	temp = shuffledArray[i];
+	//	shuffledArray[i] = shuffledArray[r];
+	//	shuffledArray[r] = temp;
+	//}
+	//int t = 0;
+	//int numberOfPlayers = players.size();
+	//for (int i = 0; i < size; i++) {
+	//	Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
+	//	placeSoldier(players[t], curProvince->getName(), 3);
+	//	t = (t + 1) % numberOfPlayers;
+	//}
+	//cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
+	//delete shuffledArray;
+
+
+
+
+
+
+
+
+
+
 	int size = worldMap->getNumberOfProvinces();
-	Die die(size);
+
+	/*
 	int* shuffledArray = new int[size];
 	for (int i = 0; i < size; i++) {
-		shuffledArray[i] = i;
+	shuffledArray[i] = i;
 	}
 	for (int i = 0; i < size; i++) {
-		int r = die.roll() - 1;
-		int temp;
-		temp = shuffledArray[i];
-		shuffledArray[i] = shuffledArray[r];
-		shuffledArray[r] = temp;
-	}
-	int t = 0;
+	int r = die.roll() - 1;
+	int temp;
+	temp = shuffledArray[i];
+	shuffledArray[i] = shuffledArray[r];
+	shuffledArray[r] = temp;
+	}*/
+	int t;
 	int numberOfPlayers = players.size();
+	Die die(numberOfPlayers);
+	t = die.roll() - 1;
+	int count = 0;
 	for (int i = 0; i < size; i++) {
-		Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
-		placeSoldier(players[t], curProvince->getName(), 3);
-		t = (t + 1) % numberOfPlayers;
+		Province* curProvince = worldMap->getProvinceByID(i);
+		if (players[t]->getNumberOfProvinces() < size / 3 + 1) {
+			placeSoldier(players[t], curProvince->getName(), 1);
+		}
+		else {
+			i--;
+		}
+		t = die.roll() - 1;
 	}
-	cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
-	delete shuffledArray;
+	cout << "* PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS *" << endl;
+	//delete shuffledArray;
 }
 
 int GameManager::getPlayerTurn(string _name) {
