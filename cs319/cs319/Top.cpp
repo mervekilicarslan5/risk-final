@@ -1523,12 +1523,12 @@ WindowManager::WindowManager()
 
 
 
-	zoom = 1.0;
+	zoom = 1;
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2 ;
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2 ;
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1742,7 +1742,6 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 			window.close();
 		else if (event.type == sf::Event::MouseButtonPressed)
 		{
-
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
 				checkClickEvents(event);
@@ -1753,7 +1752,6 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	window.setView(mainView);
 
 	window.clear(sf::Color::Black);
-
 
 	window.setView(window.getDefaultView());
 
@@ -2154,7 +2152,7 @@ void WindowManager::buttonClicked(int id) {
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
 	if (id == NEXT_PHASE_BUTTON) {
 		if (phase == INITIAL_PHASE) {
-	/*		player->setLeftSoldier(player->getNumberOfProvinces() / 3);
+		/*  player->setLeftSoldier(player->getNumberOfProvinces() / 3);
 			if (page == 2 )
 				phase = PLACEMENT_PHASE; //YOU WILL NOT BE ABLE TO CLICK ANYTHING IN INITIAL PHASE JUST SOLDIER */
 		}
@@ -2176,7 +2174,7 @@ void WindowManager::buttonClicked(int id) {
 				}
 			}
 			turn++;
-			if (turn == playerCount-1)
+			if (turn == playerCount)
 				turn = 0;
 			if (page == COMPUTER_GAME_SCREEN) {
 				string dummy;
@@ -2191,10 +2189,13 @@ void WindowManager::buttonClicked(int id) {
 			
 		}
 		else if (phase == END_TURN) {
+			buttons[NEXT_PHASE_BUTTON]->setText("Next Phase");
+			buttons[ATTACK_BUTTON]->setText("Attack");
 		}
 
 		cout << "Phase: " << phase << endl;
 	}
+
 	else if (id == ATTACK_BUTTON) {
 		if (phase == ATTACKING_PHASE) {
 			if (isProvinceClicked == 2) {
@@ -2367,7 +2368,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				string provinceName = getProvinceName(window, mouse);
 				cout << provinceName << endl;
 				if (phase == INITIAL_PHASE) {
-					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
+					if (GM->placeSoldier(turn, provinceName, 1)) {
 						if (page == 1) {
 							if (turn = 0)
 								this->GM->sendAllProvincesFromHostString(&NM);
@@ -2375,19 +2376,32 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 								this->GM->sendAllProvincesClientToHostString(&NM);
 								this->GM->sendAllProvincesFromHostString(&NM);
 							}
+							phase = END_TURN;
+						}
+						
+						if (page == COMPUTER_GAME_SCREEN) {
+							if (GM->getWorldMap()->ownerCount() != 42)
+								phase = INITIAL_PHASE;
+							else
+								phase = PLACEMENT_PHASE;
 						}
 						turn++;
-						if (turn == playerCount - 1)
+						if (turn == playerCount )
 							turn = 0;
+						
+						
 						cout << turn << "**********************";
-						phase = END_TURN;
+						provinceNameTxt.setString("Player" + to_string(turn+1) + "'s turn" );
+						
 					}
 				}
 				else if (phase == PLACEMENT_PHASE) {
-					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
-						int dummy; Province* province;
+					if (GM->placeSoldier(turn, provinceName, 1)) {
+						int dummy; Province* province; string dum;
 						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
+						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() == 0)
+							phase = ATTACKING_PHASE;
 					}
 					else {
 						provinceNameTxt.setString("It is not your city");
