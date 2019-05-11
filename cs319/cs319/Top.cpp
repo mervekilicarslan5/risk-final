@@ -1878,7 +1878,7 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 	window.setView(miniMap);
 	miniMap.update(mainView);
 	miniMap.draw(window);
-
+	window.setView(window.getDefaultView());
 	/*window.setView(miniMap);
 	miniMap.setCenter(mapTex.getSize().x / 2, mapTex.getSize().y / 2);
 	mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
