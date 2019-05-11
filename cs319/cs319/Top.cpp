@@ -2186,11 +2186,12 @@ void WindowManager::buttonClicked(int id) {
 				cout << "Player" << turn + 1 << " 's turn!!" << endl;
 				phase = END_TURN;
 			}
+			buttons[NEXT_PHASE_BUTTON]->setText("Next Phase");
+			buttons[ATTACK_BUTTON]->setText("Attack");
 			
 		}
 		else if (phase == END_TURN) {
-			buttons[NEXT_PHASE_BUTTON]->setText("Next Phase");
-			buttons[ATTACK_BUTTON]->setText("Attack");
+			
 		}
 
 		cout << "Phase: " << phase << endl;
