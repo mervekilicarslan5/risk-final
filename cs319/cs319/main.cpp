@@ -11,11 +11,11 @@ using namespace std;
 
 int main() {
 	WindowManager* WM = new WindowManager();
- 
-    WM->GM->loadProvinces();
 
-    WM->createWindow();
+	WM->GM->loadProvinces();
 
-	
+	WM->createWindow();
+
+
 	return 0;
 }

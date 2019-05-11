@@ -25,6 +25,27 @@ class NetworkManager;
 class WindowManager;
 class Button;
 class MyImage;
+class MiniMap;
+class ArmyBage;
+
+
+class ArmyBage : public sf::Sprite {
+public:
+	Image img;
+	Texture tex;
+	int sizeOfArmy;
+	Text text;
+	Color color;
+	string nameOfProvince;
+
+
+	ArmyBage();
+	ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window);
+
+};
 
 
 class Die
@@ -39,6 +60,18 @@ private:
 	int numberOfFaces;
 };
 
+class MiniMap : public sf::View {
+public:
+	sf::Texture mapTex;
+	sf::Sprite mapSprite;////////////////lol
+	sf::RectangleShape miniMapRectangle;
+	MiniMap(sf::Texture mapTexture);
+	MiniMap();
+	void update(sf::View & mainView);
+	void draw(sf::RenderWindow & window);
+
+
+};
 class Castle
 {
 public:
@@ -244,7 +277,7 @@ private:
 };
 
 class WindowManager {
-public: 
+public:
 
 	GameManager* GM;
 	NetworkManager * NM;
@@ -252,7 +285,7 @@ public:
 	int screenWidth;
 	int screenHeight;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
-	sf::Image mapImg, hoverImg;
+	sf::Image mapImg, hoverImg, roundedSquare;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -261,16 +294,19 @@ public:
 	sf::RectangleShape lowerPanel;
 	sf::Text provinceNameTxt, infoText;
 	sf::Font font;
+	MiniMap miniMap;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
 	vector<string> wheelStr;
+	vector<ArmyBage*> listOfArmyBage;
 	int phase;
-	int page = 1;
+	int page = 0;
 	int soldierAmount = 1;
 	bool turnWheel = true;
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
+	const int COMPUTER_GAME_SCREEN = 2;
 
 	const int NEXT_PHASE_BUTTON = 0;
 	const int ATTACK_BUTTON = 1;
@@ -289,22 +325,32 @@ public:
 	const int c1 = 6;
 	const int c2 = 7;
 	const int start = 8;
+	const int TURN_WHEEL_BUTTON = 9;
+
+	int playerCount = 0;
 
 	int isProvinceClicked = 0;
 	Province* first;
 	Province* second;
 	Province* currentProvince;
-	
+
 	string userName;
 	int userTurn;
 	int turn = 0;
+
 	bool _randomPlacement = true;
+	bool castle = false;
 	float rotateAmount = 22.5;
+
+
+	int counter = 0;
 
 	WindowManager();
 	~WindowManager();
 	void createWindow();
 	void menuScreen(RenderWindow & window, Event & e);
+	void multGameLan(RenderWindow & window, Event & event);
+	void multGameComp(RenderWindow & window, Event & event);
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
 	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);
@@ -314,10 +360,11 @@ public:
 	void imageClicked(int id);
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
+	void drawAllArmies(RenderWindow & window, Event & e);
 };
 
 class Button : public sf::RectangleShape {
-public :
+public:
 	sf::Text text;
 	int id;
 
@@ -334,12 +381,12 @@ public :
 };
 
 class MyImage : public sf::Sprite {
-public :
+public:
 	sf::Image img;
 	sf::Texture tex;
 	bool inMove;
 	sf::Vector2f initialPosition;
-	
+
 	MyImage();
 	MyImage(string fileName);
 	~MyImage();
@@ -347,3 +394,9 @@ public :
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
+
+
+
+
+
+
