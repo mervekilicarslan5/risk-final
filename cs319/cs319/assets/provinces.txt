@@ -25,7 +25,7 @@ Congo;-1471577089
 South Africa;-1471642625
 Madagascar;-1471708161
 Middle East;-189432065
-Afghanistan;-189497089
+Afghanistan;-206209025
 Ural;-189497345
 China;-189563137
 India;-189497601

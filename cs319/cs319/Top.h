@@ -31,7 +31,7 @@ class ArmyBage;
 
 class ArmyBage : public sf::Sprite {
 public:
-	Image img ;
+	Image img;
 	Texture tex;
 	int sizeOfArmy;
 	Text text;
@@ -40,7 +40,7 @@ public:
 
 
 	ArmyBage();
-	ArmyBage(Image img, int x, int y, string nameOfProvince,Font &font);
+	ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font);
 	void setSizeOfArmy(int size);
 	void setBageColor(sf::Color color);
 	void draw(sf::RenderWindow & window);
@@ -277,7 +277,7 @@ private:
 };
 
 class WindowManager {
-public: 
+public:
 
 	GameManager* GM;
 	NetworkManager * NM;
@@ -285,7 +285,7 @@ public:
 	int screenWidth;
 	int screenHeight;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
-	sf::Image mapImg, hoverImg,roundedSquare;
+	sf::Image mapImg, hoverImg, roundedSquare;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -325,6 +325,7 @@ public:
 	const int c1 = 6;
 	const int c2 = 7;
 	const int start = 8;
+	const int TURN_WHEEL_BUTTON = 9;
 
 	int playerCount = 0;
 
@@ -332,7 +333,7 @@ public:
 	Province* first;
 	Province* second;
 	Province* currentProvince;
-	
+
 	string userName;
 	int userTurn;
 	int turn = 0;
@@ -363,7 +364,7 @@ public:
 };
 
 class Button : public sf::RectangleShape {
-public :
+public:
 	sf::Text text;
 	int id;
 
@@ -380,12 +381,12 @@ public :
 };
 
 class MyImage : public sf::Sprite {
-public :
+public:
 	sf::Image img;
 	sf::Texture tex;
 	bool inMove;
 	sf::Vector2f initialPosition;
-	
+
 	MyImage();
 	MyImage(string fileName);
 	~MyImage();
@@ -393,7 +394,6 @@ public :
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
-
 
 
 
