@@ -37,7 +37,7 @@ public:
 	Text text;
 	Color color;
 	string nameOfProvince;
-
+	Vector2f centerCoordinates;
 
 	ArmyBage();
 	ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font);
@@ -46,6 +46,32 @@ public:
 	void draw(sf::RenderWindow & window);
 
 };
+
+
+class LineBetweenProvinces : public sf::Sprite {
+public:
+	sf::Image img;
+	sf::Texture tex;
+	float degree;
+	double step;
+	int lenght;
+	bool visible = false;
+	Vector2f first, second;
+
+	LineBetweenProvinces();
+	LineBetweenProvinces(Image img);
+	//void setCoordinatesOfProvince1(Vector2f coord);
+	//void setCoordinatesOfProvince2(Vector2f coord);
+	void setCoordinates(Vector2f first, Vector2f second);
+	void draw(RenderWindow & window);
+	void setVisible(bool flag);
+
+};
+
+
+
+
+
 
 
 class Die
@@ -285,7 +311,7 @@ public:
 	int screenWidth;
 	int screenHeight;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
-	sf::Image mapImg, hoverImg, roundedSquare;
+	sf::Image mapImg, hoverImg, roundedSquare,lineImg;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -295,6 +321,7 @@ public:
 	sf::Text provinceNameTxt, infoText;
 	sf::Font font;
 	MiniMap miniMap;
+	LineBetweenProvinces *lineForProvinces;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
 	vector<string> wheelStr;
@@ -394,8 +421,3 @@ public:
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
-
-
-
-
-

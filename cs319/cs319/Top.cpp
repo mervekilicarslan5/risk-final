@@ -1547,9 +1547,11 @@ WindowManager::WindowManager()
 	if (!roundedSquare.loadFromFile("assets/roundedSquare.png")) {
 		cout << "Unable to open file" << endl;
 	}
-	else {
-		cout << "wiiiiiiii" << endl;
+	if (!lineImg.loadFromFile("assets/line.png")) {
+		cout << "Unable to open file" << endl;
 	}
+
+
 
 	font;
 	if (!font.loadFromFile("assets/font.ttf"))
@@ -1574,7 +1576,7 @@ WindowManager::WindowManager()
 	infoText.setFont(font);
 	infoText.setCharacterSize(20);
 	infoText.setFillColor(sf::Color::Black);
-	infoText.setPosition(800, 50 + bottomUpperMargin);
+	infoText.setPosition(600, 50 + bottomUpperMargin);
 
 	mapSprite.setPosition(0, 0);
 	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
@@ -1608,7 +1610,7 @@ WindowManager::WindowManager()
 
 		myfile.close();
 	}
-
+	lineForProvinces = new LineBetweenProvinces(lineImg);
 
 
 	buttons.push_back(new Button(font));
@@ -1663,25 +1665,25 @@ WindowManager::WindowManager()
 	int numberTextSize = 30;
 
 	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 40);
-	buttons[2]->setSize(numberTextSize, numberTextSize);
 	buttons[2]->setTextSize(numberTextSize);
 	buttons[2]->setTextColor(sf::Color::Black);
 	buttons[2]->setText("-");
+	buttons[2]->setSize(buttons[2]->text.getGlobalBounds().width  , buttons[2]->text.getGlobalBounds().height);
 
-	buttons[4]->setPosition(buttons[2]->getPosition().x + buttons[2]->getSize().x, buttons[2]->getPosition().y);
-	buttons[4]->setSize(numberTextSize, numberTextSize);
+	buttons[4]->setPosition(buttons[2]->getPosition().x + buttons[2]->getGlobalBounds().width+5, buttons[2]->getPosition().y);
 	buttons[4]->setTextSize(numberTextSize);
 	buttons[4]->setTextColor(sf::Color::Black);
 	buttons[4]->setText("1");
+	buttons[4]->setSize(buttons[4]->text.getGlobalBounds().width, buttons[4]->text.getGlobalBounds().height);
 
-	buttons[3]->setPosition(buttons[4]->getPosition().x + buttons[4]->getSize().x, buttons[2]->getPosition().y);
-	buttons[3]->setSize(numberTextSize, numberTextSize);
+	buttons[3]->setPosition(buttons[4]->getPosition().x + buttons[4]->getGlobalBounds().width+10, buttons[2]->getPosition().y);
 	buttons[3]->setTextSize(numberTextSize);
 	buttons[3]->setTextColor(sf::Color::Black);
 	buttons[3]->setText("+");
+	buttons[3]->setSize(buttons[3]->text.getGlobalBounds().width, buttons[3]->text.getGlobalBounds().height);
 
 	buttons[0]->setSize(100, 40);
-	buttons[0]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - 10 - buttons[3]->getSize().y);
+	buttons[0]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - 10 -buttons[3]->getGlobalBounds().height-10);
 	buttons[0]->setText("Next Phase");
 	buttons[0]->setTextSize(20);
 	buttons[0]->setTextColor(sf::Color::White);
@@ -1844,10 +1846,12 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 
 	window.clear(sf::Color(224, 253, 255));
 	window.draw(mapSprite);
+
+
+
 	drawAllArmies(window, event);
 	if (castle)
 		window.draw(*images[4]);
-
 
 
 
@@ -1975,13 +1979,12 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.setView(mainView);
 
 	window.clear(sf::Color(224, 253, 255));
+
 	window.draw(mapSprite);
+	lineForProvinces->draw(window);
 	drawAllArmies(window, event);
 	if (castle)
 		window.draw(*images[4]);
-
-
-
 
 
 
@@ -2304,6 +2307,16 @@ void WindowManager::imageClicked(int id) {
 
 void WindowManager::provinceClicked(int id) {
 	Province* city = GM->getWorldMap()->getProvinceByID(id);
+	if (isProvinceClicked == 0) {
+		for (int i = 0; i < listOfArmyBage.size(); i++) {
+			if (listOfArmyBage[i]->nameOfProvince == city->getName())
+				listOfArmyBage[i]->setScale(2, 2);
+			else
+				listOfArmyBage[i]->setScale(1, 1);
+		}
+	}
+
+
 	if (phase == ATTACKING_PHASE || phase == FORTIFY_PHASE) {
 		if (isProvinceClicked == 0) {
 			first = city;
@@ -2311,10 +2324,58 @@ void WindowManager::provinceClicked(int id) {
 			isProvinceClicked = 1;
 			if (page == 1)
 				provinceNameTxt.setString(first->getName());
+
+
+			//-------------------------------------------------
+			//This code is to Scale a square with army size of a province.
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == city->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else
+					listOfArmyBage[i]->setScale(1, 1);
+			}
+			//--------------------------------------------------
+
+
+			//----------------------------------
+			//This is when you release from the probince. Can be changed????
+			lineForProvinces->setVisible(false);
+			//-------------------------------
 		}
 		else if (isProvinceClicked == 1) {
+			cout << "we are here" << endl;
 			second = city;
 			isProvinceClicked = 2;
+
+			//------------------------------------------------------
+			//this part is to draw line between two provinces
+			Vector2f firstCoordinates, secondCoordinates;
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == first->getName())
+					firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+				if (listOfArmyBage[i]->nameOfProvince == second->getName())
+					secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+			}
+
+			lineForProvinces->setCoordinates(firstCoordinates,secondCoordinates);
+			lineForProvinces->setVisible(true);
+			//--------------------------------------------------------
+
+
+			//-------------------------------------------------
+			//This code is to Scale a square with army size of a province.
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == first->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else if(listOfArmyBage[i]->nameOfProvince == second->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else
+					listOfArmyBage[i]->setScale(1, 1);
+			}
+			//-------------------------------------------------
+
+
+
 			if (phase == ATTACKING_PHASE)
 				provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
 			else
@@ -2325,6 +2386,17 @@ void WindowManager::provinceClicked(int id) {
 			first = city;
 			isProvinceClicked = 1;
 			provinceNameTxt.setString(first->getName());
+			lineForProvinces->setVisible(false);
+			//-------------------------------------------------
+			//This code is to Scale a square with army size of a province.
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == city->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else
+					listOfArmyBage[i]->setScale(1, 1);
+			}
+			//-------------------------------------------------
+
 		}
 		if (phase != FORTIFY_PHASE) {
 			if (first->getNumberOfSoldiers() > 3)
@@ -2339,6 +2411,16 @@ void WindowManager::provinceClicked(int id) {
 	else if (phase == POST_ATTACK) {
 		soldierAmount = first->getNumberOfSoldiers() - 1;
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+		
+		//-------------------------------------------------
+		//This code is to Scale a square with army size of a province.
+		for (int i = 0; i < listOfArmyBage.size(); i++) {
+			if (listOfArmyBage[i]->nameOfProvince == city->getName())
+				listOfArmyBage[i]->setScale(2, 2);
+			else
+				listOfArmyBage[i]->setScale(1, 1);
+		}
+		//-------------------------------------------------
 	}
 	displayProvinceInfo(city);
 }
@@ -2951,6 +3033,7 @@ ArmyBage::ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font) {
 	string temp = to_string(sizeOfArmy);
 	text.setCharacterSize(20);
 	text.setString(String(temp));
+	centerCoordinates = Vector2f(x, y);
 
 	this->setPosition(x - this->getGlobalBounds().width / 2, y - this->getGlobalBounds().height / 2);
 	text.setPosition(this->getPosition().x + this->getGlobalBounds().width / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getGlobalBounds().height / 2 - text.getGlobalBounds().height);
@@ -2982,3 +3065,66 @@ void ArmyBage::draw(sf::RenderWindow & window) {
 	window.draw(*this);
 	window.draw(this->text);
 }
+
+
+
+LineBetweenProvinces::LineBetweenProvinces(Image img) {
+	this->img = img;
+	tex.setRepeated(true);
+	this->setTexture(tex);
+	step = 0;
+	degree = 0;
+	visible = true;
+
+	this->setTextureRect(IntRect(step, 0, 960, 100));
+	this->setPosition(Vector2f(0, 0));
+	first = Vector2f(0, 0);
+	second = Vector2f(0, 0);
+	this->setScale(1, 0.25);
+	this->setOrigin(0, 12.5);
+
+}
+
+LineBetweenProvinces::LineBetweenProvinces() {
+
+}
+
+void LineBetweenProvinces::setCoordinates(Vector2f first,Vector2f second) {
+	this->first = first;
+	this->second = second;
+
+	lenght = (int) sqrt(pow(first.x - second.x, 2) + pow(first.y - second.y, 2) );
+	degree = (float) atan2(second.y - first.y, second.x - first.x) * 180 / 3.14159;
+	
+	this->setOrigin(0, img.getSize().y/2);
+
+	this->setTextureRect(IntRect(step, 0, img.getSize().x, lenght));
+	this->setPosition(first);
+	
+	this->setRotation(degree);
+}
+
+void LineBetweenProvinces::draw(RenderWindow &window) {
+	if (visible) {
+		step= step-0.1;
+		tex.loadFromImage(img);
+		tex.setRepeated(true);
+		this->setTexture(tex);
+
+		this->setTextureRect(IntRect((int)step, 0, max(0,lenght), img.getSize().y));
+		this->setOrigin(0, img.getSize().y / 2);
+		window.draw(*this);
+	}
+}
+
+void LineBetweenProvinces::setVisible(bool flag) {
+	this->visible = flag;
+}
+
+
+
+
+
+
+
+
