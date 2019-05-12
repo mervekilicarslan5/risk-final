@@ -1527,8 +1527,8 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2 ;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2 ;
+	screenWidth = GetSystemMetrics(SM_CXSCREEN)/2  ;
+	screenHeight = GetSystemMetrics(SM_CYSCREEN)/2 ;
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1568,15 +1568,7 @@ WindowManager::WindowManager()
 	lowerPanel.setFillColor(sf::Color(255, 255, 255));
 	miniMap = MiniMap(mapTex);
 
-	provinceNameTxt.setFont(font);
-	provinceNameTxt.setCharacterSize(20);
-	provinceNameTxt.setFillColor(sf::Color(0, 0, 0));
-	provinceNameTxt.setPosition(600, bottomUpperMargin);
 
-	infoText.setFont(font);
-	infoText.setCharacterSize(20);
-	infoText.setFillColor(sf::Color::Black);
-	infoText.setPosition(600, 50 + bottomUpperMargin);
 
 	mapSprite.setPosition(0, 0);
 	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
@@ -1664,37 +1656,56 @@ WindowManager::WindowManager()
 	images[2]->setScale(0.3, 0.3);
 	int numberTextSize = 30;
 
-	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 40);
 	buttons[2]->setTextSize(numberTextSize);
-	buttons[2]->setTextColor(sf::Color::Black);
+	buttons[2]->setSize(numberTextSize, numberTextSize);
 	buttons[2]->setText("-");
-	buttons[2]->setSize(buttons[2]->text.getGlobalBounds().width  , buttons[2]->text.getGlobalBounds().height);
+	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 10);
+	buttons[2]->setTextColor(sf::Color::Black);
+	buttons[2]->setFillColor(sf::Color::Red);
+	buttons[2]->setOutlineThickness(2);
+	buttons[2]->setOutlineColor(Color::Black);
 
-	buttons[4]->setPosition(buttons[2]->getPosition().x + buttons[2]->getGlobalBounds().width+5, buttons[2]->getPosition().y);
+
 	buttons[4]->setTextSize(numberTextSize);
-	buttons[4]->setTextColor(sf::Color::Black);
+	buttons[4]->setSize(numberTextSize, numberTextSize);
 	buttons[4]->setText("1");
-	buttons[4]->setSize(buttons[4]->text.getGlobalBounds().width, buttons[4]->text.getGlobalBounds().height);
+	buttons[4]->setPosition(buttons[2]->getPosition().x + buttons[2]->getGlobalBounds().width, buttons[2]->getPosition().y);
+	buttons[4]->setTextColor(sf::Color::Black);
+	buttons[4]->setFillColor(sf::Color::Red);
+	buttons[4]->setOutlineThickness(2);
+	buttons[4]->setOutlineColor(Color::Black);
 
-	buttons[3]->setPosition(buttons[4]->getPosition().x + buttons[4]->getGlobalBounds().width+10, buttons[2]->getPosition().y);
+
 	buttons[3]->setTextSize(numberTextSize);
-	buttons[3]->setTextColor(sf::Color::Black);
+	buttons[3]->setSize(numberTextSize, numberTextSize);
 	buttons[3]->setText("+");
-	buttons[3]->setSize(buttons[3]->text.getGlobalBounds().width, buttons[3]->text.getGlobalBounds().height);
+	buttons[3]->setPosition(buttons[4]->getPosition().x + buttons[4]->getGlobalBounds().width, buttons[2]->getPosition().y);
+	buttons[3]->setTextColor(sf::Color::Black);
+	buttons[3]->setFillColor(sf::Color::Red);
+	buttons[3]->setOutlineThickness(2);
+	buttons[3]->setOutlineColor(Color::Black);
+
 
 	buttons[0]->setSize(100, 40);
-	buttons[0]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - 10 -buttons[3]->getGlobalBounds().height-10);
+	buttons[0]->setPosition(buttons[2]->getPosition().x , buttons[2]->getPosition().y +buttons[2]->getSize().y + 20);
 	buttons[0]->setText("Next Phase");
 	buttons[0]->setTextSize(20);
 	buttons[0]->setTextColor(sf::Color::White);
 	buttons[0]->setFillColor(sf::Color::Blue);
+	buttons[0]->setOutlineThickness(2);
+	buttons[0]->setOutlineColor(Color::Black);
 
-	buttons[1]->setSize(100, 40);
+
+	buttons[1]->setSize(100, numberTextSize);
 	buttons[1]->setText("Attack");
-	buttons[1]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
-	buttons[1]->setTextSize(30);
+	buttons[1]->setPosition(buttons[0]->getPosition().x + buttons[0]->getSize().x + 20, buttons[2]->getPosition().y);
+	//buttons[1]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
+	buttons[1]->setTextSize(numberTextSize-2);
 	buttons[1]->setTextColor(sf::Color::White);
 	buttons[1]->setFillColor(sf::Color::Red);
+	buttons[1]->setOutlineThickness(2);
+	buttons[1]->setOutlineColor(Color::Black);
+
 
 	buttons[5]->setSize(100, 40);
 	buttons[5]->setText("Host");
@@ -1724,12 +1735,27 @@ WindowManager::WindowManager()
 	buttons[8]->setTextColor(sf::Color::White);
 	buttons[8]->setFillColor(sf::Color::Red);
 
-	buttons[9]->setSize(120, 40);
+	buttons[9]->setSize(100, 40);
 	buttons[9]->setText("Turn Wheel");
-	buttons[9]->setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
 	buttons[9]->setTextSize(20);
-	buttons[9]->setTextColor(sf::Color::White);
+	buttons[9]->setPosition(buttons[1]->getPosition().x, buttons[1]->getPosition().y + buttons[1]->getSize().y + 20);
+
+	buttons[9]->setTextColor(sf::Color::Black);
 	buttons[9]->setFillColor(sf::Color::Green);
+	buttons[9]->setOutlineThickness(2);
+	buttons[9]->setOutlineColor(Color::Black);
+
+	provinceNameTxt.setFont(font);
+	provinceNameTxt.setCharacterSize(20);
+	provinceNameTxt.setFillColor(sf::Color(0, 0, 0));
+	provinceNameTxt.setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, bottomUpperMargin);
+
+	infoText.setFont(font);
+	infoText.setCharacterSize(20);
+	infoText.setFillColor(sf::Color::Black);
+	infoText.setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, bottomUpperMargin + 40);
+
+
 }
 
 WindowManager::~WindowManager() {
@@ -2033,6 +2059,7 @@ void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
+	window.setPosition(Vector2i(0,0))  ;
 
 
 	while (window.isOpen()) {
@@ -2563,14 +2590,13 @@ void Button::draw(sf::RenderWindow & window) {
 
 void Button::setPosition(float x, float y) {
 	sf::RectangleShape::setPosition(x, y);
-	text.setPosition(x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, y + this->getSize().y / 2 - text.getGlobalBounds().height / 2);
-	cout << "size:" << text.getCharacterSize() << endl;
+	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize()/2 ));
 	//text.setPosition(x + sf::RectangleShape().getPosition().x / 2, y + sf::RectangleShape().getPosition().y / 2);
 }
 
 void Button::setSize(int width, int height) {
 	sf::RectangleShape::setSize(sf::Vector2f(width, height));
-
+	//text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getSize().y / 2 - text.getGlobalBounds().height / 2);
 	//text.setOrigin(width/2, height/2);
 }
 
@@ -2580,7 +2606,7 @@ void Button::setTextColor(sf::Color color) {
 
 void Button::setTextSize(int size) {
 	text.setCharacterSize(size);
-	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getSize().y / 2 - text.getGlobalBounds().height / 2);
+	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize()/2));
 }
 
 MyImage::MyImage() {
@@ -3074,9 +3100,9 @@ LineBetweenProvinces::LineBetweenProvinces(Image img) {
 	this->setTexture(tex);
 	step = 0;
 	degree = 0;
-	visible = true;
+	visible = false;
 
-	this->setTextureRect(IntRect(step, 0, 960, 100));
+	this->setTextureRect(IntRect(step, 0, img.getSize().x, 100));
 	this->setPosition(Vector2f(0, 0));
 	first = Vector2f(0, 0);
 	second = Vector2f(0, 0);
