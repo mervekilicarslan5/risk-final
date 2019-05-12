@@ -143,7 +143,7 @@ void Continent::setProvinces(vector<int> _provinces)
 
 Player::Player()
 {
-	leftSoldier = 10;
+	leftSoldier = 14;
 	name = "";
 	id = -1;
 	battlesLost = 0;
@@ -153,7 +153,7 @@ Player::Player()
 
 Player::Player(string _name, int _id)
 {
-	leftSoldier = 10;
+	leftSoldier = 14;
 	name = _name;
 	id = _id;
 	battlesLost = 0;
@@ -457,8 +457,14 @@ int WorldMap::ownerCount() {
 	return count;
 }
 
-
-
+vector<Province*> WorldMap::getNeighbors(Province* _province) {
+	vector<Province*> result;
+	int index = findIndex(_province);
+	for (auto it = map[index].begin(); it != map[index].end(); it++) {
+		result.push_back(provinceList[(*it)]);
+	}
+	return result;
+}
 
 Province::Province()
 {
@@ -1319,31 +1325,31 @@ void GameManager::startFortifyPhase(int id) {
 
 void GameManager::randomPlacement() {
 
-	//int size = worldMap->getNumberOfProvinces();
-	//Die die(size);
-	//int* shuffledArray = new int[size];
-	//for (int i = 0; i < size; i++) {
-	//	shuffledArray[i] = i;
-	//}
-	//for (int i = 0; i < size; i++) {
-	//	int r = die.roll() - 1;
-	//	int temp;
-	//	temp = shuffledArray[i];
-	//	shuffledArray[i] = shuffledArray[r];
-	//	shuffledArray[r] = temp;
-	//}
-	//int t = 0;
-	//int numberOfPlayers = players.size();
-	//for (int i = 0; i < size; i++) {
-	//	Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
-	//	placeSoldier(players[t], curProvince->getName(), 3);
-	//	t = (t + 1) % numberOfPlayers;
-	//}
-	//cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
-	//delete shuffledArray;
+	/*int size = worldMap->getNumberOfProvinces();
+	Die die(size);
+	int* shuffledArray = new int[size];
+	for (int i = 0; i < size; i++) {
+		shuffledArray[i] = i;
+	}
+	for (int i = 0; i < size; i++) {
+		int r = die.roll() - 1;
+		int temp;
+		temp = shuffledArray[i];
+		shuffledArray[i] = shuffledArray[r];
+		shuffledArray[r] = temp;
+	}
+	int t = 0;
+	int numberOfPlayers = players.size();
+	for (int i = 0; i < size; i++) {
+		Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
+		placeSoldier(players[t], curProvince->getName(), 3);
+		t = (t + 1) % numberOfPlayers;
+	}
+	cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
+	delete shuffledArray;
 
 
-
+*/
 
 
 
@@ -1365,6 +1371,7 @@ void GameManager::randomPlacement() {
 	shuffledArray[i] = shuffledArray[r];
 	shuffledArray[r] = temp;
 	}*/
+	
 	int t;
 	int numberOfPlayers = players.size();
 	Die die(numberOfPlayers);
@@ -1372,14 +1379,15 @@ void GameManager::randomPlacement() {
 	int count = 0;
 	for (int i = 0; i < size; i++) {
 		Province* curProvince = worldMap->getProvinceByID(i);
-		if (players[t]->getNumberOfProvinces() < size / 3 + 1) {
-			placeSoldier(players[t], curProvince->getName(), 1);
+		if (players[t]->getNumberOfProvinces() < size / 3) {
+			placeSoldier(players[t], curProvince->getName(), 5);
 		}
 		else {
 			i--;
 		}
 		t = die.roll() - 1;
 	}
+	
 	cout << "* PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS *" << endl;
 	//delete shuffledArray;
 }
@@ -1511,8 +1519,32 @@ vector<string> GameManager::split(string strToSplit, char delimeter) {
 }
 
 
+void GameManager::destroyNearSoldier(Province* province) {
+	if (province->getCastle()->isBuilt()) {
+		Player* owner = province->getOwner();
+		vector<Province*> neighbors = worldMap->getNeighbors(province);
+		vector<Province*> opponent;
+		int counter = 0;
+		for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+			if ((*it)->getOwner() != owner && (*it)->getNumberOfSoldiers() > 1) {
+				opponent.push_back((*it));
+				counter++;
+			}
+		}
+		Die die(counter);
+		int index = die.roll() - 1;
+		opponent[index]->setNumberOfSoldiers(opponent[index]->getNumberOfSoldiers() - 1);
+		cout << opponent[index]->getName() << " has lost 1 soldier due to the castle." << endl;
+	}
+}
 
-
+void GameManager::castleAttacks(Player* player) {
+	cout << "CASTLE ATTACKS" << endl;
+	vector<int> provinces = player->getProvinces();
+	for (auto it = provinces.begin(); it != provinces.end(); it++) {
+		destroyNearSoldier(worldMap->getProvinceByID((*it)));
+	}
+}
 
 
 WindowManager::WindowManager()
@@ -1876,9 +1908,10 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 
 
 	drawAllArmies(window, event);
-	if (castle)
-		window.draw(*images[4]);
 
+	for (auto it = castles.begin(); it != castles.end(); it++) {
+		window.draw(*(*it));
+	}
 
 
 
@@ -1968,7 +2001,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	if (counter > 10) {
 
 		if (turnWheel) {
-			images[1]->rotate(2.5);
+			images[1]->rotate(2.50);
 			rotateAmount = rotateAmount + 2.5;
 			if (rotateAmount == 360)
 				rotateAmount = 0;
@@ -2009,9 +2042,10 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.draw(mapSprite);
 	lineForProvinces->draw(window);
 	drawAllArmies(window, event);
-	if (castle)
-		window.draw(*images[4]);
 
+	for (auto it = castles.begin(); it != castles.end(); it++) {
+		window.draw(*(*it));
+	}
 
 
 	window.setView(window.getDefaultView());
@@ -2211,6 +2245,11 @@ void WindowManager::buttonClicked(int id) {
 				for (int i = 0; i < playerCount; i++)
 					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
 				phase = PLACEMENT_PHASE;
+				// ------------------------------ CASTLE ATTACKS BEGINS
+				string dum;
+				cout << "End of turn : " << turn << endl;
+				GM->castleAttacks(GM->getPlayerByID(turn, dum));
+				// ------------------------------ CASTLE ATTACKS ENDS
 			}
 			else if (page == GAME_SCREEN) {
 				cout << "Player" << turn + 1 << " 's turn!!" << endl;
@@ -2218,6 +2257,9 @@ void WindowManager::buttonClicked(int id) {
 			}
 			buttons[NEXT_PHASE_BUTTON]->setText("Next Phase");
 			buttons[ATTACK_BUTTON]->setText("Attack");
+
+			
+
 			
 		}
 		else if (phase == END_TURN) {
@@ -2256,6 +2298,8 @@ void WindowManager::buttonClicked(int id) {
 			}
 		}
 		else if (phase == END_TURN) {
+
+
 			/*if (page == 1) {
 				if (turn == 0)
 					this->GM->sendAllProvincesFromHostString(&NM);
@@ -2519,11 +2563,14 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				}
 			}
 			else if (id == 3) {
-				castle = true;
 				string provinceName = getProvinceName(window, mouse);
-				int index = images.size();
-				images.push_back(new MyImage("castle.png"));
-				images[index]->setPosition(2190, 828);
+				int id; Province* ptr;
+				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
+				if (GM->buildCastle(turn, provinceName)) {
+					int index = castles.size();
+					castles.push_back(new MyImage("castle.png"));
+					castles[index]->setPosition(listOfArmyBage[id]->getPosition());
+				}
 			}
 		}
 	}
