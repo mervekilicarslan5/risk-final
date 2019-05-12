@@ -16,6 +16,5 @@ int main() {
 
 	WM->createWindow();
 
-
 	return 0;
 }

@@ -198,6 +198,7 @@ public:
 	int getNumberOfProvinces();
 	Province* getProvinceByID(int id);
 	int ownerCount();
+	vector<Province*> getNeighbors(Province* _province);
 private:
 	int numberOfProvinces;
 	vector< Province* > provinceList;
@@ -267,6 +268,8 @@ public:
 	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
 	int getPlayerTurn(string _name);
 	vector<string> split(std::string strToSplit, char delimeter);
+	void destroyNearSoldier(Province* province);
+	void castleAttacks(Player* player);
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
@@ -324,6 +327,7 @@ public:
 	LineBetweenProvinces *lineForProvinces;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
+	vector<MyImage*> castles;
 	vector<string> wheelStr;
 	vector<ArmyBage*> listOfArmyBage;
 	int phase;
