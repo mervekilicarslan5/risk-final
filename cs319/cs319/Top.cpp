@@ -1524,17 +1524,19 @@ void GameManager::destroyNearSoldier(Province* province) {
 		Player* owner = province->getOwner();
 		vector<Province*> neighbors = worldMap->getNeighbors(province);
 		vector<Province*> opponent;
-		int counter = 0;
+		int counter = -1;
 		for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
 			if ((*it)->getOwner() != owner && (*it)->getNumberOfSoldiers() > 1) {
 				opponent.push_back((*it));
 				counter++;
 			}
 		}
-		Die die(counter);
-		int index = die.roll() - 1;
-		opponent[index]->setNumberOfSoldiers(opponent[index]->getNumberOfSoldiers() - 1);
-		cout << opponent[index]->getName() << " has lost 1 soldier due to the castle." << endl;
+		if (counter != -1) {
+			Die die(counter);
+			int index = die.roll() - 1;
+			opponent[index]->setNumberOfSoldiers(opponent[index]->getNumberOfSoldiers() - 1);
+			cout << opponent[index]->getName() << " has lost 1 soldier due to the castle." << endl;
+		}
 	}
 }
 
