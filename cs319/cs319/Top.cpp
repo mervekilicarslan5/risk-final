@@ -1652,14 +1652,14 @@ WindowManager::WindowManager()
 	buttons.push_back(new Button(font));
 
 
+	wheelStr.push_back("Draw bonus card");
+	wheelStr.push_back("Bankruptcy");
 	wheelStr.push_back("250 Gold");
 	wheelStr.push_back("Pass");
-	wheelStr.push_back("Build castle");
+	wheelStr.push_back("Build Castle");
 	wheelStr.push_back("Take somebody's province");
 	wheelStr.push_back("Province Lost");
 	wheelStr.push_back("Take 3 soldiers");
-	wheelStr.push_back("Draw bonus card");
-	wheelStr.push_back("Pass");
 
 
 	images.push_back(new MyImage("soldier.png"));
@@ -2005,8 +2005,10 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 		if (turnWheel) {
 			images[1]->rotate(2.50);
 			rotateAmount = rotateAmount + 2.5;
-			if (rotateAmount == 360)
+			if (rotateAmount == 360) {
 				rotateAmount = 0;
+			}
+				
 		}
 
 		sf::Vector2i mousePos = mouse.getPosition(window);
@@ -2055,10 +2057,13 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	dragObject(window, event, 3);
 	dragObject(window, event, 0);
 	window.draw(*images[0]);
-	//window.draw(*images[1]);
-	//window.draw(*images[2]);
-	window.draw(*images[3]);
 
+	// ===================== TURN WHEEL
+	window.draw(*images[1]);
+	window.draw(*images[2]);
+	// =====================
+
+	window.draw(*images[3]);
 
 	window.draw(provinceNameTxt);
 	window.draw(infoText);
@@ -2364,8 +2369,8 @@ void WindowManager::buttonClicked(int id) {
 	else if (id == TURN_WHEEL_BUTTON) {
 		if (turnWheel) {
 			turnWheel = false;
-			int index = ((int)(rotateAmount / 45) + 2) % 8;
-			cout << wheelStr[index] << endl;
+			int index = ((int)(rotateAmount / 45)) % 8;
+			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
 		}
 		else {
 			turnWheel = true;
