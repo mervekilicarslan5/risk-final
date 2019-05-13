@@ -2007,8 +2007,8 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 
 	if (turnWheel) {
-		images[1]->rotate(2.50);
-		rotateAmount = rotateAmount + 2.5*time;
+		images[1]->rotate(0.5*time);
+		rotateAmount = rotateAmount + 0.5*time;
 		if (rotateAmount == 360) {
 			rotateAmount = 0;
 		}
