@@ -59,11 +59,11 @@ public:
 	Vector2f first, second;
 
 	LineBetweenProvinces();
-	LineBetweenProvinces(Image img);
+	LineBetweenProvinces(Image &img);
 	//void setCoordinatesOfProvince1(Vector2f coord);
 	//void setCoordinatesOfProvince2(Vector2f coord);
 	void setCoordinates(Vector2f first, Vector2f second);
-	void draw(RenderWindow & window);
+	void draw(RenderWindow & window,float time);
 	void setVisible(bool flag);
 
 };
@@ -333,7 +333,9 @@ public:
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
-	bool turnWheel = true;
+	bool turnWheel = false;
+	float time; //time to calculate elapsed time
+	Clock clock;
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;

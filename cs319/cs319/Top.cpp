@@ -1927,7 +1927,6 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 	//window.draw(*images[2]);
 	window.draw(*images[3]);
 
-
 	window.draw(provinceNameTxt);
 	window.draw(infoText);
 
@@ -1961,6 +1960,12 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 }
 
 void WindowManager::multGameComp(RenderWindow & window, Event & event) {
+	time = clock.getElapsedTime().asMicroseconds();
+	clock.restart();
+	time = time / 1200;
+	if (time > 20)
+		time = 20;
+	
 	while (window.pollEvent(event))
 	{
 
@@ -1998,42 +2003,40 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 
 
-	float speed = 3;
+	//float speed = 3;
 
-	if (counter > 10) {
 
-		if (turnWheel) {
-			images[1]->rotate(2.50);
-			rotateAmount = rotateAmount + 2.5;
-			if (rotateAmount == 360) {
-				rotateAmount = 0;
-			}
+	if (turnWheel) {
+		images[1]->rotate(2.50);
+		rotateAmount = rotateAmount + 2.5*time;
+		if (rotateAmount == 360) {
+			rotateAmount = 0;
+		}
 				
-		}
-
-		sf::Vector2i mousePos = mouse.getPosition(window);
-		if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
-			if (mainView.getCenter().x >= mainView.getSize().x / 2) {
-				mainView.move(-zoom * speed, 0);
-			}
-		}
-		else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
-			if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
-				mainView.move(zoom* speed, 0);
-			}
-		}
-		if (mousePos.y < topMargin) {
-			if (mainView.getCenter().y >= mainView.getSize().y / 2) {
-				mainView.move(0, -zoom * speed);
-			}
-		}
-		else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
-			if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
-				mainView.move(0, zoom * speed);
-			}
-		}
-		counter = 0;
 	}
+
+	sf::Vector2i mousePos = mouse.getPosition(window);
+	if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
+		if (mainView.getCenter().x >= mainView.getSize().x / 2) {
+			mainView.move(-zoom * time, 0);
+		}
+	}
+	else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
+		if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
+			mainView.move(zoom* time, 0);
+		}
+	}
+	if (mousePos.y < topMargin) {
+		if (mainView.getCenter().y >= mainView.getSize().y / 2) {
+			mainView.move(0, -zoom * time);
+		}
+	}
+	else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
+		if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
+			mainView.move(0, zoom * time);
+		}
+	}
+	counter = 0;
 
 
 	counter++;
@@ -2044,7 +2047,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.clear(sf::Color(224, 253, 255));
 
 	window.draw(mapSprite);
-	lineForProvinces->draw(window);
+	lineForProvinces->draw(window,time);
 	drawAllArmies(window, event);
 
 	for (auto it = castles.begin(); it != castles.end(); it++) {
@@ -2059,8 +2062,10 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.draw(*images[0]);
 
 	// ===================== TURN WHEEL
-	window.draw(*images[1]);
-	window.draw(*images[2]);
+	if (turnWheel) {
+		window.draw(*images[1]);
+		window.draw(*images[2]);
+	}
 	// =====================
 
 	window.draw(*images[3]);
@@ -2078,20 +2083,6 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.setView(miniMap);
 	miniMap.update(mainView);
 	miniMap.draw(window);
-
-	/*window.setView(miniMap);
-	miniMap.setCenter(mapTex.getSize().x / 2, mapTex.getSize().y / 2);
-	mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
-	RectangleShape miniMapRectangle;
-	miniMapRectangle.setFillColor(Color::Transparent);
-	miniMapRectangle.setOutlineThickness(20);
-	miniMapRectangle.setOutlineColor(Color::Black);
-	miniMapRectangle.setSize(mainView.getSize());
-	miniMapRectangle.setPosition(mainView.getCenter().x - mainView.getSize().x / 2, mainView.getCenter().y - mainView.getSize().y / 2);
-	miniMap.setViewport(FloatRect(float(0.8), float(0.8), 0.2, 0.2));
-	window.draw(mapSprite);
-	window.draw(miniMapRectangle);
-*/
 
 	window.display();
 }
@@ -3149,7 +3140,7 @@ void ArmyBage::draw(sf::RenderWindow & window) {
 
 
 
-LineBetweenProvinces::LineBetweenProvinces(Image img) {
+LineBetweenProvinces::LineBetweenProvinces(Image &img) {
 	this->img = img;
 	tex.setRepeated(true);
 	this->setTexture(tex);
@@ -3185,9 +3176,9 @@ void LineBetweenProvinces::setCoordinates(Vector2f first,Vector2f second) {
 	this->setRotation(degree);
 }
 
-void LineBetweenProvinces::draw(RenderWindow &window) {
+void LineBetweenProvinces::draw(RenderWindow &window,float time) {
 	if (visible) {
-		step= step-0.1;
+		step= step-0.1*time;
 		tex.loadFromImage(img);
 		tex.setRepeated(true);
 		this->setTexture(tex);
