@@ -37,7 +37,7 @@ public:
 	Text text;
 	Color color;
 	string nameOfProvince;
-
+	Vector2f centerCoordinates;
 
 	ArmyBage();
 	ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font);
@@ -46,6 +46,32 @@ public:
 	void draw(sf::RenderWindow & window);
 
 };
+
+
+class LineBetweenProvinces : public sf::Sprite {
+public:
+	sf::Image img;
+	sf::Texture tex;
+	float degree;
+	double step;
+	int lenght;
+	bool visible = false;
+	Vector2f first, second;
+
+	LineBetweenProvinces();
+	LineBetweenProvinces(Image &img);
+	//void setCoordinatesOfProvince1(Vector2f coord);
+	//void setCoordinatesOfProvince2(Vector2f coord);
+	void setCoordinates(Vector2f first, Vector2f second);
+	void draw(RenderWindow & window, float time);
+	void setVisible(bool flag);
+
+};
+
+
+
+
+
 
 
 class Die
@@ -84,15 +110,12 @@ public:
 	void setLevel(int _level);
 	void upgradeLevel();
 	bool isBuilt();
-	void build(float x, float y);
+	void build();
 	void destroy();
-	
 private:
 	int price;
 	int level;
 	bool built;
-	string nameOfProvince;
-	Image img;
 };
 
 class Province
@@ -109,10 +132,6 @@ public:
 	void setName(string _name);
 	void setOwner(Player* _owner);
 	void setColor(string _color);
-	void setX(float x);
-	void setY(float y);
-	float getX();
-	float getY();
 	void setNumberOfSoldiers(int _numberOfSoldiers);
 
 private:
@@ -121,8 +140,6 @@ private:
 	string color;
 	int numberOfSoldiers;
 	Castle* castle;
-	float x;
-	float y;
 };
 
 class Player
@@ -181,6 +198,7 @@ public:
 	int getNumberOfProvinces();
 	Province* getProvinceByID(int id);
 	int ownerCount();
+	vector<Province*> getNeighbors(Province* _province);
 private:
 	int numberOfProvinces;
 	vector< Province* > provinceList;
@@ -218,7 +236,6 @@ public:
 	WorldMap* getWorldMap();
 	void createProvince(string name, string color);
 	void createNeighbor(string first, string second);
-	void setCurrentPlayer(int id);
 	void addPlayer(string _name);
 	Player* getPlayerByID(int id, string & name);
 	Player* getPlayerByName(string name, int & id);
@@ -251,6 +268,8 @@ public:
 	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
 	int getPlayerTurn(string _name);
 	vector<string> split(std::string strToSplit, char delimeter);
+	void destroyNearSoldier(Province* province);
+	void castleAttacks(Player* player);
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
@@ -295,7 +314,7 @@ public:
 	int screenWidth;
 	int screenHeight;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
-	sf::Image mapImg, hoverImg, roundedSquare;
+	sf::Image mapImg, hoverImg, roundedSquare, lineImg;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -305,14 +324,18 @@ public:
 	sf::Text provinceNameTxt, infoText;
 	sf::Font font;
 	MiniMap miniMap;
+	LineBetweenProvinces *lineForProvinces;
 	vector<Button*> buttons;
 	vector<MyImage*> images;
+	vector<MyImage*> castles;
 	vector<string> wheelStr;
 	vector<ArmyBage*> listOfArmyBage;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
-	bool turnWheel = true;
+	bool turnWheel = false;
+	float time; //time to calculate elapsed time
+	Clock clock;
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
@@ -329,14 +352,18 @@ public:
 	const int ATTACKING_PHASE = 2;
 	const int POST_ATTACK = 3;
 	const int FORTIFY_PHASE = 4;
-	const int END_TURN = 5;
+	const int MARKET_PHASE = 5;
+	const int END_TURN = 6;
 
 	const int host = 5;
 	const int c1 = 6;
 	const int c2 = 7;
 	const int start = 8;
+	const int TURN_WHEEL_BUTTON = 9;
 
 	int playerCount = 0;
+	int countForWheel = 0;
+	bool wheel = false;
 
 	int isProvinceClicked = 0;
 	Province* first;
@@ -403,9 +430,3 @@ public:
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
-
-
-
-
-
-
