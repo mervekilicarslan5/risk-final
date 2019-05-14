@@ -1,0 +1,130 @@
+WindowManager::WindowManager()
+{
+***
+//MENU BUTTON
+	menuButton.push_back(new MyImage("B2.png"));
+	menuButton.push_back(new MyImage("B3.png"));
+	menuButton.push_back(new MyImage("B0.png"));
+	menuButton.push_back(new MyImage("settingsK.png"));
+	menuButton.push_back(new MyImage("creditsK.png"));
+	menuButton.push_back(new MyImage("playK.png"));
+
+
+
+	menuButton[0]->setInitialPosition(screenWidth / 4 + screenWidth/8, screenHeight / 4 + screenHeight / 8 + 10);
+	menuButton[0]->setPosition(menuButton[0]->getInitialPosition());
+	menuButton[0]->setScale(0.5, 0.5);
+	
+	menuButton[1]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + 10 );
+	menuButton[1]->setPosition(menuButton[1]->getInitialPosition());
+	menuButton[1]->setScale(0.5, 0.5);
+
+	menuButton[2]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight/ 4 + 10);
+
+	menuButton[2]->setPosition(menuButton[2]->getInitialPosition());
+	menuButton[2]->setScale(0.5, 0.5);
+
+	menuButton[3]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + 10);
+	menuButton[3]->setPosition(menuButton[3]->getInitialPosition());
+	menuButton[3]->setScale(0.5, 0.5);
+
+	menuButton[4]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + 10);
+	menuButton[4]->setPosition(menuButton[4]->getInitialPosition());
+	menuButton[4]->setScale(0.5, 0.5);
+
+	menuButton[5]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + 10);
+	menuButton[5]->setPosition(menuButton[5]->getInitialPosition());
+	menuButton[5]->setScale(0.5, 0.5);
+	//MENU BUTTON
+}
+
+void WindowManager::menuScreen(RenderWindow& window, Event& event) {
+	static int x = 0;
+	sf::Texture texture;
+	if (!texture.loadFromFile("T2.jpg"));
+	// Assign it to a sprite
+	sf::Sprite sprite2;
+	sprite2.setTexture(texture);
+	// Draw the textured sprite
+	window.draw(sprite2);
+
+
+	
+	while (window.pollEvent(event)) {
+		cout << "we are checking" << x++ << endl;
+		if (event.type == sf::Event::Closed)
+			window.close();
+
+		if (event.type == sf::Event::MouseMoved)
+		{
+			
+			menuEvents(event, 1);
+
+		}
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				menuEvents(event, 0);
+			}
+		}
+		
+	}
+}
+
+void WindowManager::menuEvents(sf::Event& e, int i) {
+	int id = 0;
+	
+	if (i == 0) {
+		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
+			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x)/2 &&
+				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y)/2) {
+				cout << "Menu Events BUTTON"<<id << endl;
+				buttonClicked(id);
+				return;
+			}
+			id++;
+		}
+	}
+	 if (i==1) {
+		int id = 0;
+		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
+			cout << "how muck" << endl;
+			if ((*it)->getPosition().x < e.mouseMove.x && e.mouseMove.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
+				(*it)->getPosition().y < e.mouseMove.y && e.mouseMove.y < (*it)->getPosition().y + ((*it)->getSize().y) / 2) {
+				cout << id << endl;
+				changeButton(id);
+				return;
+			}
+			id++;
+		}
+			
+				window.draw(*menuButton[0]);
+				window.draw(*menuButton[1]);
+				window.draw(*menuButton[2]);
+				cout << "new window" << endl;
+				window.display();
+				return;
+			
+		
+		
+
+	}
+}
+void WindowManager::changeButton(int id) {
+	cout << "bhange button" << endl;
+	window.draw(*menuButton[id+3]);	
+	window.display();
+}
+
+void WindowManager::buttonClicked(int id) {
+	cout << "button clicked" << endl;
+	if (page == MENU_SCREEN) {
+		cout << "clickked weghwioefng" << endl;
+		if (id == 2) {
+			//userName = "host";
+			//NM->createNetwork(&GM,"h", userName);
+      ....
+      }
+
+
