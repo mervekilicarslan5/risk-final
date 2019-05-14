@@ -2157,7 +2157,7 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 	for (auto it = buttons.begin(); it != buttons.end(); it++) {
 		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
 			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
-			buttonClicked(id, e);
+			buttonClicked(id, e, window);
 			return;
 		}
 		id++;
@@ -2175,7 +2175,7 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 
 }
 
-void WindowManager::buttonClicked(int id, sf::Event &event) {
+void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
 	cout << "button clicked" << endl;
 	if (page == MENU_SCREEN) {
 		cout << "clickked weghwioefng" << endl;
@@ -2279,6 +2279,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event) {
 			GM->currentPlayer = turn;
 			wheel = false;
 			countForWheel = 0;
+			takeCastle = false;
 
 		}
 		else if (phase == END_TURN) {
@@ -2377,7 +2378,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event) {
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 
-	else if (id == TURN_WHEEL_BUTTON && wheel && countForWheel < 2 && phase == MARKET_PHASE) {
+	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
 		countForWheel++;
 		string temp;
 		if (turnWheel) {
@@ -2400,28 +2401,12 @@ void WindowManager::buttonClicked(int id, sf::Event &event) {
 			}
 			else if (index == 4) {
 				//build castle
-		
+			
 				id = 3;
 				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
-				images[id]->setPosition(sf::Vector2f(mouse.getPosition(window)));
 				images[id]->inMove = true;
-				if (event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove) {
-					sf::Vector2i PixelPos = mouse.getPosition(window);
-					sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
-					images[id]->inMove = false;
-					images[id]->setPosition(images[id]->getInitialPosition());
-					images[id]->setScale(sf::Vector2f(1, 1));
-					if (id == 3 && phase == MARKET_PHASE) {
-						string provinceName = getProvinceName(window, mouse);
-						int id; Province* ptr;
-						GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
-						if (GM->buildCastle(turn, provinceName)) {
-							int index = castles.size();
-							castles.push_back(new MyImage("castle.png"));
-							castles[index]->setPosition(listOfArmyBage[id]->getPosition());
-						}
-					}
-				}
+				takeCastle = true;
+				
 			}
 			else if (index == 5) {
 				//take province
@@ -2605,10 +2590,11 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			images[id]->inMove = true;
 		}
 	}
-	else if (event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove) {
+	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Right) && event.key.code == mouse.Right&& images[id]->inMove && id == 3)) {
 		sf::Vector2i PixelPos = mouse.getPosition(window);
 		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 		images[id]->inMove = false;
+		takeCastle = false;
 		images[id]->setPosition(images[id]->getInitialPosition());
 		images[id]->setScale(sf::Vector2f(1, 1));
 		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
