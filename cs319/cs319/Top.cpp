@@ -2415,7 +2415,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		string temp;
 		if (turnWheel) {
 			turnWheel = false;
-			int index = 4/* ((int)(rotateAmount / 45)) % 8;*/;
+			int index =  ((int)(rotateAmount / 45)) % 8;
 			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
 			if (index == 0) {
 				//draw bonus card
