@@ -1,6 +1,10 @@
 #include "Top.h"
+namespace globalsS {
+	int screenWidth;
+	int screenHeight;
+};
 using namespace std;
-
+using namespace globalsS;
 Die::Die()
 {
 	numberOfFaces = 6;
@@ -266,7 +270,7 @@ bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 			return true;
 		}
 	}
-		
+
 	if (!hasProvince(worldMap, _province))
 		return false;
 	_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
@@ -1573,8 +1577,8 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2; // 1920; //
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2; // 1080; //
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1596,7 +1600,27 @@ WindowManager::WindowManager()
 	if (!lineImg.loadFromFile("assets/line.png")) {
 		cout << "Unable to open file" << endl;
 	}
-
+	if (!topPanelImg.loadFromFile("assets/topPanel.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!coinImg.loadFromFile("assets/coin.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!actionImg.loadFromFile("assets/swords.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!timerImg.loadFromFile("assets/time.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!timerImg.loadFromFile("assets/time.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!crownImg.loadFromFile("assets/crown.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!castleImg.loadFromFile("assets/castle.png")) {
+		cout << "Unable to open file" << endl;
+	}
 
 
 	font;
@@ -1613,7 +1637,7 @@ WindowManager::WindowManager()
 	lowerPanel.setPosition(0, bottomUpperMargin);
 	lowerPanel.setFillColor(sf::Color(255, 255, 255));
 	miniMap = MiniMap(mapTex);
-
+	topPanel = new TopBar(topPanelImg, coinImg, actionImg, timerImg, crownImg, font);
 
 
 	mapSprite.setPosition(0, 0);
@@ -1636,7 +1660,7 @@ WindowManager::WindowManager()
 
 			vector<string> temp = GM->split(line, ',');
 			listOfArmyBage.push_back(new ArmyBage(roundedSquare, stoi(temp[1]), stoi(temp[2]), temp[0], font));
-
+			listOfCastleBage.push_back(new CastleBage(castleImg, stoi(temp[3]), stoi(temp[4]), temp[0]));
 			//listOfArmyBage.push_back(ArmyBage(temp));
 			//cityName = prov[0];
 			//color = stoi(prov[1]);
@@ -1922,10 +1946,10 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 
 
 	drawAllArmies(window, event);
-
-	for (auto it = castles.begin(); it != castles.end(); it++) {
-		window.draw(*(*it));
-	}
+	drawAllCastles(window, event);
+	/*for (auto it = castles.begin(); it != castles.end(); it++) {
+	window.draw(*(*it));
+	}*/
 
 
 
@@ -2061,14 +2085,15 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.draw(mapSprite);
 	lineForProvinces->draw(window, time);
 	drawAllArmies(window, event);
-
-	for (auto it = castles.begin(); it != castles.end(); it++) {
-		window.draw(*(*it));
-	}
+	drawAllCastles(window, event);
+	//for (auto it = castles.begin(); it != castles.end(); it++) {
+	//	window.draw(*(*it));
+	//}
 
 
 	window.setView(window.getDefaultView());
 	window.draw(lowerPanel);
+
 	dragObject(window, event, 3);
 	dragObject(window, event, 0);
 	window.draw(*images[0]);
@@ -2080,6 +2105,8 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	}
 	// =====================
 
+
+
 	window.draw(*images[3]);
 
 	window.draw(provinceNameTxt);
@@ -2089,8 +2116,13 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 		if (i != 5 && i != 6 && i != 7 && i != 8)
 			buttons[i]->draw(window);
 	}
+	int currentPlayer = GM->currentPlayer;
+	string currentPlayerName;
+	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
 
 
+	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), this->phase, currentPlayerName);
+	topPanel->draw(window);
 	//miniMap Staff
 	window.setView(miniMap);
 	miniMap.update(mainView);
@@ -2235,7 +2267,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 		else if (phase == ATTACKING_PHASE) {
 			phase = FORTIFY_PHASE;
-			
+
 			buttons[ATTACK_BUTTON]->setText("Fortify");
 		}
 		else if (phase == FORTIFY_PHASE) {
@@ -2255,9 +2287,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			// ------------------------------ CASTLE ATTACKS ENDS
 
 			buttons[NEXT_PHASE_BUTTON]->setText("End Turn");
-			
+
 		}
-		else if(phase == MARKET_PHASE) {
+		else if (phase == MARKET_PHASE) {
 			turn++;
 			if (turn == playerCount)
 				turn = 0;
@@ -2378,12 +2410,12 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 
-	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && wheel && phase == MARKET_PHASE) {
+	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
 		countForWheel++;
 		string temp;
 		if (turnWheel) {
 			turnWheel = false;
-			int index = 4/* ((int)(rotateAmount / 45)) % 8;*/;
+			int index = ((int)(rotateAmount / 45)) % 8;
 			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
 			if (index == 0) {
 				//draw bonus card
@@ -2401,12 +2433,12 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			}
 			else if (index == 4) {
 				//build castle
-			
+
 				id = 3;
 				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
 				images[id]->inMove = true;
 				takeCastle = true;
-				
+
 			}
 			else if (index == 5) {
 				//take province
@@ -2435,7 +2467,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 					prov = GM->getWorldMap()->getProvinceByID(random);
 					GM->getPlayerByID(turn, pname);
 				}
-				prov->setOwner(GM->getPlayerByID((turn+1)%3, pname));
+				prov->setOwner(GM->getPlayerByID((turn + 1) % 3, pname));
 				cout << pname << "gets " << prov->getName() << endl;
 			}
 			else if (index == 7) {
@@ -2643,7 +2675,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 					}
 				}
 			}
-			else if (id == 3 && phase == MARKET_PHASE) {
+			else if (id == 3) {
 				string provinceName = getProvinceName(window, mouse);
 				int id; Province* ptr;
 				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
@@ -2655,6 +2687,32 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			}
 		}
 	}
+}
+
+void WindowManager::drawAllCastles(RenderWindow & window, Event & e) {
+	for (int i = 0; i < listOfCastleBage.size(); i++) {
+		Province* ptr;
+		WorldMap* wmPtr = GM->getWorldMap();
+		int temp;
+		int playerId;
+		wmPtr->getProvinceByName(listOfCastleBage[i]->nameOfProvince, temp, ptr);
+		if (ptr != NULL && (ptr->getCastle())->isBuilt()) {
+			if (ptr->getOwner() != NULL) {
+				playerId = ptr->getOwner()->getId();
+				if (playerId == 0)
+					listOfCastleBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
+				if (playerId == 1)
+					listOfCastleBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
+				if (playerId == 2)
+					listOfCastleBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
+				(listOfCastleBage[i])->draw(window);
+			}
+
+		}
+	}
+
+
+
 }
 
 void WindowManager::drawAllArmies(RenderWindow & window, Event & e) {
@@ -3222,6 +3280,39 @@ void ArmyBage::draw(sf::RenderWindow & window) {
 
 
 
+CastleBage::CastleBage() {
+
+}
+
+
+CastleBage::CastleBage(Image img, int x, int y, string nameOfProvince) {
+	this->nameOfProvince = nameOfProvince;
+	this->img = img;
+	tex.loadFromImage(img);
+	this->setTexture(tex);
+	this->setScale(1, 1);
+	centerCoordinates = Vector2f(x, y);
+
+	this->setPosition(x - this->getGlobalBounds().width / 2, y - this->getGlobalBounds().height / 2);
+}
+
+
+void CastleBage::draw(sf::RenderWindow & window) {
+	this->setColor(this->color);
+	window.draw(*this);
+}
+void CastleBage::setBageColor(sf::Color color) {
+	this->setColor(color);
+	this->color = color;
+}
+
+
+
+
+
+
+
+
 LineBetweenProvinces::LineBetweenProvinces(Image &img) {
 	this->img = img;
 	tex.setRepeated(true);
@@ -3276,9 +3367,125 @@ void LineBetweenProvinces::setVisible(bool flag) {
 }
 
 
+TopBar::TopBar(Image img, Image coinImg, Image actionImage, Image turnImage, Image playerImage, Font &font) {
+	this->img = img;
+	this->coinImg = coinImg;
+	this->actionImg = actionImage;
+	this->turnImg = turnImage;
+	this->playerImg = playerImage;
+
+	int lenght = screenWidth;
+	float ratio = float(lenght) / img.getSize().x;
+
+	panelTexture.loadFromImage(this->img);
+	coinTexture.loadFromImage(this->coinImg);
+	actionTexture.loadFromImage(this->actionImg);
+	turnTexture.loadFromImage(this->turnImg);
+	playerTexture.loadFromImage(this->playerImg);
+
+	this->setTexture(panelTexture);
+
+	coinSprite.setTexture(coinTexture);
+	coinSprite.setScale(ratio, ratio);
+
+	actionSprite.setTexture(actionTexture);
+	actionSprite.setScale(ratio, ratio);
+
+	turnSprite.setTexture(turnTexture);
+	turnSprite.setScale(ratio, ratio);
+
+	playerSprite.setTexture(playerTexture);
+	playerSprite.setScale(ratio, ratio);
+
+	//---------------
+	coinText.setFont(font);
+	coinText.setCharacterSize(20);
+	coinText.setString("120");
+
+	actionText.setFont(font);
+	actionText.setCharacterSize(20);
+	actionText.setString("7");
+
+	turnText.setFont(font);
+	turnText.setCharacterSize(20);
+	turnText.setString("1");
+
+	playerText.setFont(font);
+	playerText.setCharacterSize(20);
+	playerText.setString("Elnur");
+	//-------------------------
+	coinField.setSize(Vector2f(100, 50));
+	coinField.setFillColor(Color(0, 0, 0, 30));
+
+	actionField.setSize(Vector2f(100, 50));
+	actionField.setFillColor(Color(0, 0, 0, 30));
+
+	turnField.setSize(Vector2f(100, 50));
+	turnField.setFillColor(Color(0, 0, 0, 30));
+
+	playerField.setSize(Vector2f(120, 50));
+	playerField.setFillColor(Color(0, 0, 0, 30));
+
+	//this->setColor(Color(255, 255, 255, 100));
+	this->setPosition(0, 0);
+	this->setTextureRect(IntRect(0, 0, panelTexture.getSize().x, 100));
+	this->setScale(float(lenght) / panelTexture.getSize().x, 0.65*ratio);
+
+
+
+	coinField.setPosition(195, 2);
+	coinSprite.setPosition(200, 5);
+	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10, coinSprite.getPosition().y + coinSprite.getGlobalBounds().height / 2 - coinText.getGlobalBounds().height / 2);
+
+	actionField.setPosition(coinField.getPosition().x + coinField.getGlobalBounds().width + 35, 2);
+	actionSprite.setPosition(actionField.getPosition().x + 5, 7);
+	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2 - actionText.getGlobalBounds().height / 2);
+
+	turnField.setPosition(actionField.getPosition().x + actionField.getGlobalBounds().width + 35, 2);
+	turnSprite.setPosition(turnField.getPosition().x + 5, 7);
+	turnText.setPosition(turnSprite.getPosition().x + turnSprite.getGlobalBounds().width + 10, turnSprite.getPosition().y + turnSprite.getGlobalBounds().height / 2 - turnText.getGlobalBounds().height / 2);
+
+
+	playerField.setPosition(turnField.getPosition().x + turnField.getGlobalBounds().width + 35, 2);
+	playerSprite.setPosition(playerField.getPosition().x + 5, 7);
+	playerText.setPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width + 10, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 - playerText.getGlobalBounds().height / 2);
 
 
 
 
 
+}
 
+TopBar::TopBar() {
+
+}
+
+
+void TopBar::draw(RenderWindow & window) {
+	window.draw(*this);
+
+	window.draw(coinField);
+	window.draw(coinSprite);
+	window.draw(coinText);
+
+	window.draw(actionField);
+	window.draw(actionSprite);
+	window.draw(actionText);
+
+	window.draw(turnField);
+	window.draw(turnSprite);
+	window.draw(turnText);
+
+	window.draw(playerField);
+	window.draw(playerSprite);
+	window.draw(playerText);
+
+}
+
+void TopBar::update(int moneyAmount, int actionAmount, int currentTurn, string player) {
+	coinText.setString(to_string(moneyAmount));
+	actionText.setString(to_string(actionAmount));
+	turnText.setString(to_string(currentTurn));
+	playerText.setString(player);
+
+}
