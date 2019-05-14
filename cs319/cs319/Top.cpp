@@ -1,6 +1,10 @@
 #include "Top.h"
+namespace globalsS {
+	int screenWidth;
+	int screenHeight;
+};
 using namespace std;
-
+using namespace globalsS;
 Die::Die()
 {
 	numberOfFaces = 6;
@@ -1573,8 +1577,8 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
+	screenWidth =  GetSystemMetrics(SM_CXSCREEN) / 2; // 1920; //
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2; // 1080; //
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -2117,7 +2121,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
 
 
-	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), this->turn, currentPlayerName);
+	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), this->phase, currentPlayerName);
 	topPanel->draw(window);
 	//miniMap Staff
 	window.setView(miniMap);
@@ -3345,7 +3349,7 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 	this->turnImg = turnImage;
 	this->playerImg = playerImage;
 
-	int lenght = (GetSystemMetrics(SM_CXSCREEN) / 2);
+	int lenght = screenWidth;
 	float ratio = float(lenght) / img.getSize().x;
 
 	panelTexture.loadFromImage(this->img);
@@ -3400,7 +3404,7 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 	//this->setColor(Color(255, 255, 255, 100));
 	this->setPosition(0, 0);
 	this->setTextureRect(IntRect(0,0,panelTexture.getSize().x, 100));
-	this->setScale(float (lenght) /panelTexture.getSize().x, 0.55);
+	this->setScale(float (lenght) /panelTexture.getSize().x, 0.65*ratio);
 
 
 

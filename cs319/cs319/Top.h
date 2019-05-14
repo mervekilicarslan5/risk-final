@@ -30,6 +30,7 @@ class ArmyBage;
 class TopBar;
 
 
+
 class ArmyBage : public sf::Sprite {
 public:
 	Image img;
@@ -352,8 +353,7 @@ public:
 	GameManager * GM;
 	NetworkManager * NM;
 	double zoom;
-	int screenWidth;
-	int screenHeight;
+
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
 	sf::Image mapImg, hoverImg, roundedSquare,lineImg, coinImg,actionImg,timerImg,topPanelImg, crownImg,castleImg;
 	sf::Texture mapTex;
