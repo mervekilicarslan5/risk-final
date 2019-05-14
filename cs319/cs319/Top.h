@@ -382,6 +382,8 @@ public:
 	float time; //time to calculate elapsed time
 	Clock clock;
 
+	int totalTurn = 1;
+
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
 	const int COMPUTER_GAME_SCREEN = 2;

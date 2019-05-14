@@ -2184,7 +2184,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
 
 
-	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), this->phase, currentPlayerName);
+	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), totalTurn, currentPlayerName);
 	topPanel->draw(window);
 	//miniMap Staff
 	window.setView(miniMap);
@@ -2358,8 +2358,10 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 		else if(phase == MARKET_PHASE) {
 			turn++;
-			if (turn == playerCount)
+			if (turn == playerCount) {
 				turn = 0;
+				totalTurn++;
+			}
 			if (page == COMPUTER_GAME_SCREEN) {
 				string dummy;
 				for (int i = 0; i < playerCount; i++)
