@@ -2378,7 +2378,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 
-	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
+	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && wheel && phase == MARKET_PHASE) {
 		countForWheel++;
 		string temp;
 		if (turnWheel) {
