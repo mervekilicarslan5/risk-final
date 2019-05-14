@@ -2189,7 +2189,7 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 	for (auto it = buttons.begin(); it != buttons.end(); it++) {
 		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
 			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
-			buttonClicked(id);
+			buttonClicked(id, e, window);
 			return;
 		}
 		id++;
@@ -2207,7 +2207,7 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 
 }
 
-void WindowManager::buttonClicked(int id) {
+void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
 	cout << "button clicked" << endl;
 	if (page == MENU_SCREEN) {
 		cout << "clickked weghwioefng" << endl;
@@ -2311,6 +2311,7 @@ void WindowManager::buttonClicked(int id) {
 			GM->currentPlayer = turn;
 			wheel = false;
 			countForWheel = 0;
+			takeCastle = false;
 
 		}
 		else if (phase == END_TURN) {
@@ -2409,42 +2410,65 @@ void WindowManager::buttonClicked(int id) {
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 
-	else if (id == TURN_WHEEL_BUTTON && wheel && countForWheel < 2 && phase == MARKET_PHASE) {
+	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
 		countForWheel++;
 		string temp;
 		if (turnWheel) {
 			turnWheel = false;
-			int index = ((int)(rotateAmount / 45)) % 8;
+			int index = 4/* ((int)(rotateAmount / 45)) % 8;*/;
 			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
 			if (index == 0) {
 				//draw bonus card
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
 			}
 			else if (index == 1) {
 				//bankrupt
-				//GM->getPlayerByID(turn, temp)->setMoney(0);
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+				GM->getPlayerByID(turn, temp)->setMoney(0);
 			}
 			else if (index == 2) {
 				//250 gold
-				//GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
 			}
 			else if (index == 3) {
 				//pass
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
 			}
 			else if (index == 4) {
 				//build castle
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			
+				id = 3;
+				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
+				images[id]->inMove = true;
+				takeCastle = true;
+				
 			}
 			else if (index == 5) {
 				//take province
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+				Die die(GM->getWorldMap()->getNumberOfProvinces());
+				int random = die.roll();
+				Province* prov = GM->getWorldMap()->getProvinceByID(random);
+				string pname;
+				GM->getPlayerByID(turn, pname);
+				while (prov->getOwner()->getName() == pname) {
+					int random = die.roll();
+					prov = GM->getWorldMap()->getProvinceByID(random);
+					GM->getPlayerByID(turn, pname);
+				}
+				prov->setOwner(GM->getPlayerByID(turn, pname));
+				cout << pname << "gets " << prov->getName() << endl;
 			}
 			else if (index == 6) {
 				//give province
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+				Die die(GM->getWorldMap()->getNumberOfProvinces());
+				int random = die.roll();
+				Province* prov = GM->getWorldMap()->getProvinceByID(random);
+				string pname;
+				GM->getPlayerByID(turn, pname);
+				while (prov->getOwner()->getName() != pname) {
+					int random = die.roll();
+					prov = GM->getWorldMap()->getProvinceByID(random);
+					GM->getPlayerByID(turn, pname);
+				}
+				prov->setOwner(GM->getPlayerByID((turn+1)%3, pname));
+				cout << pname << "gets " << prov->getName() << endl;
 			}
 			else if (index == 7) {
 				//take 3 soldiers
@@ -2598,10 +2622,11 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			images[id]->inMove = true;
 		}
 	}
-	else if (event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove) {
+	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Right) && event.key.code == mouse.Right&& images[id]->inMove && id == 3)) {
 		sf::Vector2i PixelPos = mouse.getPosition(window);
 		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 		images[id]->inMove = false;
+		takeCastle = false;
 		images[id]->setPosition(images[id]->getInitialPosition());
 		images[id]->setScale(sf::Vector2f(1, 1));
 		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)

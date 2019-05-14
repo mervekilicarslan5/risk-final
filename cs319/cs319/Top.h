@@ -407,6 +407,7 @@ public:
 	int playerCount = 0;
 	int countForWheel = 0;
 	bool wheel = false;
+	bool takeCastle = false;
 
 	int isProvinceClicked = 0;
 	Province* first;
@@ -435,7 +436,7 @@ public:
 	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);
 	void provinceClicked(int id);
 	void checkClickEvents(sf::Event & e);
-	void buttonClicked(int id);
+	void buttonClicked(int id, sf::Event &event, sf::RenderWindow & window);
 	void imageClicked(int id);
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
