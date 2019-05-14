@@ -143,7 +143,7 @@ void Continent::setProvinces(vector<int> _provinces)
 
 Player::Player()
 {
-	leftSoldier = 14;
+	leftSoldier = 20;
 	name = "";
 	id = -1;
 	battlesLost = 0;
@@ -153,7 +153,7 @@ Player::Player()
 
 Player::Player(string _name, int _id)
 {
-	leftSoldier = 14;
+	leftSoldier = 20;
 	name = _name;
 	id = _id;
 	battlesLost = 0;
@@ -253,8 +253,20 @@ void Player::loseProvince(WorldMap* worldMap, Province* _province) {
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 {
-	if (leftSoldier < amount)
-		return false;
+	int pricesold = 50;
+	if (leftSoldier < amount) {
+		if (money < (pricesold * amount)) {
+			cout << "******* insufficientmoney for soldier" << endl;
+			return false;
+		}
+		else {
+			money -= (pricesold*amount);
+			_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
+			worldMap->showProvinceStatus(_province);
+			return true;
+		}
+	}
+		
 	if (!hasProvince(worldMap, _province))
 		return false;
 	_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
@@ -892,7 +904,7 @@ void GameManager::loadProvinces() {
 	createNeighbor("istanbul", "edirne");
 	createNeighbor("istanbul", "kocaeli");
 	createNeighbor("eskisehir", "kocaeli");
-*/
+	*/
 	fstream file("assets/provinces.txt");
 
 	int color;
@@ -1093,8 +1105,8 @@ void GameManager::startGame(NetworkManager ** NM) {
 
 
 		/*else if ((*NM)->connectionType == "c2" && turn == 1) {
-			cout << endl << "============		" << players[3]->getName() << " TURN		===============  " << endl;
-			sendAllProvincesFromHost(NM);
+		cout << endl << "============		" << players[3]->getName() << " TURN		===============  " << endl;
+		sendAllProvincesFromHost(NM);
 		}*/
 	}
 }
@@ -1329,27 +1341,27 @@ void GameManager::randomPlacement() {
 	Die die(size);
 	int* shuffledArray = new int[size];
 	for (int i = 0; i < size; i++) {
-		shuffledArray[i] = i;
+	shuffledArray[i] = i;
 	}
 	for (int i = 0; i < size; i++) {
-		int r = die.roll() - 1;
-		int temp;
-		temp = shuffledArray[i];
-		shuffledArray[i] = shuffledArray[r];
-		shuffledArray[r] = temp;
+	int r = die.roll() - 1;
+	int temp;
+	temp = shuffledArray[i];
+	shuffledArray[i] = shuffledArray[r];
+	shuffledArray[r] = temp;
 	}
 	int t = 0;
 	int numberOfPlayers = players.size();
 	for (int i = 0; i < size; i++) {
-		Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
-		placeSoldier(players[t], curProvince->getName(), 3);
-		t = (t + 1) % numberOfPlayers;
+	Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
+	placeSoldier(players[t], curProvince->getName(), 3);
+	t = (t + 1) % numberOfPlayers;
 	}
 	cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
 	delete shuffledArray;
 
 
-*/
+	*/
 
 
 
@@ -1371,7 +1383,7 @@ void GameManager::randomPlacement() {
 	shuffledArray[i] = shuffledArray[r];
 	shuffledArray[r] = temp;
 	}*/
-	
+
 	int t;
 	int numberOfPlayers = players.size();
 	Die die(numberOfPlayers);
@@ -1387,7 +1399,7 @@ void GameManager::randomPlacement() {
 		}
 		t = die.roll() - 1;
 	}
-	
+
 	cout << "* PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS *" << endl;
 	//delete shuffledArray;
 }
@@ -1561,8 +1573,8 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN)/2  ;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN)/2 ;
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1605,6 +1617,8 @@ WindowManager::WindowManager()
 	if (!castleImg.loadFromFile("assets/castle.png")) {
 		cout << "Unable to open file" << endl;
 	}
+
+
 	font;
 	if (!font.loadFromFile("assets/font.ttf"))
 	{
@@ -2205,8 +2219,8 @@ void WindowManager::buttonClicked(int id) {
 			if (_randomPlacement == true) {
 				GM->randomPlacement();
 				string dummy;
-				for (int i = 0 ; i < playerCount ; i++)
-					GM->getPlayerByID(i,dummy)->setLeftSoldier(GM->getPlayerByID(i,dummy)->getNumberOfProvinces() / 3);
+				for (int i = 0; i < playerCount; i++)
+					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
 				phase = PLACEMENT_PHASE;
 			}
 			else {
@@ -2240,19 +2254,20 @@ void WindowManager::buttonClicked(int id) {
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
 	if (id == NEXT_PHASE_BUTTON) {
 		if (phase == INITIAL_PHASE) {
-		/*  player->setLeftSoldier(player->getNumberOfProvinces() / 3);
+			/*  player->setLeftSoldier(player->getNumberOfProvinces() / 3);
 			if (page == 2 )
-				phase = PLACEMENT_PHASE; //YOU WILL NOT BE ABLE TO CLICK ANYTHING IN INITIAL PHASE JUST SOLDIER */
+			phase = PLACEMENT_PHASE; //YOU WILL NOT BE ABLE TO CLICK ANYTHING IN INITIAL PHASE JUST SOLDIER */
 		}
 		else if (phase == PLACEMENT_PHASE) {
 			phase = ATTACKING_PHASE;
 		}
 		else if (phase == ATTACKING_PHASE) {
 			phase = FORTIFY_PHASE;
-			buttons[NEXT_PHASE_BUTTON]->setText("End Turn");
+			
 			buttons[ATTACK_BUTTON]->setText("Fortify");
 		}
 		else if (phase == FORTIFY_PHASE) {
+			phase = MARKET_PHASE;
 			if (page == 1) {
 				if (turn = 0)
 					this->GM->sendAllProvincesFromHostString(&NM);
@@ -2266,6 +2281,11 @@ void WindowManager::buttonClicked(int id) {
 			cout << "End of turn : " << turn << endl;
 			GM->castleAttacks(GM->getPlayerByID(turn, dum));
 			// ------------------------------ CASTLE ATTACKS ENDS
+
+			buttons[NEXT_PHASE_BUTTON]->setText("End Turn");
+			
+		}
+		else if(phase == MARKET_PHASE) {
 			turn++;
 			if (turn == playerCount)
 				turn = 0;
@@ -2274,7 +2294,7 @@ void WindowManager::buttonClicked(int id) {
 				for (int i = 0; i < playerCount; i++)
 					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
 				phase = PLACEMENT_PHASE;
-				
+
 			}
 			else if (page == GAME_SCREEN) {
 				cout << "Player" << turn + 1 << " 's turn!!" << endl;
@@ -2282,13 +2302,14 @@ void WindowManager::buttonClicked(int id) {
 			}
 			buttons[NEXT_PHASE_BUTTON]->setText("Next Phase");
 			buttons[ATTACK_BUTTON]->setText("Attack");
+			cout << "Player" << turn + 1 << " 's turn!!" << endl;
+			phase = PLACEMENT_PHASE;
+			GM->currentPlayer = turn;
+			wheel = false;
+			countForWheel = 0;
 
-			
-
-			
 		}
 		else if (phase == END_TURN) {
-			
 		}
 
 		cout << "Phase: " << phase << endl;
@@ -2298,6 +2319,7 @@ void WindowManager::buttonClicked(int id) {
 		if (phase == ATTACKING_PHASE) {
 			if (isProvinceClicked == 2) {
 				if (GM->attack(player, second->getOwner(), first, second, soldierAmount)) {
+					wheel = true;
 					phase = POST_ATTACK; //change phase 
 					buttons[ATTACK_BUTTON]->setText("Place");
 					provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
@@ -2326,28 +2348,28 @@ void WindowManager::buttonClicked(int id) {
 
 
 			/*if (page == 1) {
-				if (turn == 0)
-					this->GM->sendAllProvincesFromHostString(&NM);
-				else {
+			if (turn == 0)
+			this->GM->sendAllProvincesFromHostString(&NM);
+			else {
 
-					if (userTurn == 0) {
-						this->GM->sendAllProvincesClientToHostString(&NM);
-						this->GM->sendAllProvincesFromHostString(&NM);
-					}
-					else
-						this->GM->sendAllProvincesFromHostString(&NM);
-				}
+			if (userTurn == 0) {
+			this->GM->sendAllProvincesClientToHostString(&NM);
+			this->GM->sendAllProvincesFromHostString(&NM);
+			}
+			else
+			this->GM->sendAllProvincesFromHostString(&NM);
+			}
 			}
 			turn++;
 			if (turn == playerCount -1 )
-				turn = 0;
+			turn = 0;
 			if (turn == userTurn) {
-				if (GM->getWorldMap()->ownerCount() < 42)
-					phase = INITIAL_PHASE;
-				else {
-					player->setLeftSoldier(player->getNumberOfProvinces() / 3);
-					phase = PLACEMENT_PHASE;
-				}
+			if (GM->getWorldMap()->ownerCount() < 42)
+			phase = INITIAL_PHASE;
+			else {
+			player->setLeftSoldier(player->getNumberOfProvinces() / 3);
+			phase = PLACEMENT_PHASE;
+			}
 
 			}*/
 		}
@@ -2382,12 +2404,49 @@ void WindowManager::buttonClicked(int id) {
 		}
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
-	
-	else if (id == TURN_WHEEL_BUTTON) {
+
+	else if (id == TURN_WHEEL_BUTTON && wheel && countForWheel < 2 && phase == MARKET_PHASE) {
+		countForWheel++;
+		string temp;
 		if (turnWheel) {
 			turnWheel = false;
 			int index = ((int)(rotateAmount / 45)) % 8;
 			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
+			if (index == 0) {
+				//draw bonus card
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+			else if (index == 1) {
+				//bankrupt
+				//GM->getPlayerByID(turn, temp)->setMoney(0);
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+			else if (index == 2) {
+				//250 gold
+				//GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+			else if (index == 3) {
+				//pass
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+			else if (index == 4) {
+				//build castle
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+			else if (index == 5) {
+				//take province
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+			else if (index == 6) {
+				//give province
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+			else if (index == 7) {
+				//take 3 soldiers
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+
 		}
 		else {
 			turnWheel = true;
@@ -2453,7 +2512,7 @@ void WindowManager::provinceClicked(int id) {
 					secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
 			}
 
-			lineForProvinces->setCoordinates(firstCoordinates,secondCoordinates);
+			lineForProvinces->setCoordinates(firstCoordinates, secondCoordinates);
 			lineForProvinces->setVisible(true);
 			//--------------------------------------------------------
 
@@ -2463,7 +2522,7 @@ void WindowManager::provinceClicked(int id) {
 			for (int i = 0; i < listOfArmyBage.size(); i++) {
 				if (listOfArmyBage[i]->nameOfProvince == first->getName())
 					listOfArmyBage[i]->setScale(2, 2);
-				else if(listOfArmyBage[i]->nameOfProvince == second->getName())
+				else if (listOfArmyBage[i]->nameOfProvince == second->getName())
 					listOfArmyBage[i]->setScale(2, 2);
 				else
 					listOfArmyBage[i]->setScale(1, 1);
@@ -2507,7 +2566,7 @@ void WindowManager::provinceClicked(int id) {
 	else if (phase == POST_ATTACK) {
 		soldierAmount = first->getNumberOfSoldiers() - 1;
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-		
+
 		//-------------------------------------------------
 		//This code is to Scale a square with army size of a province.
 		for (int i = 0; i < listOfArmyBage.size(); i++) {
@@ -2523,7 +2582,7 @@ void WindowManager::provinceClicked(int id) {
 
 void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
 	string dummy;
-	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITIAL_PHASE) && this->GM->getPlayerByID(turn,dummy)->getLeftSoldier() == 0 )
+	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITIAL_PHASE || phase == MARKET_PHASE) /*&& this->GM->getPlayerByID(turn, dummy)->getLeftSoldier() == 0*/)
 		return;
 	if (images[id]->inMove) {
 		images[id]->setScale(sf::Vector2f(0.5, 0.5));
@@ -2557,7 +2616,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 							}
 							phase = END_TURN;
 						}
-						
+
 						if (page == COMPUTER_GAME_SCREEN) {
 							if (GM->getWorldMap()->ownerCount() != 42)
 								phase = INITIAL_PHASE;
@@ -2565,21 +2624,21 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 								phase = PLACEMENT_PHASE;
 						}
 						turn++;
-						if (turn == playerCount )
+						if (turn == playerCount)
 							turn = 0;
-						
-						
+
+
 						cout << turn << "**********************";
-						provinceNameTxt.setString("Player" + to_string(turn+1) + "'s turn" );
-						
+						provinceNameTxt.setString("Player" + to_string(turn + 1) + "'s turn");
+
 					}
 				}
-				else if (phase == PLACEMENT_PHASE) {
+				else if (phase == PLACEMENT_PHASE || phase == MARKET_PHASE) {
 					if (GM->placeSoldier(turn, provinceName, 1)) {
 						int dummy; Province* province; string dum;
 						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
-						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() == 0)
+						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() == 0 && phase == PLACEMENT_PHASE)
 							phase = ATTACKING_PHASE;
 					}
 					else {

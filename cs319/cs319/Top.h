@@ -349,7 +349,7 @@ private:
 class WindowManager {
 public:
 
-	GameManager* GM;
+	GameManager * GM;
 	NetworkManager * NM;
 	double zoom;
 	int screenWidth;
@@ -395,7 +395,8 @@ public:
 	const int ATTACKING_PHASE = 2;
 	const int POST_ATTACK = 3;
 	const int FORTIFY_PHASE = 4;
-	const int END_TURN = 5;
+	const int MARKET_PHASE = 5;
+	const int END_TURN = 6;
 
 	const int host = 5;
 	const int c1 = 6;
@@ -404,6 +405,8 @@ public:
 	const int TURN_WHEEL_BUTTON = 9;
 
 	int playerCount = 0;
+	int countForWheel = 0;
+	bool wheel = false;
 
 	int isProvinceClicked = 0;
 	Province* first;
@@ -471,4 +474,3 @@ public:
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
-
