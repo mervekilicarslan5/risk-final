@@ -1788,7 +1788,7 @@ WindowManager::WindowManager()
 	buttons[0]->setSize(100, 40);
 	buttons[0]->setPosition(buttons[2]->getPosition().x , buttons[2]->getPosition().y +buttons[2]->getSize().y + 20);
 	buttons[0]->setText("Next Phase");
-	buttons[0]->setTextSize(20);
+	buttons[0]->setTextSize(10);
 	buttons[0]->setTextColor(sf::Color::White);
 	buttons[0]->setFillColor(sf::Color::Blue);
 	buttons[0]->setOutlineThickness(2);
@@ -2684,6 +2684,8 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 	string dummy;
 	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITIAL_PHASE || phase == MARKET_PHASE) /*&& this->GM->getPlayerByID(turn, dummy)->getLeftSoldier() == 0*/)
 		return;
+	if (id == 3 && !(phase == MARKET_PHASE))
+		return;
 	if (images[id]->inMove) {
 		images[id]->setScale(sf::Vector2f(0.5, 0.5));
 		images[id]->setPosition(sf::Vector2f(mouse.getPosition(window).x - 0.5*images[id]->getLocalBounds().width / 2, mouse.getPosition(window).y - 0.5*images[id]->getLocalBounds().height / 2));
@@ -2747,7 +2749,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 					}
 				}
 			}
-			else if (id == 3) {
+			else if (id == 3 && phase == MARKET_PHASE) {
 				string provinceName = getProvinceName(window, mouse);
 				int id; Province* ptr;
 				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
