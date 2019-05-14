@@ -312,6 +312,7 @@ public:
 	vector<string> split(std::string strToSplit, char delimeter);
 	void destroyNearSoldier(Province* province);
 	void castleAttacks(Player* player);
+	vector<Player*> getPlayers();
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
@@ -368,6 +369,7 @@ public:
 	MiniMap miniMap;
 	LineBetweenProvinces *lineForProvinces;
 	vector<Button*> buttons;
+	vector<Text*> playerStatus;
 	vector<MyImage*> images;
 	vector<MyImage*> castles;
 	vector<string> wheelStr;
@@ -421,6 +423,8 @@ public:
 	bool _randomPlacement = true;
 	bool castle = false;
 	float rotateAmount = 22.5;
+	float rotateStep = 2.5;
+	int rotateRandom = 250;
 
 
 	int counter = 0;
@@ -433,13 +437,16 @@ public:
 	void multGameComp(RenderWindow & window, Event & event);
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
+	bool insideTheWindow(Vector2i pos);
 	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);
 	void provinceClicked(int id);
 	void checkClickEvents(sf::Event & e);
 	void buttonClicked(int id, sf::Event &event, sf::RenderWindow & window);
 	void imageClicked(int id);
+	void handleWheel();
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
+	void displayPlayerStatus();
 	void drawAllArmies(RenderWindow & window, Event & e);
 	void drawAllCastles(RenderWindow & window, Event & e);
 };

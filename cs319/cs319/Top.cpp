@@ -1564,6 +1564,10 @@ void GameManager::castleAttacks(Player* player) {
 	}
 }
 
+vector<Player*> GameManager::getPlayers() {
+	return players;
+}
+
 
 WindowManager::WindowManager()
 {
@@ -1686,6 +1690,31 @@ WindowManager::WindowManager()
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
+
+	
+
+	for (int i = 0; i < 6; i++) {
+		Text* b = new Text();
+		b->setFont(font);
+		b->setCharacterSize(15);
+		b->setString("\n");
+		b->setOrigin(0, b->getLocalBounds().height);
+		playerStatus.push_back(b);
+	}
+
+	playerStatus[0]->setPosition(10, bottomUpperMargin - 10);
+	playerStatus[1]->setPosition(10, playerStatus[0]->getPosition().y - playerStatus[0]->getLocalBounds().height - 10);
+	playerStatus[2]->setPosition(10, playerStatus[1]->getPosition().y - playerStatus[1]->getLocalBounds().height - 10);
+	playerStatus[3]->setPosition(10, playerStatus[2]->getPosition().y - playerStatus[2]->getLocalBounds().height - 10);
+	playerStatus[4]->setPosition(10, playerStatus[3]->getPosition().y - playerStatus[3]->getLocalBounds().height - 10);
+	playerStatus[5]->setPosition(10, playerStatus[4]->getPosition().y - playerStatus[4]->getLocalBounds().height - 10);
+
+	playerStatus[0]->setFillColor(Color::Red);
+	playerStatus[1]->setFillColor(Color::Blue);
+	playerStatus[2]->setFillColor(Color::Green);
+	playerStatus[3]->setFillColor(Color::Cyan);
+	playerStatus[4]->setFillColor(Color::Black);
+	playerStatus[5]->setFillColor(Color::Magenta);
 
 
 	wheelStr.push_back("Draw bonus card");
@@ -1830,6 +1859,19 @@ WindowManager::WindowManager()
 
 WindowManager::~WindowManager() {
 
+}
+
+void WindowManager::displayPlayerStatus() {
+	vector<Player*> players = GM->getPlayers();
+	int size = players.size();
+
+	for (int i = 0; i < size; i++) {
+		string msg = "";
+		msg += players[i]->getName() + " -> ";
+		msg += to_string(players[i]->getProvinces().size()) + " Provinces, ";
+		msg += to_string(players[i]->getMoney()) + " Gold";
+		playerStatus[i]->setString(msg);
+	}
 }
 
 void WindowManager::menuScreen(RenderWindow & window, Event & event) {
@@ -2038,42 +2080,58 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 
 
-
-	//float speed = 3;
-
-
-	if (turnWheel) {
-		images[1]->rotate(0.5*time);
-		rotateAmount = rotateAmount + 0.5*time;
-		if (rotateAmount == 360) {
-			rotateAmount = 0;
-		}
+	// DO NOT CHANGE THIS PART
+	// float speed = 3;
+	if (counter > 10) {
+		if (turnWheel && rotateRandom == 0) {
+			if (rotateStep > 0)
+				rotateStep -= 0.01;
+			else {
+				rotateStep = 0;
+				turnWheel = false;
+				handleWheel();
+			}
 				
+		}
+		else {
+			rotateRandom--;
+		}
+		
+		if (turnWheel) {
+			images[1]->rotate(rotateStep);
+			rotateAmount += rotateStep;
+			if (rotateAmount >= 360) {
+				rotateAmount = 0;
+			}
+		}
+		counter = 0;
+		// TEST
+		displayPlayerStatus();
 	}
 
 	sf::Vector2i mousePos = mouse.getPosition(window);
-	if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
-		if (mainView.getCenter().x >= mainView.getSize().x / 2) {
-			mainView.move(-zoom * time, 0);
+	if (insideTheWindow(mousePos)) {
+		if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().x >= mainView.getSize().x / 2) {
+				mainView.move(-zoom * time, 0);
+			}
+		}
+		else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
+				mainView.move(zoom* time, 0);
+			}
+		}
+		if (mousePos.y < topMargin) {
+			if (mainView.getCenter().y >= mainView.getSize().y / 2) {
+				mainView.move(0, -zoom * time);
+			}
+		}
+		else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
+			if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
+				mainView.move(0, zoom * time);
+			}
 		}
 	}
-	else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
-		if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
-			mainView.move(zoom* time, 0);
-		}
-	}
-	if (mousePos.y < topMargin) {
-		if (mainView.getCenter().y >= mainView.getSize().y / 2) {
-			mainView.move(0, -zoom * time);
-		}
-	}
-	else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
-		if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
-			mainView.move(0, zoom * time);
-		}
-	}
-	counter = 0;
-
 
 	counter++;
 	//mapSprite.setPosition(mainView.getCenter().x, mainView.getCenter().y);
@@ -2116,6 +2174,11 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 		if (i != 5 && i != 6 && i != 7 && i != 8)
 			buttons[i]->draw(window);
 	}
+
+	for (int i = 0; i < playerStatus.size(); i++) {
+		window.draw(*playerStatus[i]);
+	}
+
 	int currentPlayer = GM->currentPlayer;
 	string currentPlayerName;
 	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
@@ -2129,6 +2192,10 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	miniMap.draw(window);
 
 	window.display();
+}
+
+bool WindowManager::insideTheWindow(Vector2i mousePos) {
+	return mousePos.x >= 0 && mousePos.y >= 0 && mousePos.x <= screenWidth && mousePos.y <= screenHeight;
 }
 
 void WindowManager::createWindow() {
@@ -2409,75 +2476,18 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
-
+	//  
 	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
 		countForWheel++;
-		string temp;
+		
 		if (turnWheel) {
 			turnWheel = false;
-			int index =  ((int)(rotateAmount / 45)) % 8;
-			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
-			if (index == 0) {
-				//draw bonus card
-			}
-			else if (index == 1) {
-				//bankrupt
-				GM->getPlayerByID(turn, temp)->setMoney(0);
-			}
-			else if (index == 2) {
-				//250 gold
-				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
-			}
-			else if (index == 3) {
-				//pass
-			}
-			else if (index == 4) {
-				//build castle
-			
-				id = 3;
-				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
-				images[id]->inMove = true;
-				takeCastle = true;
-				
-			}
-			else if (index == 5) {
-				//take province
-				Die die(GM->getWorldMap()->getNumberOfProvinces());
-				int random = die.roll();
-				Province* prov = GM->getWorldMap()->getProvinceByID(random);
-				string pname;
-				GM->getPlayerByID(turn, pname);
-				while (prov->getOwner()->getName() == pname) {
-					int random = die.roll();
-					prov = GM->getWorldMap()->getProvinceByID(random);
-					GM->getPlayerByID(turn, pname);
-				}
-				prov->setOwner(GM->getPlayerByID(turn, pname));
-				cout << pname << "gets " << prov->getName() << endl;
-			}
-			else if (index == 6) {
-				//give province
-				Die die(GM->getWorldMap()->getNumberOfProvinces());
-				int random = die.roll();
-				Province* prov = GM->getWorldMap()->getProvinceByID(random);
-				string pname;
-				GM->getPlayerByID(turn, pname);
-				while (prov->getOwner()->getName() != pname) {
-					int random = die.roll();
-					prov = GM->getWorldMap()->getProvinceByID(random);
-					GM->getPlayerByID(turn, pname);
-				}
-				prov->setOwner(GM->getPlayerByID((turn+1)%3, pname));
-				cout << pname << "gets " << prov->getName() << endl;
-			}
-			else if (index == 7) {
-				//take 3 soldiers
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
-			}
-
 		}
 		else {
+			rotateStep = 2.5;
 			turnWheel = true;
+			Die die(200);
+			rotateRandom = die.roll() + 100;
 		}
 	}
 }
@@ -2485,6 +2495,68 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 void WindowManager::imageClicked(int id) {
 	if (id == 0) {
 		cout << "Image clicked" << endl;
+	}
+}
+
+void WindowManager::handleWheel() {
+	string temp;
+	int index = ((int)(rotateAmount / 45)) % 8;
+	cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
+	if (index == 0) {
+		//draw bonus card
+	}
+	else if (index == 1) {
+		//bankrupt
+		GM->getPlayerByID(turn, temp)->setMoney(0);
+	}
+	else if (index == 2) {
+		//250 gold
+		GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
+	}
+	else if (index == 3) {
+		//pass
+	}
+	else if (index == 4) {
+		//build castle
+
+		GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
+		images[3]->inMove = true;
+		takeCastle = true;
+
+	}
+	else if (index == 5) {
+		//take province
+		Die die(GM->getWorldMap()->getNumberOfProvinces());
+		int random = die.roll();
+		Province* prov = GM->getWorldMap()->getProvinceByID(random);
+		string pname;
+		GM->getPlayerByID(turn, pname);
+		while (prov->getOwner()->getName() == pname) {
+			int random = die.roll();
+			prov = GM->getWorldMap()->getProvinceByID(random);
+			GM->getPlayerByID(turn, pname);
+		}
+		prov->setOwner(GM->getPlayerByID(turn, pname));
+		cout << pname << "gets " << prov->getName() << endl;
+	}
+	else if (index == 6) {
+		//give province
+		Die die(GM->getWorldMap()->getNumberOfProvinces());
+		int random = die.roll();
+		Province* prov = GM->getWorldMap()->getProvinceByID(random);
+		string pname;
+		GM->getPlayerByID(turn, pname);
+		while (prov->getOwner()->getName() != pname) {
+			int random = die.roll();
+			prov = GM->getWorldMap()->getProvinceByID(random);
+			GM->getPlayerByID(turn, pname);
+		}
+		prov->setOwner(GM->getPlayerByID((turn + 1) % 3, pname));
+		cout << pname << "gets " << prov->getName() << endl;
+	}
+	else if (index == 7) {
+		//take 3 soldiers
+		GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
 	}
 }
 
