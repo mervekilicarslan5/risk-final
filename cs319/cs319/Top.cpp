@@ -760,6 +760,11 @@ bool GameManager::attack(Player* attacker, Player* defender, Province* from, Pro
 	}
 	cout << "Attacker lost " << result[1] << " soldiers" << endl;
 	cout << "Defender lost " << result[0] << " soldiers" << endl;
+	if (result[1] != 0 || result[0] != 0) {
+		windowManager->battleNotifier->updateData("Battle of " + to->getName(), attacker->getName(), defender->getName(), to_string(from->getNumberOfSoldiers()), to_string(to->getNumberOfSoldiers()), to_string(result[1]), to_string(result[0]));
+		windowManager->battleNotifier->activate();
+	}
+
 	from->setNumberOfSoldiers(from->getNumberOfSoldiers() - result[1]);
 	to->setNumberOfSoldiers(to->getNumberOfSoldiers() - result[0]);
 	if (result[0] > result[1]) {
@@ -1625,6 +1630,27 @@ WindowManager::WindowManager()
 	if (!castleImg.loadFromFile("assets/castle.png")) {
 		cout << "Unable to open file" << endl;
 	}
+	if (!attackPhaseImg.loadFromFile("assets/attackPhase.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!placementPhaseImg.loadFromFile("assets/placementPhase.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!marketPhaseImg.loadFromFile("assets/marketPhase.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!fortifyPhaseImg.loadFromFile("assets/fortifyPhase.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!postAttackPhaseImg.loadFromFile("assets/postAttackPhase.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!sceleteImg.loadFromFile("assets/rip.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!warriorImg.loadFromFile("assets/warrior.png")) {
+		cout << "Unable to open file" << endl;
+	}
 
 
 	font;
@@ -1656,8 +1682,13 @@ WindowManager::WindowManager()
 	string line;
 	ifstream myfile("assets/coordinates.txt");
 
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(1,placementPhaseImg, screenWidth/2,screenHeight/2, screenWidth *0.75, 400));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(2,attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.70, 400));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(4,fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(5,marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
 
-
+	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, screenWidth / 2, screenHeight / 2, font);
 
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
@@ -1691,7 +1722,40 @@ WindowManager::WindowManager()
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 
-	
+	menuButton.push_back(new MyImage("B2.png"));
+	menuButton.push_back(new MyImage("B3.png"));
+	menuButton.push_back(new MyImage("B0.png"));
+	menuButton.push_back(new MyImage("settingsK.png"));
+	menuButton.push_back(new MyImage("creditsK.png"));
+	menuButton.push_back(new MyImage("playK.png"));
+
+
+
+	menuButton[0]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 6);
+	menuButton[0]->setPosition(menuButton[0]->getInitialPosition());
+	menuButton[0]->setScale(0.5, 0.5);
+
+	menuButton[1]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + screenHeight/ 6);
+	menuButton[1]->setPosition(menuButton[1]->getInitialPosition());
+	menuButton[1]->setScale(0.5, 0.5);
+
+	menuButton[2]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4  + screenHeight / 6);
+
+	menuButton[2]->setPosition(menuButton[2]->getInitialPosition());
+	menuButton[2]->setScale(0.5, 0.5);
+
+	menuButton[3]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + +screenHeight / 6);
+	menuButton[3]->setPosition(menuButton[3]->getInitialPosition());
+	menuButton[3]->setScale(0.5, 0.5);
+
+	menuButton[4]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + screenHeight / 6);
+	menuButton[4]->setPosition(menuButton[4]->getInitialPosition());
+	menuButton[4]->setScale(0.5, 0.5);
+
+	menuButton[5]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 6);
+	menuButton[5]->setPosition(menuButton[5]->getInitialPosition());
+	menuButton[5]->setScale(0.5, 0.5);
+	//MENU BUTTON
 
 	for (int i = 0; i < 6; i++) {
 		Text* b = new Text();
@@ -1862,7 +1926,7 @@ WindowManager::WindowManager()
 	infoText.setFillColor(sf::Color::Black);
 	infoText.setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, bottomUpperMargin + 40);
 
-
+	GM->windowManager = this;
 }
 
 WindowManager::~WindowManager() {
@@ -1881,8 +1945,91 @@ void WindowManager::displayPlayerStatus() {
 		playerStatus[i]->setString(msg);
 	}
 }
+void WindowManager::menuScreen(RenderWindow& window, Event& event) {
+	static int x = 0;
+	sf::Texture texture;
+	if (!texture.loadFromFile("assets/T2.jpg"));
+	// Assign it to a sprite
+	sf::Sprite sprite2;
+	sprite2.setTexture(texture);
+	// Draw the textured sprite
+	window.draw(sprite2);
 
-void WindowManager::menuScreen(RenderWindow & window, Event & event) {
+
+
+	while (window.pollEvent(event)) {
+		cout << "we are checking" << x++ << endl;
+		if (event.type == sf::Event::Closed)
+			window.close();
+
+		if (event.type == sf::Event::MouseMoved)
+		{
+
+			menuEvents(event, 1);
+
+		}
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				menuEvents(event, 0);
+			}
+		}
+
+	}
+}
+void WindowManager::menuEvents(sf::Event& e, int i) {
+	int id = 0;
+
+	if (i == 0) {
+		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
+			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
+				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y) / 2) {
+				cout << "Menu Events BUTTON" << id << endl;
+				buttonClicked(id, e, window);
+				return;
+			}
+			id++;
+		}
+	}
+	if (i == 1) {
+		int id = 0;
+		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
+			cout << "how muck" << endl;
+			if ((*it)->getPosition().x < e.mouseMove.x && e.mouseMove.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
+				(*it)->getPosition().y < e.mouseMove.y && e.mouseMove.y < (*it)->getPosition().y + ((*it)->getSize().y) / 2) {
+				cout << id << endl;
+				changeButton(id);
+				return;
+			}
+			id++;
+		}
+
+		window.draw(*menuButton[0]);
+		window.draw(*menuButton[1]);
+		window.draw(*menuButton[2]);
+		cout << "new window" << endl;
+		window.display();
+		return;
+
+
+
+
+	}
+}
+void WindowManager::changeButton(int id) {
+	cout << "bhange button" << endl;
+	//sf::SoundBuffer buffer;
+	//buffer.loadFromFile("assets/menuOp.wav");
+		//sf::Sound sound;
+		//sound.setBuffer(buffer);
+		//sound.play();
+	
+	window.draw(*menuButton[id + 3]);
+	window.display();
+}
+
+/*void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	static int x = 0;
 	while (window.pollEvent(event)) {
 		cout << "we are checking" << x++ << endl;
@@ -1910,6 +2057,7 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 
 	window.display();
 }
+*/
 
 void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 	while (window.pollEvent(event))
@@ -2054,6 +2202,14 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	
 	while (window.pollEvent(event))
 	{
+		screenWidth = window.getSize().x; // 1920; //
+		screenHeight = window.getSize().y ; // 1080; //
+		//::ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
+		leftMargin = screenWidth / 10;
+		rightMargin = (screenWidth * 9) / 10;
+		topMargin = screenHeight / 10;
+		bottomLowerMargin = (screenHeight * 7) / 10;
+		bottomUpperMargin = (screenHeight * 8) / 10;
 
 		if (event.type == sf::Event::Closed)
 			window.close();
@@ -2159,6 +2315,17 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 	window.setView(window.getDefaultView());
 	window.draw(lowerPanel);
+	battleNotifier->draw(window, time);
+	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
+		if (phase == listOfPhaseNotifiers[i]->phaseId)
+			listOfPhaseNotifiers[i]->activate();
+		else
+			listOfPhaseNotifiers[i]->deactivate();
+	}
+
+	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
+		listOfPhaseNotifiers[i]->draw(window,time);
+	}
 
 	dragObject(window, event, 3);
 	dragObject(window, event, 0);
@@ -2211,7 +2378,7 @@ bool WindowManager::insideTheWindow(Vector2i mousePos) {
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
-	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
+	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk",Style::Default);
 	window.setPosition(Vector2i(0,0))  ;
 
 
@@ -2289,7 +2456,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	cout << "button clicked" << endl;
 	if (page == MENU_SCREEN) {
 		cout << "clickked weghwioefng" << endl;
-		if (id == 5) {
+		if (id == 2) {
 			//userName = "host";
 			//NM->createNetwork(&GM,"h", userName);
 
@@ -3715,16 +3882,16 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 	playerText.setCharacterSize(20);
 	playerText.setString("Elnur");
 	//-------------------------
-	coinField.setSize(Vector2f(100,50));
+	coinField.setSize(Vector2f(100 * ratio,55*ratio));
 	coinField.setFillColor(Color(0, 0, 0, 30));
 	
-	actionField.setSize(Vector2f(100, 50));
+	actionField.setSize(Vector2f(100 * ratio, 55 * ratio));
 	actionField.setFillColor(Color(0, 0, 0, 30));
 
-	turnField.setSize(Vector2f(100, 50));
+	turnField.setSize(Vector2f(100*ratio, 55 * ratio));
 	turnField.setFillColor(Color(0, 0, 0, 30));
 	
-	playerField.setSize(Vector2f(120, 50));
+	playerField.setSize(Vector2f(180*ratio, 55 * ratio));
 	playerField.setFillColor(Color(0, 0, 0, 30));
 
 	//this->setColor(Color(255, 255, 255, 100));
@@ -3734,22 +3901,22 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 
 
 
-	coinField.setPosition(195, 2);
-	coinSprite.setPosition(200, 5);
-	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10, coinSprite.getPosition().y+ coinSprite.getGlobalBounds().height/2- coinText.getGlobalBounds().height / 2);
+	coinField.setPosition(195*ratio, 2 * ratio);
+	coinSprite.setPosition(coinField.getPosition().x + 5, 5*ratio);
+	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10*ratio, coinSprite.getPosition().y+ coinSprite.getGlobalBounds().height/2- coinText.getGlobalBounds().height / 2);
 
-	actionField.setPosition(coinField.getPosition().x + coinField.getGlobalBounds().width + 35, 2);
-	actionSprite.setPosition(actionField.getPosition().x +5, 7);
-	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2- actionText.getGlobalBounds().height/2);
+	actionField.setPosition(coinField.getPosition().x + coinField.getGlobalBounds().width + 35, 2 * ratio);
+	actionSprite.setPosition(actionField.getPosition().x +5, 7 * ratio);
+	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10 * ratio, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2- actionText.getGlobalBounds().height/2);
 
-	turnField.setPosition(actionField.getPosition().x + actionField.getGlobalBounds().width + 35, 2);
-	turnSprite.setPosition(turnField.getPosition().x +5, 7);
-	turnText.setPosition(turnSprite.getPosition().x + turnSprite.getGlobalBounds().width + 10, turnSprite.getPosition().y + turnSprite.getGlobalBounds().height / 2 - turnText.getGlobalBounds().height / 2);
+	turnField.setPosition(actionField.getPosition().x + actionField.getGlobalBounds().width + 35, 2 * ratio);
+	turnSprite.setPosition(turnField.getPosition().x +5, 7 * ratio);
+	turnText.setPosition(turnSprite.getPosition().x + turnSprite.getGlobalBounds().width + 10 * ratio, turnSprite.getPosition().y + turnSprite.getGlobalBounds().height / 2 - turnText.getGlobalBounds().height / 2);
 
 
-	playerField.setPosition(turnField.getPosition().x + turnField.getGlobalBounds().width + 35, 2);
-	playerSprite.setPosition(playerField.getPosition().x + 5, 7);
-	playerText.setPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width + 10, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 - playerText.getGlobalBounds().height / 2);
+	playerField.setPosition(turnField.getPosition().x + turnField.getGlobalBounds().width + 35, 2 * ratio);
+	playerSprite.setPosition(playerField.getPosition().x + 5, 7 * ratio);
+	playerText.setPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width + 10 * ratio, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 - playerText.getGlobalBounds().height / 2);
 
 
 
@@ -3788,5 +3955,236 @@ void TopBar::update(int moneyAmount, int actionAmount, int currentTurn, string p
 	actionText.setString(to_string(actionAmount));
 	turnText.setString(to_string(currentTurn));
 	playerText.setString(player);
+
+}
+
+PhaseNotifier::PhaseNotifier() {
+
+}
+
+PhaseNotifier::PhaseNotifier(int phaseId,Image img, int x, int y, int fx,int fy) {
+	this->phaseId = phaseId;
+	this->img = img;
+	this->tex.loadFromImage(img);
+	this->setTexture(this->tex);
+	visible = false;
+	moveTimer = 0;
+	this->setPosition( x - img.getSize().x/2,  y- img.getSize().y / 2);
+
+	this->bigCoordinates = Vector2f(x - img.getSize().x / 2, y - img.getSize().y / 2);
+	this->smallCoordinates = Vector2f(fx, fy);
+	this->ck.restart();
+	this->deactivate();
+}
+
+
+void PhaseNotifier::draw(sf::RenderWindow & window,float time) {
+	if (!visible)
+		return;
+	window.draw(*this);
+	moveTimer = this->ck.getElapsedTime().asSeconds()+moveTimer;
+	this->ck.restart();
+
+	if (moveTimer > 0.7) {
+
+
+
+		if (this->getPosition().x < smallCoordinates.x)
+			this->setPosition(this->getPosition().x + 2*time, this->getPosition().y);
+		
+		if (this->bigCoordinates.y < this->smallCoordinates.y) {
+			if (this->getPosition().y < smallCoordinates.y)
+				this->setPosition(this->getPosition().x, this->getPosition().y + 2 * time);
+		}
+		else {
+			if (this->getPosition().y > smallCoordinates.y)
+				this->setPosition(this->getPosition().x, this->getPosition().y - 2 * time);
+		}
+
+		if (this->getScale().x > 0.4)
+			this->setScale(this->getScale().x - 0.01*time, this->getScale().x - 0.01*time);
+
+	}
+
+
+}
+
+void PhaseNotifier::activate() {
+	if (visible)
+		return;
+	visible = true;
+	moveTimer = 0;
+	this->setScale(1, 1);
+	this->setPosition(this->bigCoordinates);
+	ck.restart();
+}
+void PhaseNotifier::deactivate() {
+	if (!visible)
+		return;
+	moveTimer = 0;
+	visible = false;
+
+}
+
+BattleNotifier::BattleNotifier() {
+
+}
+
+BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3, int x, int y,Font font) {
+	imageOfBattle = img1;
+	imageOfDeath = img2;
+	warriorsImg = img3;
+	this->font = font;
+	visible = false;
+
+
+	texureOfBattle.loadFromImage(imageOfBattle);
+	textureOfDeath.loadFromImage(imageOfDeath);
+	textureOfWarriors.loadFromImage(warriorsImg);
+
+	this->setTexture(texureOfBattle);
+	spriteOfDeath.setTexture(textureOfDeath);
+	spriteOfWarriors.setTexture(textureOfWarriors);
+
+	this->setPositionCenter(x, y);
+
+	battleText.setFont(this->font);
+	battleText.setCharacterSize(40);
+	battleText.setString("Battle");
+	battleText.setFillColor(Color(0, 0, 0));
+
+	playerName1.setFont(this->font);
+	playerName1.setCharacterSize(40);
+	playerName1.setStyle(1<<2);
+	playerName1.setFillColor(Color(0, 0, 0));
+
+	playerName2.setFont(this->font);
+	playerName2.setCharacterSize(40);
+	playerName2.setStyle(1 << 2);
+	playerName2.setFillColor(Color(0, 0, 0));
+
+	soldiers1.setFont(this->font);
+	soldiers1.setCharacterSize(40);
+	soldiers1.setFillColor(Color(0, 0, 0));
+
+	soldiers2.setFont(this->font);
+	soldiers2.setCharacterSize(40);
+	soldiers2.setFillColor(Color(0, 0, 0));
+
+
+	soldierLost1.setFont(this->font);
+	soldierLost1.setCharacterSize(40);
+	soldierLost1.setFillColor(Color(0, 0, 0));
+
+	soldierLost2.setFont(this->font);
+	soldierLost2.setCharacterSize(40);
+	soldierLost2.setFillColor(Color(0, 0, 0));
+
+}
+
+void BattleNotifier::setPositionCenter(int x, int y) {
+	this->setPosition(x - this->getGlobalBounds().width / 2, y - this->getGlobalBounds().height / 2);
+	centerCoordinates = Vector2f(x,y);
+}
+
+void BattleNotifier::updateData(string battleString, string playerNameString1, string playerNameString2, string soldiersString1, string soldiersString2, string soldierLostString1, string soldierLostString2) {
+	this->battleString = battleString;
+	this->playerName1 = playerName1;
+	this->playerName2 = playerName2;
+	this->soldiersString1 = soldiersString1;
+	this->soldiersString2 = soldiersString2;
+	this->soldierLostString1 = soldierLostString1;
+	this->soldierLostString2 = soldierLostString2;
+
+	this->battleText.setString(battleString);
+	playerName1.setString(playerNameString1);
+	playerName2.setString(playerNameString2);
+	soldiers1.setString(soldiersString1);
+	soldiers2.setString(soldiersString2);
+	soldierLost1.setString(soldierLostString1);
+	soldierLost2.setString(soldierLostString2);
+
+	battleText.setPosition(Vector2f(this->centerCoordinates.x - battleText.getGlobalBounds().width / 2, this->centerCoordinates.y - battleText.getGlobalBounds().height / 2 - this->getGlobalBounds().height) );
+	playerName1.setPosition(this->centerCoordinates.x - this->getGlobalBounds().width - playerName1.getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
+	playerName2.setPosition(this->centerCoordinates.x + this->getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
+
+
+	spriteOfWarriors.setPosition(this->centerCoordinates.x - spriteOfWarriors.getGlobalBounds().width / 2, this->centerCoordinates.y + spriteOfWarriors.getGlobalBounds().height / 2);
+	soldiers1.setPosition(this->centerCoordinates.x - 10 - this->getGlobalBounds().width / 2 - soldiers1.getGlobalBounds().width, this->centerCoordinates.y + spriteOfWarriors.getGlobalBounds().height / 2);
+	soldiers2.setPosition(this->centerCoordinates.x + this->getGlobalBounds().width / 2 + soldiers2.getGlobalBounds().width, this->centerCoordinates.y + spriteOfWarriors.getGlobalBounds().height / 2);
+
+
+	spriteOfDeath.setPosition(this->centerCoordinates.x - spriteOfDeath.getGlobalBounds().width / 2, spriteOfWarriors.getPosition().y + spriteOfWarriors.getGlobalBounds().height + 10);
+	soldierLost1.setPosition(this->centerCoordinates.x - 10 - this->getGlobalBounds().width / 2 - soldierLost1.getGlobalBounds().width, spriteOfWarriors.getPosition().y + spriteOfWarriors.getGlobalBounds().height + 10);
+	soldierLost2.setPosition(this->centerCoordinates.x + this->getGlobalBounds().width / 2 + soldierLost2.getGlobalBounds().width, spriteOfWarriors.getPosition().y + spriteOfWarriors.getGlobalBounds().height + 10);
+
+}
+void BattleNotifier::draw(sf::RenderWindow & window, float time) {
+	
+	if (!visible)
+		return;
+	if (opacityParam < 100)
+		this->deactivate();
+	cout << removeTimer << endl;
+	removeTimer = this->ckk.getElapsedTime().asSeconds() + removeTimer;
+	this->ckk.restart();
+	
+	if (removeTimer > 2) {
+		opacityParam = opacityParam - 0.3*time ;
+		this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
+
+		battleText.setFillColor(Color(battleText.getFillColor().r, battleText.getFillColor().g, battleText.getFillColor().b, (int)opacityParam));
+		playerName1.setFillColor(Color(playerName1.getFillColor().r, playerName1.getFillColor().g, playerName1.getFillColor().b, (int)opacityParam));
+		playerName2.setFillColor(Color(playerName2.getFillColor().r, playerName2.getFillColor().g, playerName2.getFillColor().b, (int)opacityParam));
+		soldiers1.setFillColor(Color(soldiers1.getFillColor().r, soldiers1.getFillColor().g, soldiers1.getFillColor().b, (int)opacityParam));
+		soldiers2.setFillColor(Color(soldiers2.getFillColor().r, soldiers2.getFillColor().g, soldiers2.getFillColor().b, (int)opacityParam));
+		spriteOfDeath.setColor(Color(spriteOfDeath.getColor().r, spriteOfDeath.getColor().g, spriteOfDeath.getColor().b, (int)opacityParam));
+
+		soldierLost1.setFillColor(Color(soldierLost1.getFillColor().r, soldierLost1.getFillColor().g, soldierLost1.getFillColor().b, (int)opacityParam));
+		soldierLost2.setFillColor(Color(soldierLost2.getFillColor().r, soldierLost2.getFillColor().g, soldierLost2.getFillColor().b, (int)opacityParam));
+	}
+
+	window.draw(*this);
+	window.draw(battleText);
+
+	window.draw(playerName1);
+	window.draw(playerName2);
+	window.draw(spriteOfWarriors);
+	window.draw(soldiers1);
+	window.draw(soldiers2);
+
+	window.draw(spriteOfDeath);
+
+	window.draw(soldierLost1);
+	window.draw(soldierLost2);
+
+
+}
+
+
+
+
+void BattleNotifier::activate() {
+	visible = true;
+	removeTimer = 0;
+	opacityParam = 255.f;
+	this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
+
+	battleText.setFillColor(Color(battleText.getFillColor().r, battleText.getFillColor().g, battleText.getFillColor().b, (int)opacityParam));
+	playerName1.setFillColor(Color(playerName1.getFillColor().r, playerName1.getFillColor().g, playerName1.getFillColor().b, (int)opacityParam));
+	playerName2.setFillColor(Color(playerName2.getFillColor().r, playerName2.getFillColor().g, playerName2.getFillColor().b, (int)opacityParam));
+	soldiers1.setFillColor(Color(soldiers1.getFillColor().r, soldiers1.getFillColor().g, soldiers1.getFillColor().b, (int)opacityParam));
+	soldiers2.setFillColor(Color(soldiers2.getFillColor().r, soldiers2.getFillColor().g, soldiers2.getFillColor().b, (int)opacityParam));
+	spriteOfDeath.setColor(Color(spriteOfDeath.getColor().r, spriteOfDeath.getColor().g, spriteOfDeath.getColor().b, (int)opacityParam));
+
+	soldierLost1.setFillColor(Color(soldierLost1.getFillColor().r, soldierLost1.getFillColor().g, soldierLost1.getFillColor().b, (int)opacityParam));
+	soldierLost2.setFillColor(Color(soldierLost2.getFillColor().r, soldierLost2.getFillColor().g, soldierLost2.getFillColor().b, (int)opacityParam));
+	this->ckk.restart();
+
+}
+void BattleNotifier::deactivate() {
+	visible = false;
+	removeTimer = 0;
+	opacityParam = 0.f;
 
 }
