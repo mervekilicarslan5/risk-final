@@ -2004,6 +2004,14 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	
 	while (window.pollEvent(event))
 	{
+		screenWidth = window.getSize().x; // 1920; //
+		screenHeight = window.getSize().y ; // 1080; //
+		//::ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
+		leftMargin = screenWidth / 10;
+		rightMargin = (screenWidth * 9) / 10;
+		topMargin = screenHeight / 10;
+		bottomLowerMargin = (screenHeight * 7) / 10;
+		bottomUpperMargin = (screenHeight * 8) / 10;
 
 		if (event.type == sf::Event::Closed)
 			window.close();
@@ -2134,7 +2142,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
-	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
+	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk",Style::Default);
 	window.setPosition(Vector2i(0,0))  ;
 
 
@@ -3414,16 +3422,16 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 	playerText.setCharacterSize(20);
 	playerText.setString("Elnur");
 	//-------------------------
-	coinField.setSize(Vector2f(100,50));
+	coinField.setSize(Vector2f(100 * ratio,55*ratio));
 	coinField.setFillColor(Color(0, 0, 0, 30));
 	
-	actionField.setSize(Vector2f(100, 50));
+	actionField.setSize(Vector2f(100 * ratio, 55 * ratio));
 	actionField.setFillColor(Color(0, 0, 0, 30));
 
-	turnField.setSize(Vector2f(100, 50));
+	turnField.setSize(Vector2f(100*ratio, 55 * ratio));
 	turnField.setFillColor(Color(0, 0, 0, 30));
 	
-	playerField.setSize(Vector2f(120, 50));
+	playerField.setSize(Vector2f(180*ratio, 55 * ratio));
 	playerField.setFillColor(Color(0, 0, 0, 30));
 
 	//this->setColor(Color(255, 255, 255, 100));
@@ -3433,22 +3441,22 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 
 
 
-	coinField.setPosition(195, 2);
-	coinSprite.setPosition(200, 5);
-	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10, coinSprite.getPosition().y+ coinSprite.getGlobalBounds().height/2- coinText.getGlobalBounds().height / 2);
+	coinField.setPosition(195*ratio, 2 * ratio);
+	coinSprite.setPosition(coinField.getPosition().x + 5, 5*ratio);
+	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10*ratio, coinSprite.getPosition().y+ coinSprite.getGlobalBounds().height/2- coinText.getGlobalBounds().height / 2);
 
-	actionField.setPosition(coinField.getPosition().x + coinField.getGlobalBounds().width + 35, 2);
-	actionSprite.setPosition(actionField.getPosition().x +5, 7);
-	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2- actionText.getGlobalBounds().height/2);
+	actionField.setPosition(coinField.getPosition().x + coinField.getGlobalBounds().width + 35, 2 * ratio);
+	actionSprite.setPosition(actionField.getPosition().x +5, 7 * ratio);
+	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10 * ratio, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2- actionText.getGlobalBounds().height/2);
 
-	turnField.setPosition(actionField.getPosition().x + actionField.getGlobalBounds().width + 35, 2);
-	turnSprite.setPosition(turnField.getPosition().x +5, 7);
-	turnText.setPosition(turnSprite.getPosition().x + turnSprite.getGlobalBounds().width + 10, turnSprite.getPosition().y + turnSprite.getGlobalBounds().height / 2 - turnText.getGlobalBounds().height / 2);
+	turnField.setPosition(actionField.getPosition().x + actionField.getGlobalBounds().width + 35, 2 * ratio);
+	turnSprite.setPosition(turnField.getPosition().x +5, 7 * ratio);
+	turnText.setPosition(turnSprite.getPosition().x + turnSprite.getGlobalBounds().width + 10 * ratio, turnSprite.getPosition().y + turnSprite.getGlobalBounds().height / 2 - turnText.getGlobalBounds().height / 2);
 
 
-	playerField.setPosition(turnField.getPosition().x + turnField.getGlobalBounds().width + 35, 2);
-	playerSprite.setPosition(playerField.getPosition().x + 5, 7);
-	playerText.setPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width + 10, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 - playerText.getGlobalBounds().height / 2);
+	playerField.setPosition(turnField.getPosition().x + turnField.getGlobalBounds().width + 35, 2 * ratio);
+	playerSprite.setPosition(playerField.getPosition().x + 5, 7 * ratio);
+	playerText.setPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width + 10 * ratio, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 - playerText.getGlobalBounds().height / 2);
 
 
 
