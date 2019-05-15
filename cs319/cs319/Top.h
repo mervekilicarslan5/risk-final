@@ -368,6 +368,7 @@ public:
 	sf::Font font;
 	TopBar *topPanel;
 	MiniMap miniMap;
+	vector<MyImage*> menuButton;
 	LineBetweenProvinces *lineForProvinces;
 	vector<Button*> buttons;
 	vector<Text*> playerStatus;
@@ -456,6 +457,8 @@ public:
 	void displayPlayerStatus();
 	void drawAllArmies(RenderWindow & window, Event & e);
 	void drawAllCastles(RenderWindow & window, Event & e);
+	void menuEvents(sf::Event& e, int i);
+	void changeButton(int id);
 };
 
 class Button : public sf::RectangleShape {
