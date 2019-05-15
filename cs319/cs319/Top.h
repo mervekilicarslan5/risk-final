@@ -409,6 +409,7 @@ public:
 	int countForWheel = 0;
 	bool wheel = false;
 	bool takeCastle = false;
+	bool wonSoldier = false;
 
 	int isProvinceClicked = 0;
 	Province* first;

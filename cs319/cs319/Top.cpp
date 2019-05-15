@@ -2334,6 +2334,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			wheel = false;
 			countForWheel = 0;
 			takeCastle = false;
+			wonSoldier = false;
 
 		}
 		else if (phase == END_TURN) {
@@ -2431,7 +2432,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			}
 		}
 
-		else if (phase == MARKET_PHASE) {
+		else if (phase == MARKET_PHASE && !wonSoldier) {
 			int soldierPrice = 50;
 			if (player->getMoney() / soldierPrice > soldierAmount)
 				soldierAmount++;
@@ -2445,7 +2446,8 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				soldierAmount--;
 			}
 		}
-		else if (phase == POST_ATTACK || phase == FORTIFY_PHASE || phase == PLACEMENT_PHASE || phase == MARKET_PHASE) {
+
+		else if (phase == POST_ATTACK || phase == FORTIFY_PHASE || phase == PLACEMENT_PHASE || (phase == MARKET_PHASE && !wonSoldier)) {
 			if (soldierAmount > 1) {
 				soldierAmount--;
 			}
@@ -2455,10 +2457,11 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
 		countForWheel++;
+		wonSoldier = false;
 		string temp;
 		if (turnWheel) {
 			turnWheel = false;
-			int index = 7 /*((int)(rotateAmount / 45)) % 8*/;
+			int index = ((int)(rotateAmount / 45)) % 8;
 			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
 			if (index == 0) {
 				//draw bonus card
@@ -2519,6 +2522,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				string dum;
 				soldierAmount = GM->getPlayerByID(turn, dum)->getLeftSoldier();
 				buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+				wonSoldier = true;
 			}
 
 		}
@@ -2711,6 +2715,9 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				}
 				else if (phase == PLACEMENT_PHASE || phase == MARKET_PHASE) {
 					if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
+						if (wonSoldier) {
+							wonSoldier = false;
+						}
 						int dummy; Province* province; string dum;
 						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
@@ -2721,7 +2728,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 							buttons[ATTACK_BUTTON]->setFlag(true);
 							buttons[NEXT_PHASE_BUTTON]->setFlag(true);
 						}
-						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() != 0) {
+						else if (GM->getPlayerByID(turn, dum)->getLeftSoldier() != 0) {
 							soldierAmount = GM->getPlayerByID(turn, dum)->getLeftSoldier();
 							buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 						}
