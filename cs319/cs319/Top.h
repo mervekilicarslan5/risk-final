@@ -28,6 +28,7 @@ class MyImage;
 class MiniMap;
 class ArmyBage;
 class TopBar;
+class LineBetweenProvinces;
 
 
 
@@ -324,7 +325,6 @@ private:
 	bool gameOn;
 };
 
-
 class NetworkManager {
 public:
 	WindowManager * WM;
@@ -446,6 +446,9 @@ public:
 	void buttonClicked(int id, sf::Event &event, sf::RenderWindow & window);
 	void imageClicked(int id);
 	void handleWheel();
+	void highlight(Province* city);
+	void drawLine(Province* from, Province* to);
+	void resetHighlights();
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
 	void displayPlayerStatus();

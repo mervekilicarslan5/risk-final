@@ -2564,122 +2564,267 @@ void WindowManager::handleWheel() {
 
 void WindowManager::provinceClicked(int id) {
 	Province* city = GM->getWorldMap()->getProvinceByID(id);
-	if (isProvinceClicked == 0) {
-		for (int i = 0; i < listOfArmyBage.size(); i++) {
-			if (listOfArmyBage[i]->nameOfProvince == city->getName())
-				listOfArmyBage[i]->setScale(2, 2);
-			else
-				listOfArmyBage[i]->setScale(1, 1);
+	Player* player = GM->getPlayers()[turn];
+	
+	//
+	//if (isProvinceClicked == 0) {
+	//	for (int i = 0; i < listOfArmyBage.size(); i++) {
+	//		if (listOfArmyBage[i]->nameOfProvince == city->getName())
+	//			listOfArmyBage[i]->setScale(2, 2);
+	//		else
+	//			listOfArmyBage[i]->setScale(1, 1);
+	//	}
+	//}
+
+	//if (phase == ATTACKING_PHASE || phase == FORTIFY_PHASE) {
+	//	if (isProvinceClicked == 0) {
+	//		first = city;
+	//		second = NULL;
+	//		isProvinceClicked = 1;
+	//		if (page == 1)
+	//			provinceNameTxt.setString(first->getName());
+
+	//		//-------------------------------------------------
+	//		//This code is to Scale a square with army size of a province.
+	//		highlight(city);
+	//		//--------------------------------------------------
+
+
+	//		//----------------------------------
+	//		//This is when you release from the probince. Can be changed????
+	//		lineForProvinces->setVisible(false);
+	//		//-------------------------------
+	//	}
+	//	else if (isProvinceClicked == 1) {
+	//		cout << "we are here" << endl;
+	//		second = city;
+	//		isProvinceClicked = 2;
+
+	//		//------------------------------------------------------
+	//		//this part is to draw line between two provinces
+	//		Vector2f firstCoordinates, secondCoordinates;
+	//		for (int i = 0; i < listOfArmyBage.size(); i++) {
+	//			if (listOfArmyBage[i]->nameOfProvince == first->getName())
+	//				firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+	//			if (listOfArmyBage[i]->nameOfProvince == second->getName())
+	//				secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+	//		}
+
+	//		lineForProvinces->setCoordinates(firstCoordinates, secondCoordinates);
+	//		lineForProvinces->setVisible(true);
+	//		//--------------------------------------------------------
+
+
+	//		//-------------------------------------------------
+	//		//This code is to Scale a square with army size of a province.
+	//		for (int i = 0; i < listOfArmyBage.size(); i++) {
+	//			if (listOfArmyBage[i]->nameOfProvince == first->getName())
+	//				listOfArmyBage[i]->setScale(2, 2);
+	//			else if (listOfArmyBage[i]->nameOfProvince == second->getName())
+	//				listOfArmyBage[i]->setScale(2, 2);
+	//			else
+	//				listOfArmyBage[i]->setScale(1, 1);
+	//		}
+	//		//-------------------------------------------------
+
+
+
+	//		if (phase == ATTACKING_PHASE)
+	//			provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
+	//		else
+	//			provinceNameTxt.setString("From " + first->getName() + " to " + second->getName());
+	//	}
+	//	else if (isProvinceClicked == 2) {
+	//		second = NULL;
+	//		first = city;
+	//		isProvinceClicked = 1;
+	//		provinceNameTxt.setString(first->getName());
+	//		lineForProvinces->setVisible(false);
+	//		//-------------------------------------------------
+	//		//This code is to Scale a square with army size of a province.
+	//		for (int i = 0; i < listOfArmyBage.size(); i++) {
+	//			if (listOfArmyBage[i]->nameOfProvince == city->getName())
+	//				listOfArmyBage[i]->setScale(2, 2);
+	//			else
+	//				listOfArmyBage[i]->setScale(1, 1);
+	//		}
+	//		//-------------------------------------------------
+
+	//	}
+	//	if (phase != FORTIFY_PHASE) {
+	//		if (first->getNumberOfSoldiers() > 3)
+	//			soldierAmount = 3;
+	//		else
+	//			soldierAmount = first->getNumberOfSoldiers() - 1;
+	//	}
+	//	else
+	//		soldierAmount = first->getNumberOfSoldiers() - 1;
+	//	buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+	//}
+	//else if (phase == POST_ATTACK) {
+	//	soldierAmount = first->getNumberOfSoldiers() - 1;
+	//	buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+
+	//	//-------------------------------------------------
+	//	//This code is to Scale a square with army size of a province.
+	//	for (int i = 0; i < listOfArmyBage.size(); i++) {
+	//		if (listOfArmyBage[i]->nameOfProvince == city->getName())
+	//			listOfArmyBage[i]->setScale(2, 2);
+	//		else
+	//			listOfArmyBage[i]->setScale(1, 1);
+	//	}
+	//	//-------------------------------------------------
+	//}
+
+	if (phase == PLACEMENT_PHASE){}
+	else if (phase == ATTACKING_PHASE){
+		if (isProvinceClicked == 0){
+			if (city->getOwner() == player) {
+				first = city;
+				second = NULL;
+				isProvinceClicked = 1;
+				if (page == 1)
+					provinceNameTxt.setString(first->getName());
+				resetHighlights();
+				highlight(city);
+			}
+			else {
+				resetHighlights();
+			}
+			lineForProvinces->setVisible(false);
+		}
+		else if (isProvinceClicked == 1){
+			if (city->getOwner() != player) {
+				second = city;
+				isProvinceClicked = 2;
+				resetHighlights();
+				highlight(first);
+				highlight(second);
+				drawLine(first, second);
+				provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
+			}
+			else {
+				first = city;
+				second = NULL;
+				isProvinceClicked = 1;
+				if (page == 1)
+					provinceNameTxt.setString(first->getName());
+				resetHighlights();
+				highlight(city);
+				lineForProvinces->setVisible(false);
+				
+			}
+		}
+		else if (isProvinceClicked == 2){
+			if (city->getOwner() == player) {
+				first = city;
+				second = NULL;
+				isProvinceClicked = 1;
+				if (page == 1)
+					provinceNameTxt.setString(first->getName());
+				resetHighlights();
+				highlight(city);
+				lineForProvinces->setVisible(false);
+			}
+			else {
+				first = NULL;
+				second = NULL;
+				isProvinceClicked = 0;
+				provinceNameTxt.setString("");
+				resetHighlights();
+				lineForProvinces->setVisible(false);
+			}
 		}
 	}
-
-
-	if (phase == ATTACKING_PHASE || phase == FORTIFY_PHASE) {
+	else if (phase == FORTIFY_PHASE) {
 		if (isProvinceClicked == 0) {
-			first = city;
-			second = NULL;
-			isProvinceClicked = 1;
-			if (page == 1)
-				provinceNameTxt.setString(first->getName());
-
-
-			//-------------------------------------------------
-			//This code is to Scale a square with army size of a province.
-			for (int i = 0; i < listOfArmyBage.size(); i++) {
-				if (listOfArmyBage[i]->nameOfProvince == city->getName())
-					listOfArmyBage[i]->setScale(2, 2);
-				else
-					listOfArmyBage[i]->setScale(1, 1);
+			if (city->getOwner() == player) {
+				first = city;
+				second = NULL;
+				isProvinceClicked = 1;
+				if (page == 1)
+					provinceNameTxt.setString(first->getName());
+				resetHighlights();
+				highlight(city);
 			}
-			//--------------------------------------------------
-
-
-			//----------------------------------
-			//This is when you release from the probince. Can be changed????
+			else {
+				resetHighlights();
+			}
 			lineForProvinces->setVisible(false);
-			//-------------------------------
 		}
 		else if (isProvinceClicked == 1) {
-			cout << "we are here" << endl;
-			second = city;
-			isProvinceClicked = 2;
-
-			//------------------------------------------------------
-			//this part is to draw line between two provinces
-			Vector2f firstCoordinates, secondCoordinates;
-			for (int i = 0; i < listOfArmyBage.size(); i++) {
-				if (listOfArmyBage[i]->nameOfProvince == first->getName())
-					firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
-				if (listOfArmyBage[i]->nameOfProvince == second->getName())
-					secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
-			}
-
-			lineForProvinces->setCoordinates(firstCoordinates, secondCoordinates);
-			lineForProvinces->setVisible(true);
-			//--------------------------------------------------------
-
-
-			//-------------------------------------------------
-			//This code is to Scale a square with army size of a province.
-			for (int i = 0; i < listOfArmyBage.size(); i++) {
-				if (listOfArmyBage[i]->nameOfProvince == first->getName())
-					listOfArmyBage[i]->setScale(2, 2);
-				else if (listOfArmyBage[i]->nameOfProvince == second->getName())
-					listOfArmyBage[i]->setScale(2, 2);
-				else
-					listOfArmyBage[i]->setScale(1, 1);
-			}
-			//-------------------------------------------------
-
-
-
-			if (phase == ATTACKING_PHASE)
-				provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
-			else
+			if (city->getOwner() == player) {
+				second = city;
+				isProvinceClicked = 2;
+				resetHighlights();
+				highlight(first);
+				highlight(second);
+				drawLine(first, second);
 				provinceNameTxt.setString("From " + first->getName() + " to " + second->getName());
+			}
+			else {
+				first = NULL;
+				second = NULL;
+				isProvinceClicked = 0;
+				if (page == 1)
+					provinceNameTxt.setString("");
+				resetHighlights();
+				lineForProvinces->setVisible(false);
+			}
 		}
 		else if (isProvinceClicked == 2) {
-			second = NULL;
-			first = city;
-			isProvinceClicked = 1;
-			provinceNameTxt.setString(first->getName());
-			lineForProvinces->setVisible(false);
-			//-------------------------------------------------
-			//This code is to Scale a square with army size of a province.
-			for (int i = 0; i < listOfArmyBage.size(); i++) {
-				if (listOfArmyBage[i]->nameOfProvince == city->getName())
-					listOfArmyBage[i]->setScale(2, 2);
-				else
-					listOfArmyBage[i]->setScale(1, 1);
+			if (city->getOwner() == player) {
+				first = city;
+				second = NULL;
+				isProvinceClicked = 1;
+				if (page == 1)
+					provinceNameTxt.setString(first->getName());
+				resetHighlights();
+				highlight(city);
+				lineForProvinces->setVisible(false);
 			}
-			//-------------------------------------------------
-
+			else {
+				first = NULL;
+				second = NULL;
+				isProvinceClicked = 0;
+				provinceNameTxt.setString("");
+				resetHighlights();
+				lineForProvinces->setVisible(false);
+			}
 		}
-		if (phase != FORTIFY_PHASE) {
-			if (first->getNumberOfSoldiers() > 3)
-				soldierAmount = 3;
-			else
-				soldierAmount = first->getNumberOfSoldiers() - 1;
-		}
-		else
-			soldierAmount = first->getNumberOfSoldiers() - 1;
-		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
-	else if (phase == POST_ATTACK) {
-		soldierAmount = first->getNumberOfSoldiers() - 1;
-		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-
-		//-------------------------------------------------
-		//This code is to Scale a square with army size of a province.
-		for (int i = 0; i < listOfArmyBage.size(); i++) {
-			if (listOfArmyBage[i]->nameOfProvince == city->getName())
-				listOfArmyBage[i]->setScale(2, 2);
-			else
-				listOfArmyBage[i]->setScale(1, 1);
-		}
-		//-------------------------------------------------
+	else if (phase == MARKET_PHASE) {
 	}
+
 	displayProvinceInfo(city);
+}
+
+void WindowManager::highlight(Province* city) {
+	for (int i = 0; i < listOfArmyBage.size(); i++) {
+		if (listOfArmyBage[i]->nameOfProvince == city->getName()) {
+			listOfArmyBage[i]->setScale(2, 2);
+			return;
+		}
+	}
+}
+
+void WindowManager::resetHighlights() {
+	for (int i = 0; i < listOfArmyBage.size(); i++) {
+		listOfArmyBage[i]->setScale(1, 1);
+	}
+}
+
+void WindowManager::drawLine(Province* from, Province* to) {
+	Vector2f firstCoordinates, secondCoordinates;
+	for (int i = 0; i < listOfArmyBage.size(); i++) {
+		if (listOfArmyBage[i]->nameOfProvince == from->getName())
+			firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+		if (listOfArmyBage[i]->nameOfProvince == to->getName())
+			secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+	}
+
+	lineForProvinces->setCoordinates(firstCoordinates, secondCoordinates);
+	lineForProvinces->setVisible(true);
 }
 
 void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
@@ -2897,7 +3042,6 @@ void MyImage::setInitialPosition(float x, float y) {
 sf::Vector2f MyImage::getInitialPosition() {
 	return initialPosition;
 }
-
 
 NetworkManager::NetworkManager(WindowManager * WM) {
 	this->WM = WM;
@@ -3277,7 +3421,6 @@ vector<string> NetworkManager::split(string strToSplit, char delimeter) {
 	return splittedStrings;
 }
 
-
 MiniMap::MiniMap(sf::Texture  mapTexture) {
 	sf::View::View();
 	this->setSize(GetSystemMetrics(SM_CXSCREEN) / 5, GetSystemMetrics(SM_CYSCREEN) / 5);
@@ -3286,6 +3429,7 @@ MiniMap::MiniMap(sf::Texture  mapTexture) {
 	mapSprite.setTexture(mapTex);
 	mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
 }
+
 MiniMap::MiniMap() {
 	sf::View::View();
 }
@@ -3302,13 +3446,13 @@ void MiniMap::update(sf::View & mainView) {
 	this->setViewport(FloatRect(float(0.8), float(0.8), 0.2, 0.2));
 
 }
+
 void MiniMap::draw(sf::RenderWindow & window) {
 	window.draw(mapSprite);
 	window.draw(miniMapRectangle);
 
 
 }
-
 
 ArmyBage::ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font) {
 	this->nameOfProvince = nameOfProvince;
@@ -3381,13 +3525,6 @@ void CastleBage::setBageColor(sf::Color color) {
 	this->setColor(color);
 	this->color = color;
 }
-
-
-
-
-
-
-
 
 LineBetweenProvinces::LineBetweenProvinces(Image &img) {
 	this->img = img;
