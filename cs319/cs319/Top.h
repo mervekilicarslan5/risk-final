@@ -207,7 +207,7 @@ public:
 	void setId(int _id);
 	void captureProvince(WorldMap* worldMap, Province* _province);
 	void loseProvince(WorldMap* worldMap, Province* _province);
-	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
+	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province );
 	bool hasProvince(WorldMap * worldMap, Province* _province);
 	int buildCastle(Province* province);
 	int getNumberOfProvinces();
@@ -317,6 +317,7 @@ public:
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
+	
 
 private:
 	vector<Player*> players;
@@ -412,6 +413,7 @@ public:
 	int countForWheel = 0;
 	bool wheel = false;
 	bool takeCastle = false;
+	bool wonSoldier = false;
 
 	int isProvinceClicked = 0;
 	Province* first;
@@ -471,6 +473,12 @@ public:
 	void setTextColor(sf::Color color);
 	void setTextSize(int size);
 	void setSize(int width, int height);
+	void setFlag(bool flag);
+	bool getFlag();
+	int getText();
+
+private:
+	bool flag;
 };
 
 class MyImage : public sf::Sprite {
