@@ -28,6 +28,7 @@ class MyImage;
 class MiniMap;
 class ArmyBage;
 class TopBar;
+class LineBetweenProvinces;
 
 
 
@@ -206,7 +207,7 @@ public:
 	void setId(int _id);
 	void captureProvince(WorldMap* worldMap, Province* _province);
 	void loseProvince(WorldMap* worldMap, Province* _province);
-	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
+	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province );
 	bool hasProvince(WorldMap * worldMap, Province* _province);
 	int buildCastle(Province* province);
 	int getNumberOfProvinces();
@@ -312,9 +313,11 @@ public:
 	vector<string> split(std::string strToSplit, char delimeter);
 	void destroyNearSoldier(Province* province);
 	void castleAttacks(Player* player);
+	vector<Player*> getPlayers();
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
+	
 
 private:
 	vector<Player*> players;
@@ -322,7 +325,6 @@ private:
 	Die* die;
 	bool gameOn;
 };
-
 
 class NetworkManager {
 public:
@@ -368,6 +370,7 @@ public:
 	MiniMap miniMap;
 	LineBetweenProvinces *lineForProvinces;
 	vector<Button*> buttons;
+	vector<Text*> playerStatus;
 	vector<MyImage*> images;
 	vector<MyImage*> castles;
 	vector<string> wheelStr;
@@ -379,6 +382,8 @@ public:
 	bool turnWheel = false;
 	float time; //time to calculate elapsed time
 	Clock clock;
+
+	int totalTurn = 1;
 
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
@@ -408,6 +413,7 @@ public:
 	int countForWheel = 0;
 	bool wheel = false;
 	bool takeCastle = false;
+	bool wonSoldier = false;
 
 	int isProvinceClicked = 0;
 	Province* first;
@@ -421,6 +427,8 @@ public:
 	bool _randomPlacement = true;
 	bool castle = false;
 	float rotateAmount = 22.5;
+	float rotateStep = 2.5;
+	int rotateRandom = 250;
 
 
 	int counter = 0;
@@ -433,13 +441,19 @@ public:
 	void multGameComp(RenderWindow & window, Event & event);
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
+	bool insideTheWindow(Vector2i pos);
 	string getProvinceName(sf::RenderWindow & window, sf::Mouse & m);
 	void provinceClicked(int id);
 	void checkClickEvents(sf::Event & e);
 	void buttonClicked(int id, sf::Event &event, sf::RenderWindow & window);
 	void imageClicked(int id);
+	void handleWheel();
+	void highlight(Province* city);
+	void drawLine(Province* from, Province* to);
+	void resetHighlights();
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
+	void displayPlayerStatus();
 	void drawAllArmies(RenderWindow & window, Event & e);
 	void drawAllCastles(RenderWindow & window, Event & e);
 };
@@ -459,6 +473,12 @@ public:
 	void setTextColor(sf::Color color);
 	void setTextSize(int size);
 	void setSize(int width, int height);
+	void setFlag(bool flag);
+	bool getFlag();
+	int getText();
+
+private:
+	bool flag;
 };
 
 class MyImage : public sf::Sprite {
