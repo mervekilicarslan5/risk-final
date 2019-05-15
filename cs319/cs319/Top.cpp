@@ -1,6 +1,10 @@
 #include "Top.h"
+namespace globalsS {
+	int screenWidth;
+	int screenHeight;
+};
 using namespace std;
-
+using namespace globalsS;
 Die::Die()
 {
 	numberOfFaces = 6;
@@ -68,7 +72,7 @@ void Castle::upgradeLevel()
 		level = 2;
 		price += 50;
 	}
-		
+
 }
 
 bool Castle::isBuilt() {
@@ -143,7 +147,7 @@ void Continent::setProvinces(vector<int> _provinces)
 
 Player::Player()
 {
-	leftSoldier = 10;
+	leftSoldier = 20;
 	name = "";
 	id = -1;
 	battlesLost = 0;
@@ -153,7 +157,7 @@ Player::Player()
 
 Player::Player(string _name, int _id)
 {
-	leftSoldier = 10;
+	leftSoldier = 20;
 	name = _name;
 	id = _id;
 	battlesLost = 0;
@@ -235,26 +239,38 @@ void Player::setId(int _id)
 
 void Player::captureProvince(WorldMap* worldMap, Province * _province)
 {
-	if (! (this->hasProvince(worldMap, _province))) {
+	if (!(this->hasProvince(worldMap, _province))) {
 		if (_province->getOwner() != NULL) {
 			_province->getOwner()->loseProvince(worldMap, _province);
 		}
 		provinces.push_back(worldMap->findIndex(_province));
 		_province->setOwner(this);
 	}
-	
+
 }
 
 void Player::loseProvince(WorldMap* worldMap, Province* _province) {
-	vector <int> :: iterator index = find(provinces.begin(), provinces.end(), worldMap->findIndex(_province));
+	vector <int> ::iterator index = find(provinces.begin(), provinces.end(), worldMap->findIndex(_province));
 	if (index != provinces.end())
 		provinces.erase(index);
 }
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 {
-	if (leftSoldier < amount)
-		return false;
+	int pricesold = 50;
+	if (leftSoldier < amount) {
+		if (money < (pricesold * amount)) {
+			cout << "******* insufficientmoney for soldier" << endl;
+			return false;
+		}
+		else {
+			money -= (pricesold*amount);
+			_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
+			worldMap->showProvinceStatus(_province);
+			return true;
+		}
+	}
+		
 	if (!hasProvince(worldMap, _province))
 		return false;
 	_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
@@ -272,7 +288,7 @@ bool Player::hasProvince(WorldMap * worldMap, Province * _province)
 }
 
 int Player::buildCastle(Province* province) {
-	
+
 	if (province->getCastle()->isBuilt() == false) {
 		if (province->getCastle()->getPrice() > money) {
 			cout << "Insufficient money to build castle!";
@@ -282,7 +298,7 @@ int Player::buildCastle(Province* province) {
 		money -= province->getCastle()->getPrice();
 		return 1;
 	}
-		
+
 	else if (province->getCastle()->getLevel() == 1) {
 		if (province->getCastle()->getPrice() > money) {
 			cout << "Insufficient money to upgrade castle!";
@@ -334,7 +350,7 @@ void WorldMap::addEdge(int first, int second)
 }
 
 int WorldMap::findIndex(Province * _province)
-{	
+{
 	int count = 0;
 	for (auto it = provinceList.begin(); it != provinceList.end(); it++) {
 		if (*it == _province) {
@@ -417,7 +433,7 @@ void WorldMap::getProvinceByName(string name, int & index, Province* & ptr) {
 void WorldMap::showProvinceStatus(Province* p) {
 	cout << "------------------------------------" << endl;
 	cout << "Province Name: " << p->getName() << endl;
-	if(p->getOwner() == NULL)
+	if (p->getOwner() == NULL)
 		cout << "Current Owner: None" << endl;
 	else
 		cout << "Current Owner: " << p->getOwner()->getName() << endl;
@@ -457,8 +473,14 @@ int WorldMap::ownerCount() {
 	return count;
 }
 
-
-
+vector<Province*> WorldMap::getNeighbors(Province* _province) {
+	vector<Province*> result;
+	int index = findIndex(_province);
+	for (auto it = map[index].begin(); it != map[index].end(); it++) {
+		result.push_back(provinceList[(*it)]);
+	}
+	return result;
+}
 
 Province::Province()
 {
@@ -608,8 +630,8 @@ bool GameManager::buildCastle(Player* player, Province* province) {
 		return false;
 	return true;
 
-	
-	
+
+
 }
 
 bool GameManager::buildCastle(int playerId, string provinceName) {
@@ -629,7 +651,7 @@ bool GameManager::buildCastle(string playerName, string provinceName) {
 }
 
 bool GameManager::placeSoldier(Player * player, string provinceName, int amount)
-{	
+{
 	Province* province; int i;
 	worldMap->getProvinceByName(provinceName, i, province);
 	if (province->getOwner() != NULL && province->getOwner() != player)
@@ -666,7 +688,7 @@ bool GameManager::fortify(Player* player, Province* from, Province * to, int amo
 		cout << "No path between " << from->getName() << " and " << to->getName() << endl;
 		return false;
 	}
-		
+
 	from->setNumberOfSoldiers(from->getNumberOfSoldiers() - amount);
 	to->setNumberOfSoldiers(to->getNumberOfSoldiers() + amount);
 	cout << amount << " soldiers have been fortified from " << from->getName() << " to " << to->getName() << endl;
@@ -748,7 +770,7 @@ bool GameManager::attack(Player* attacker, Player* defender, Province* from, Pro
 		attacker->incBattlesLost();
 		defender->incBattlesWon();
 	}
-		
+
 	if (to->getNumberOfSoldiers() == 0) {
 		cout << attacker->getName() << " has captured the city " << to->getName() << endl;
 		attacker->captureProvince(worldMap, to);
@@ -765,7 +787,7 @@ bool GameManager::attack(string attackerName, string defenderName, string fromSt
 		cout << "No such players" << endl;
 		return false;
 	}
-	Province* from, * to;
+	Province* from, *to;
 	worldMap->getProvinceByName(fromStr, i, from);
 	if (i == -1) {
 		cout << fromStr << " does not exist!" << endl;
@@ -789,8 +811,8 @@ void GameManager::showProvinceStatus(string name) {
 	worldMap->showProvinceStatus(ptr);
 }
 
-vector<int> GameManager::rollDice(int attacker, int defender)  {
-	
+vector<int> GameManager::rollDice(int attacker, int defender) {
+
 	vector<int> attackerResults, defenderResults;
 	vector<int> result;
 	result.push_back(0);
@@ -815,7 +837,7 @@ vector<int> GameManager::rollDice(int attacker, int defender)  {
 			result[1]++;
 	}
 
-	return result; 
+	return result;
 }
 
 void GameManager::startPlacement() {
@@ -827,17 +849,17 @@ void GameManager::startPlacement() {
 
 	for (int i = 0; i < numberOfProvinces; i++) {
 		Player* currentPlayer = players[turn % numberOfPlayers];
-		cout << currentPlayer->getName() << "'s turn" << endl; 
-		
+		cout << currentPlayer->getName() << "'s turn" << endl;
+
 		Province* currentProvince;
 		string city;
 		while (true) {
 			cout << "Choose a city to place a soldier: ";
-			 cin >> city;
+			cin >> city;
 			int dummy;
-			
+
 			worldMap->getProvinceByName(city, dummy, currentProvince);
-			
+
 			if (currentProvince == NULL) {
 				cout << "No such city." << endl;
 			}
@@ -886,7 +908,7 @@ void GameManager::loadProvinces() {
 	createNeighbor("istanbul", "edirne");
 	createNeighbor("istanbul", "kocaeli");
 	createNeighbor("eskisehir", "kocaeli");
-*/
+	*/
 	fstream file("assets/provinces.txt");
 
 	int color;
@@ -896,7 +918,7 @@ void GameManager::loadProvinces() {
 	string line;
 	ifstream myfile("assets/provinces.txt");
 	if (myfile.is_open()) {
-		while (getline(myfile,line)) {
+		while (getline(myfile, line)) {
 			vector<string> prov = split(line, ';');
 			cityName = prov[0];
 			color = stoi(prov[1]);
@@ -1005,7 +1027,7 @@ void GameManager::loadProvinces() {
 	createNeighbor("konya", "antalya");*/
 
 	cout << "efsfsef" << endl;
-	
+
 }
 
 void GameManager::startGame(NetworkManager ** NM) {
@@ -1026,9 +1048,9 @@ void GameManager::startGame(NetworkManager ** NM) {
 			(*NM)->sendDataFromHost(this, 0, 0, 0, 0);
 		}
 	}
-		
+
 	showWorldStatus();
-		
+
 	gameOn = true;
 
 	int turn = 0;
@@ -1036,7 +1058,7 @@ void GameManager::startGame(NetworkManager ** NM) {
 	int numberOfProvinces = worldMap->getNumberOfProvinces();
 	cout << endl << "==================================  " << endl;
 	while (gameOn) {
-		
+
 		if ((*NM)->connectionType == "h" && turn == 0) {
 			cout << endl << "============		YOUR TURN		===============  " << endl;
 			currentPlayer = 0;
@@ -1045,7 +1067,7 @@ void GameManager::startGame(NetworkManager ** NM) {
 			turn = 1;
 		}
 		else if ((*NM)->connectionType == "h" && turn == 1) {
-			cout << endl << "============		"<< players[1]->getName() <<" TURN		===============  " << endl;
+			cout << endl << "============		" << players[1]->getName() << " TURN		===============  " << endl;
 			sendAllProvincesClientToHost((*NM)->connectionType, NM);
 			sendAllProvincesFromHost(NM);
 			cout << endl << "============		" << players[2]->getName() << " TURN		===============  " << endl;
@@ -1087,8 +1109,8 @@ void GameManager::startGame(NetworkManager ** NM) {
 
 
 		/*else if ((*NM)->connectionType == "c2" && turn == 1) {
-			cout << endl << "============		" << players[3]->getName() << " TURN		===============  " << endl;
-			sendAllProvincesFromHost(NM);
+		cout << endl << "============		" << players[3]->getName() << " TURN		===============  " << endl;
+		sendAllProvincesFromHost(NM);
 		}*/
 	}
 }
@@ -1121,7 +1143,7 @@ void GameManager::startPlacementPhase(int id) {
 			}
 			else {
 				cout << "The amount cannot be more than " << n << endl;
-			} 
+			}
 		}
 		else {
 			cout << "No such city" << endl;
@@ -1152,7 +1174,7 @@ void GameManager::startAttackingPhase(int id) {
 		else {
 			cout << "attack to: ";
 			cin >> to;
-			Province* toPtr; 
+			Province* toPtr;
 			worldMap->getProvinceByName(to, dummy, toPtr);
 			if (toPtr == NULL) {
 				cout << "No such city" << endl;
@@ -1167,10 +1189,10 @@ void GameManager::startAttackingPhase(int id) {
 				int amount;
 				cout << "amount: ";
 				cin >> amount;
-				if (amount >= fromPtr->getNumberOfSoldiers() ) {
+				if (amount >= fromPtr->getNumberOfSoldiers()) {
 					cout << "There has to be at least one soldier left in the city" << endl;
 				}
-				else if (amount > 3 || amount < 1){
+				else if (amount > 3 || amount < 1) {
 					cout << "The number needs to be betwen 1 - 3" << endl;
 				}
 				else {
@@ -1195,14 +1217,14 @@ void GameManager::startMarket(int id) {
 	cout << endl << "*** MARKET PHASE ***" << endl;
 	cout << "Your money: " << player->getMoney() << endl;
 	cout << "How many soldiers do you want? (100 gold per soldier): ";
-	int amount; 
+	int amount;
 	while (true) {
 		cin >> amount;
 		if (amount * 100 > player->getMoney()) {
 			cout << "Insufficient money" << endl;
 		}
 		else {
-			player->setMoney(player->getMoney()-amount*100);
+			player->setMoney(player->getMoney() - amount * 100);
 			break;
 		}
 	}
@@ -1257,7 +1279,7 @@ void GameManager::startMarket(int id) {
 			else {
 				cout << "No such city" << endl;
 			}
-						
+
 		}
 		cout << "Your money: " << player->getMoney() << endl;
 		cout << "Do you wanna buy castle (y / n): ";
@@ -1298,7 +1320,7 @@ void GameManager::startFortifyPhase(int id) {
 			else if (toPtr->getOwner() != player) {
 				cout << "This city does not belong to you" << endl;
 			}
-			else if (!worldMap->hasPath(player,fromPtr,toPtr)) {
+			else if (!worldMap->hasPath(player, fromPtr, toPtr)) {
 				cout << "There must be a path between the cities" << endl;
 			}
 			else {
@@ -1318,32 +1340,32 @@ void GameManager::startFortifyPhase(int id) {
 }
 
 void GameManager::randomPlacement() {
-	
-	//int size = worldMap->getNumberOfProvinces();
-	//Die die(size);
-	//int* shuffledArray = new int[size];
-	//for (int i = 0; i < size; i++) {
-	//	shuffledArray[i] = i;
-	//}
-	//for (int i = 0; i < size; i++) {
-	//	int r = die.roll() - 1;
-	//	int temp;
-	//	temp = shuffledArray[i];
-	//	shuffledArray[i] = shuffledArray[r];
-	//	shuffledArray[r] = temp;
-	//}
-	//int t = 0;
-	//int numberOfPlayers = players.size();
-	//for (int i = 0; i < size; i++) {
-	//	Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
-	//	placeSoldier(players[t], curProvince->getName(), 3);
-	//	t = (t + 1) % numberOfPlayers;
-	//}
-	//cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
-	//delete shuffledArray;
+
+	/*int size = worldMap->getNumberOfProvinces();
+	Die die(size);
+	int* shuffledArray = new int[size];
+	for (int i = 0; i < size; i++) {
+	shuffledArray[i] = i;
+	}
+	for (int i = 0; i < size; i++) {
+	int r = die.roll() - 1;
+	int temp;
+	temp = shuffledArray[i];
+	shuffledArray[i] = shuffledArray[r];
+	shuffledArray[r] = temp;
+	}
+	int t = 0;
+	int numberOfPlayers = players.size();
+	for (int i = 0; i < size; i++) {
+	Province* curProvince = worldMap->getProvinceByID(shuffledArray[i]);
+	placeSoldier(players[t], curProvince->getName(), 3);
+	t = (t + 1) % numberOfPlayers;
+	}
+	cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
+	delete shuffledArray;
 
 
-
+	*/
 
 
 
@@ -1365,6 +1387,7 @@ void GameManager::randomPlacement() {
 	shuffledArray[i] = shuffledArray[r];
 	shuffledArray[r] = temp;
 	}*/
+
 	int t;
 	int numberOfPlayers = players.size();
 	Die die(numberOfPlayers);
@@ -1372,33 +1395,34 @@ void GameManager::randomPlacement() {
 	int count = 0;
 	for (int i = 0; i < size; i++) {
 		Province* curProvince = worldMap->getProvinceByID(i);
-		if (players[t]->getNumberOfProvinces() < size / 3 + 1) {
-			placeSoldier(players[t], curProvince->getName(), 1);
+		if (players[t]->getNumberOfProvinces() < size / 3) {
+			placeSoldier(players[t], curProvince->getName(), 5);
 		}
 		else {
 			i--;
 		}
 		t = die.roll() - 1;
 	}
+
 	cout << "* PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS *" << endl;
 	//delete shuffledArray;
 }
 
 int GameManager::getPlayerTurn(string _name) {
 	int dummy;
-	Player * user = getPlayerByName(_name,dummy);
+	Player * user = getPlayerByName(_name, dummy);
 	int index;
 	for (int i = 0; i < players.size(); i++) {
 		if (players[i] == user)
 			index = i;
 	}
 	return index;
-	
+
 }
 
 void GameManager::sendAllProvincesFromHostString(NetworkManager ** NM) {
 	string _provinces = "";
-	
+
 	if ((*NM)->connectionType == "h") {
 		for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
 			Province * pro = worldMap->getProvinceByID(i);
@@ -1414,15 +1438,15 @@ void GameManager::sendAllProvincesFromHostString(NetworkManager ** NM) {
 	}
 	else {
 		string received = (*NM)->sendStringFromHost(_provinces);
-		vector<string> data = (*NM)->split(received,',');
+		vector<string> data = (*NM)->split(received, ',');
 		for (int i = 0; i < data.size(); i += 4) {
 
 			string dummy;
-			int pId = stoi (data[i]);
-			int cId = stoi(data[i+1]);
-			int count = stoi(data[i+2]);
-			int casLev= stoi(data[i+3]);
-			
+			int pId = stoi(data[i]);
+			int cId = stoi(data[i + 1]);
+			int count = stoi(data[i + 2]);
+			int casLev = stoi(data[i + 3]);
+
 			Player * playerChanged = this->getPlayerByID(pId, dummy);
 			Province * provinceChanged = this->getWorldMap()->getProvinceByID(cId);
 			//provinceChanged->setOwner(playerChanged);
@@ -1430,10 +1454,10 @@ void GameManager::sendAllProvincesFromHostString(NetworkManager ** NM) {
 				playerChanged->captureProvince(this->getWorldMap(), provinceChanged);
 			provinceChanged->setNumberOfSoldiers(count);
 			provinceChanged->getCastle()->setLevel(casLev);
-	
+
 		}
 	}
-	
+
 	showWorldStatus();
 }
 
@@ -1474,7 +1498,7 @@ void GameManager::sendAllProvincesClientToHostString(NetworkManager ** NM) {
 					playerChanged->captureProvince(this->getWorldMap(), provinceChanged);
 				provinceChanged->setNumberOfSoldiers(count);
 				provinceChanged->getCastle()->setLevel(casLev);
-				
+
 			}
 			break;
 		}
@@ -1491,12 +1515,12 @@ void GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
 	showWorldStatus();
 }
 
-void GameManager::sendAllProvincesClientToHost (string _connectionType, NetworkManager ** NM) {
+void GameManager::sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM) {
 	for (int i = 0; i < worldMap->getNumberOfProvinces(); i++) {
 		Province * pro = worldMap->getProvinceByID(i);
-		(*NM)->sendDataFromClientToHost(this, _connectionType, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(),pro->getCastle()->getLevel());
+		(*NM)->sendDataFromClientToHost(this, _connectionType, pro->getOwner()->getId(), i, pro->getNumberOfSoldiers(), pro->getCastle()->getLevel());
 	}
-		
+
 }
 
 vector<string> GameManager::split(string strToSplit, char delimeter) {
@@ -1511,8 +1535,34 @@ vector<string> GameManager::split(string strToSplit, char delimeter) {
 }
 
 
+void GameManager::destroyNearSoldier(Province* province) {
+	if (province->getCastle()->isBuilt()) {
+		Player* owner = province->getOwner();
+		vector<Province*> neighbors = worldMap->getNeighbors(province);
+		vector<Province*> opponent;
+		int counter = -1;
+		for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+			if ((*it)->getOwner() != owner && (*it)->getNumberOfSoldiers() > 1) {
+				opponent.push_back((*it));
+				counter++;
+			}
+		}
+		if (counter != -1) {
+			Die die(counter);
+			int index = die.roll() - 1;
+			opponent[index]->setNumberOfSoldiers(opponent[index]->getNumberOfSoldiers() - 1);
+			cout << opponent[index]->getName() << " has lost 1 soldier due to the castle." << endl;
+		}
+	}
+}
 
-
+void GameManager::castleAttacks(Player* player) {
+	cout << "CASTLE ATTACKS" << endl;
+	vector<int> provinces = player->getProvinces();
+	for (auto it = provinces.begin(); it != provinces.end(); it++) {
+		destroyNearSoldier(worldMap->getProvinceByID((*it)));
+	}
+}
 
 
 WindowManager::WindowManager()
@@ -1523,12 +1573,12 @@ WindowManager::WindowManager()
 
 
 
-	zoom = 1.0;
+	zoom = 1;
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2;
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;
+	screenWidth =  GetSystemMetrics(SM_CXSCREEN) / 2; // 1920; //
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2; // 1080; //
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1547,9 +1597,31 @@ WindowManager::WindowManager()
 	if (!roundedSquare.loadFromFile("assets/roundedSquare.png")) {
 		cout << "Unable to open file" << endl;
 	}
-	else {
-		cout << "wiiiiiiii" << endl;
+	if (!lineImg.loadFromFile("assets/line.png")) {
+		cout << "Unable to open file" << endl;
 	}
+	if (!topPanelImg.loadFromFile("assets/topPanel.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!coinImg.loadFromFile("assets/coin.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!actionImg.loadFromFile("assets/swords.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!timerImg.loadFromFile("assets/time.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!timerImg.loadFromFile("assets/time.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!crownImg.loadFromFile("assets/crown.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	if (!castleImg.loadFromFile("assets/castle.png")) {
+		cout << "Unable to open file" << endl;
+	}
+
 
 	font;
 	if (!font.loadFromFile("assets/font.ttf"))
@@ -1565,16 +1637,8 @@ WindowManager::WindowManager()
 	lowerPanel.setPosition(0, bottomUpperMargin);
 	lowerPanel.setFillColor(sf::Color(255, 255, 255));
 	miniMap = MiniMap(mapTex);
+	topPanel = new TopBar(topPanelImg, coinImg, actionImg, timerImg, crownImg,font);
 
-	provinceNameTxt.setFont(font);
-	provinceNameTxt.setCharacterSize(20);
-	provinceNameTxt.setFillColor(sf::Color(0, 0, 0));
-	provinceNameTxt.setPosition(600, bottomUpperMargin);
-
-	infoText.setFont(font);
-	infoText.setCharacterSize(20);
-	infoText.setFillColor(sf::Color::Black);
-	infoText.setPosition(600, 50 + bottomUpperMargin);
 
 	mapSprite.setPosition(0, 0);
 	mainView.setCenter(mapSprite.getLocalBounds().width / 2, mapSprite.getLocalBounds().height / 2);
@@ -1593,10 +1657,10 @@ WindowManager::WindowManager()
 
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
-			
-			vector<string> temp  = GM->split( line, ',');
-			listOfArmyBage.push_back(new ArmyBage(roundedSquare,stoi(temp[1]), stoi(temp[2]), temp[0],font));
 
+			vector<string> temp = GM->split(line, ',');
+			listOfArmyBage.push_back(new ArmyBage(roundedSquare, stoi(temp[1]), stoi(temp[2]), temp[0], font));
+			listOfCastleBage.push_back(new CastleBage(castleImg, stoi(temp[3]), stoi(temp[4]), temp[0]));
 			//listOfArmyBage.push_back(ArmyBage(temp));
 			//cityName = prov[0];
 			//color = stoi(prov[1]);
@@ -1608,9 +1672,9 @@ WindowManager::WindowManager()
 
 		myfile.close();
 	}
+	lineForProvinces = new LineBetweenProvinces(lineImg);
 
 
-
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
@@ -1623,15 +1687,15 @@ WindowManager::WindowManager()
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 
-	
+
+	wheelStr.push_back("Draw bonus card");
+	wheelStr.push_back("Bankruptcy");
 	wheelStr.push_back("250 Gold");
 	wheelStr.push_back("Pass");
-	wheelStr.push_back("Build castle");
+	wheelStr.push_back("Build Castle");
 	wheelStr.push_back("Take somebody's province");
 	wheelStr.push_back("Province Lost");
 	wheelStr.push_back("Take 3 soldiers");
-	wheelStr.push_back("Draw bonus card");
-	wheelStr.push_back("Pass");
 
 
 	images.push_back(new MyImage("soldier.png"));
@@ -1662,37 +1726,56 @@ WindowManager::WindowManager()
 	images[2]->setScale(0.3, 0.3);
 	int numberTextSize = 30;
 
-	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 40);
-	buttons[2]->setSize(numberTextSize, numberTextSize);
 	buttons[2]->setTextSize(numberTextSize);
-	buttons[2]->setTextColor(sf::Color::Black);
+	buttons[2]->setSize(numberTextSize, numberTextSize);
 	buttons[2]->setText("-");
+	buttons[2]->setPosition(images[0]->getInitialPosition().x + images[0]->getSize().x + 20, bottomUpperMargin + 10);
+	buttons[2]->setTextColor(sf::Color::Black);
+	buttons[2]->setFillColor(sf::Color::Red);
+	buttons[2]->setOutlineThickness(2);
+	buttons[2]->setOutlineColor(Color::Black);
 
-	buttons[4]->setPosition(buttons[2]->getPosition().x + buttons[2]->getSize().x, buttons[2]->getPosition().y);
-	buttons[4]->setSize(numberTextSize, numberTextSize);
+
 	buttons[4]->setTextSize(numberTextSize);
-	buttons[4]->setTextColor(sf::Color::Black);
+	buttons[4]->setSize(numberTextSize, numberTextSize);
 	buttons[4]->setText("1");
+	buttons[4]->setPosition(buttons[2]->getPosition().x + buttons[2]->getGlobalBounds().width, buttons[2]->getPosition().y);
+	buttons[4]->setTextColor(sf::Color::Black);
+	buttons[4]->setFillColor(sf::Color::Red);
+	buttons[4]->setOutlineThickness(2);
+	buttons[4]->setOutlineColor(Color::Black);
 
-	buttons[3]->setPosition(buttons[4]->getPosition().x + buttons[4]->getSize().x, buttons[2]->getPosition().y);
-	buttons[3]->setSize(numberTextSize, numberTextSize);
+
 	buttons[3]->setTextSize(numberTextSize);
-	buttons[3]->setTextColor(sf::Color::Black);
+	buttons[3]->setSize(numberTextSize, numberTextSize);
 	buttons[3]->setText("+");
+	buttons[3]->setPosition(buttons[4]->getPosition().x + buttons[4]->getGlobalBounds().width, buttons[2]->getPosition().y);
+	buttons[3]->setTextColor(sf::Color::Black);
+	buttons[3]->setFillColor(sf::Color::Red);
+	buttons[3]->setOutlineThickness(2);
+	buttons[3]->setOutlineColor(Color::Black);
+
 
 	buttons[0]->setSize(100, 40);
-	buttons[0]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 - 10 - buttons[3]->getSize().y);
+	buttons[0]->setPosition(buttons[2]->getPosition().x , buttons[2]->getPosition().y +buttons[2]->getSize().y + 20);
 	buttons[0]->setText("Next Phase");
 	buttons[0]->setTextSize(20);
 	buttons[0]->setTextColor(sf::Color::White);
 	buttons[0]->setFillColor(sf::Color::Blue);
+	buttons[0]->setOutlineThickness(2);
+	buttons[0]->setOutlineColor(Color::Black);
 
-	buttons[1]->setSize(100, 40);
+
+	buttons[1]->setSize(100, numberTextSize);
 	buttons[1]->setText("Attack");
-	buttons[1]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
-	buttons[1]->setTextSize(30);
+	buttons[1]->setPosition(buttons[0]->getPosition().x + buttons[0]->getSize().x + 20, buttons[2]->getPosition().y);
+	//buttons[1]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
+	buttons[1]->setTextSize(numberTextSize-2);
 	buttons[1]->setTextColor(sf::Color::White);
 	buttons[1]->setFillColor(sf::Color::Red);
+	buttons[1]->setOutlineThickness(2);
+	buttons[1]->setOutlineColor(Color::Black);
+
 
 	buttons[5]->setSize(100, 40);
 	buttons[5]->setText("Host");
@@ -1722,12 +1805,27 @@ WindowManager::WindowManager()
 	buttons[8]->setTextColor(sf::Color::White);
 	buttons[8]->setFillColor(sf::Color::Red);
 
-	buttons[9]->setSize(120, 40);
+	buttons[9]->setSize(100, 40);
 	buttons[9]->setText("Turn Wheel");
-	buttons[9]->setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
 	buttons[9]->setTextSize(20);
-	buttons[9]->setTextColor(sf::Color::White);
+	buttons[9]->setPosition(buttons[1]->getPosition().x, buttons[1]->getPosition().y + buttons[1]->getSize().y + 20);
+
+	buttons[9]->setTextColor(sf::Color::Black);
 	buttons[9]->setFillColor(sf::Color::Green);
+	buttons[9]->setOutlineThickness(2);
+	buttons[9]->setOutlineColor(Color::Black);
+
+	provinceNameTxt.setFont(font);
+	provinceNameTxt.setCharacterSize(20);
+	provinceNameTxt.setFillColor(sf::Color(0, 0, 0));
+	provinceNameTxt.setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, bottomUpperMargin);
+
+	infoText.setFont(font);
+	infoText.setCharacterSize(20);
+	infoText.setFillColor(sf::Color::Black);
+	infoText.setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, bottomUpperMargin + 40);
+
+
 }
 
 WindowManager::~WindowManager() {
@@ -1737,12 +1835,11 @@ WindowManager::~WindowManager() {
 void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	static int x = 0;
 	while (window.pollEvent(event)) {
-		cout << "we are checking" <<x++<< endl;
+		cout << "we are checking" << x++ << endl;
 		if (event.type == sf::Event::Closed)
 			window.close();
 		else if (event.type == sf::Event::MouseButtonPressed)
 		{
-
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
 				checkClickEvents(event);
@@ -1753,10 +1850,9 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	window.setView(mainView);
 
 	window.clear(sf::Color::Black);
-	
 
 	window.setView(window.getDefaultView());
-	
+
 	buttons[5]->draw(window);
 	buttons[6]->draw(window);
 	buttons[7]->draw(window);
@@ -1802,10 +1898,19 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 
 
 
-	float speed = 3;
-	if (counter > 10) {
-		sf::Vector2i mousePos = mouse.getPosition(window);
 
+	float speed = 3;
+
+	if (counter > 10) {
+
+		if (turnWheel) {
+			images[1]->rotate(2.5);
+			rotateAmount = rotateAmount + 2.5;
+			if (rotateAmount == 360)
+				rotateAmount = 0;
+		}
+
+		sf::Vector2i mousePos = mouse.getPosition(window);
 		if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
 			if (mainView.getCenter().x >= mainView.getSize().x / 2) {
 				mainView.move(-zoom * speed, 0);
@@ -1838,11 +1943,25 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 	window.clear(sf::Color(224, 253, 255));
 	window.draw(mapSprite);
 
+
+
+	drawAllArmies(window, event);
+	drawAllCastles(window, event);
+	/*for (auto it = castles.begin(); it != castles.end(); it++) {
+		window.draw(*(*it));
+	}*/
+
+
+
+
 	window.setView(window.getDefaultView());
 	window.draw(lowerPanel);
+	dragObject(window, event, 3);
 	dragObject(window, event, 0);
 	window.draw(*images[0]);
-
+	//window.draw(*images[1]);
+	//window.draw(*images[2]);
+	window.draw(*images[3]);
 
 	window.draw(provinceNameTxt);
 	window.draw(infoText);
@@ -1852,11 +1971,37 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 			buttons[i]->draw(window);
 	}
 
+
+	//miniMap Staff
+	window.setView(miniMap);
+	miniMap.update(mainView);
+	miniMap.draw(window);
+	window.setView(window.getDefaultView());
+	/*window.setView(miniMap);
+	miniMap.setCenter(mapTex.getSize().x / 2, mapTex.getSize().y / 2);
+	mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
+	RectangleShape miniMapRectangle;
+	miniMapRectangle.setFillColor(Color::Transparent);
+	miniMapRectangle.setOutlineThickness(20);
+	miniMapRectangle.setOutlineColor(Color::Black);
+	miniMapRectangle.setSize(mainView.getSize());
+	miniMapRectangle.setPosition(mainView.getCenter().x - mainView.getSize().x / 2, mainView.getCenter().y - mainView.getSize().y / 2);
+	miniMap.setViewport(FloatRect(float(0.8), float(0.8), 0.2, 0.2));
+	window.draw(mapSprite);
+	window.draw(miniMapRectangle);
+*/
+
 	window.display();
 
 }
 
 void WindowManager::multGameComp(RenderWindow & window, Event & event) {
+	time = clock.getElapsedTime().asMicroseconds();
+	clock.restart();
+	time = time / 1200;
+	if (time > 20)
+		time = 20;
+	
 	while (window.pollEvent(event))
 	{
 
@@ -1892,42 +2037,42 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	}
 
 
-		
 
-		float speed = 3;
 
-		if (counter > 10) {
+	//float speed = 3;
 
-			if (turnWheel) {
-				images[1]->rotate(2.5);
-				rotateAmount = rotateAmount + 2.5;
-				if (rotateAmount == 360)
-					rotateAmount = 0;
-			}
 
-			sf::Vector2i mousePos = mouse.getPosition(window);
-			if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
-				if (mainView.getCenter().x >= mainView.getSize().x / 2) {
-					mainView.move(-zoom * speed, 0);
-				}
-			}
-			else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
-				if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
-					mainView.move(zoom* speed, 0);
-				}
-			}
-			if (mousePos.y < topMargin) {
-				if (mainView.getCenter().y >= mainView.getSize().y / 2) {
-					mainView.move(0, -zoom * speed);
-				}
-			}
-			else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
-				if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
-					mainView.move(0, zoom * speed);
-				}
-			}
-			counter = 0;
+	if (turnWheel) {
+		images[1]->rotate(0.5*time);
+		rotateAmount = rotateAmount + 0.5*time;
+		if (rotateAmount == 360) {
+			rotateAmount = 0;
 		}
+				
+	}
+
+	sf::Vector2i mousePos = mouse.getPosition(window);
+	if (mousePos.x < leftMargin && mousePos.y < bottomUpperMargin) {
+		if (mainView.getCenter().x >= mainView.getSize().x / 2) {
+			mainView.move(-zoom * time, 0);
+		}
+	}
+	else if (mousePos.x > rightMargin && mousePos.y < bottomUpperMargin) {
+		if (mainView.getCenter().x < mapTex.getSize().x - mainView.getSize().x / 2) {
+			mainView.move(zoom* time, 0);
+		}
+	}
+	if (mousePos.y < topMargin) {
+		if (mainView.getCenter().y >= mainView.getSize().y / 2) {
+			mainView.move(0, -zoom * time);
+		}
+	}
+	else if (mousePos.y > bottomLowerMargin && mousePos.y < bottomUpperMargin) {
+		if (mainView.getCenter().y - lowerPanel.getSize().y * zoom < mapTex.getSize().y - mainView.getSize().y / 2) {
+			mainView.move(0, zoom * time);
+		}
+	}
+	counter = 0;
 
 
 	counter++;
@@ -1935,25 +2080,34 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	//lowerPanel.setPosition(mainView.getCenter().x - screenWidth / 2, mainView.getCenter().y + screenHeight * 3 / 10);
 	window.setView(mainView);
 
-		window.clear(sf::Color(224,253,255));
-		window.draw(mapSprite);
-		drawAllArmies(window, event);
-		if (castle)
-			window.draw(*images[4]);
+	window.clear(sf::Color(224, 253, 255));
 
-	
+	window.draw(mapSprite);
+	lineForProvinces->draw(window,time);
+	drawAllArmies(window, event);
+	drawAllCastles(window, event);
+	//for (auto it = castles.begin(); it != castles.end(); it++) {
+	//	window.draw(*(*it));
+	//}
+
+
+	window.setView(window.getDefaultView());
+	window.draw(lowerPanel);
+
+	dragObject(window, event, 3);
+	dragObject(window, event, 0);
+	window.draw(*images[0]);
+
+	// ===================== TURN WHEEL
+	if (turnWheel) {
+		window.draw(*images[1]);
+		window.draw(*images[2]);
+	}
+	// =====================
 
 
 
-
-		window.setView(window.getDefaultView());
-		window.draw(lowerPanel);
-		dragObject(window, event, 3);
-		window.draw(*images[0]);
-		//window.draw(*images[1]);
-		//window.draw(*images[2]);
-		window.draw(*images[3]);
-		
+	window.draw(*images[3]);
 
 	window.draw(provinceNameTxt);
 	window.draw(infoText);
@@ -1962,34 +2116,26 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 		if (i != 5 && i != 6 && i != 7 && i != 8)
 			buttons[i]->draw(window);
 	}
+	int currentPlayer = GM->currentPlayer;
+	string currentPlayerName;
+	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
 
 
-		//miniMap Staff
-		window.setView(miniMap);
-		miniMap.update(mainView);
-		miniMap.draw(window);
+	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), this->phase, currentPlayerName);
+	topPanel->draw(window);
+	//miniMap Staff
+	window.setView(miniMap);
+	miniMap.update(mainView);
+	miniMap.draw(window);
 
-		/*window.setView(miniMap);
-		miniMap.setCenter(mapTex.getSize().x / 2, mapTex.getSize().y / 2);
-		mapSprite.setTextureRect(IntRect(0, 0, mapTex.getSize().x, mapTex.getSize().y));
-		RectangleShape miniMapRectangle;
-		miniMapRectangle.setFillColor(Color::Transparent);
-		miniMapRectangle.setOutlineThickness(20);
-		miniMapRectangle.setOutlineColor(Color::Black);
-		miniMapRectangle.setSize(mainView.getSize());
-		miniMapRectangle.setPosition(mainView.getCenter().x - mainView.getSize().x / 2, mainView.getCenter().y - mainView.getSize().y / 2);
-		miniMap.setViewport(FloatRect(float(0.8), float(0.8), 0.2, 0.2));
-		window.draw(mapSprite);
-		window.draw(miniMapRectangle);
-*/
-
-		window.display();
-	}
+	window.display();
+}
 
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
+	window.setPosition(Vector2i(0,0))  ;
 
 
 	while (window.isOpen()) {
@@ -2026,7 +2172,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 	sf::Vector2i PixelPos = m.getPosition(window);
 	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 	if (MousePos.x <= mapImg.getSize().x && MousePos.y <= mapImg.getSize().y) {
-		cout << "XXX   "<< MousePos.x << "      YYY "<< MousePos.y << endl;
+		cout << "XXX   " << MousePos.x << "      YYY " << MousePos.y << endl;
 		int colorInInt = (int)mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
 		cout << colorInInt << "**********************" << endl;
 		auto it = GM->colorLookUpTable.find(colorInInt);
@@ -2038,12 +2184,12 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 
 void WindowManager::checkClickEvents(sf::Event & e) {
 	int id = 0;
-	
+
 
 	for (auto it = buttons.begin(); it != buttons.end(); it++) {
 		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
 			(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + (*it)->getSize().y) {
-			buttonClicked(id);
+			buttonClicked(id, e, window);
 			return;
 		}
 		id++;
@@ -2058,23 +2204,33 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 		id++;
 	}
 
-	
+
 }
 
-void WindowManager::buttonClicked(int id) {
-	cout<<"button clicked"<<endl;
+void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
+	cout << "button clicked" << endl;
 	if (page == MENU_SCREEN) {
 		cout << "clickked weghwioefng" << endl;
 		if (id == 5) {
 			//userName = "host";
 			//NM->createNetwork(&GM,"h", userName);
-			
+
 			playerCount = 3; // will be taken from user
 			const string name = "player";
 			for (int i = 0; i < playerCount; i++) {
-				this->GM->addPlayer( name  + to_string(i+1));
+				this->GM->addPlayer(name + to_string(i + 1));
 			}
-			GM->randomPlacement();
+			if (_randomPlacement == true) {
+				GM->randomPlacement();
+				string dummy;
+				for (int i = 0; i < playerCount; i++)
+					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+				phase = PLACEMENT_PHASE;
+			}
+			else {
+				phase = INITIAL_PHASE;
+			}
+			cout << "clickked weghwioefng" << endl;
 			turn = 0;
 			page = COMPUTER_GAME_SCREEN;
 		}
@@ -2102,18 +2258,20 @@ void WindowManager::buttonClicked(int id) {
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
 	if (id == NEXT_PHASE_BUTTON) {
 		if (phase == INITIAL_PHASE) {
-			player->setLeftSoldier(player->getNumberOfProvinces() / 3);
-			//phase = PLACEMENT_PHASE;
+			/*  player->setLeftSoldier(player->getNumberOfProvinces() / 3);
+			if (page == 2 )
+			phase = PLACEMENT_PHASE; //YOU WILL NOT BE ABLE TO CLICK ANYTHING IN INITIAL PHASE JUST SOLDIER */
 		}
 		else if (phase == PLACEMENT_PHASE) {
 			phase = ATTACKING_PHASE;
 		}
 		else if (phase == ATTACKING_PHASE) {
 			phase = FORTIFY_PHASE;
-			buttons[NEXT_PHASE_BUTTON]->setText("End Turn");
+			
 			buttons[ATTACK_BUTTON]->setText("Fortify");
 		}
 		else if (phase == FORTIFY_PHASE) {
+			phase = MARKET_PHASE;
 			if (page == 1) {
 				if (turn = 0)
 					this->GM->sendAllProvincesFromHostString(&NM);
@@ -2122,23 +2280,51 @@ void WindowManager::buttonClicked(int id) {
 					this->GM->sendAllProvincesFromHostString(&NM);
 				}
 			}
+			// ------------------------------ CASTLE ATTACKS BEGINS
+			string dum;
+			cout << "End of turn : " << turn << endl;
+			GM->castleAttacks(GM->getPlayerByID(turn, dum));
+			// ------------------------------ CASTLE ATTACKS ENDS
+
+			buttons[NEXT_PHASE_BUTTON]->setText("End Turn");
+			
+		}
+		else if(phase == MARKET_PHASE) {
 			turn++;
-			if (turn = 3)
+			if (turn == playerCount)
 				turn = 0;
-			cout << "Player"  << turn+1 << " 's turn!!" << endl;
-			phase = END_TURN;
+			if (page == COMPUTER_GAME_SCREEN) {
+				string dummy;
+				for (int i = 0; i < playerCount; i++)
+					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+				phase = PLACEMENT_PHASE;
+
+			}
+			else if (page == GAME_SCREEN) {
+				cout << "Player" << turn + 1 << " 's turn!!" << endl;
+				phase = END_TURN;
+			}
+			buttons[NEXT_PHASE_BUTTON]->setText("Next Phase");
+			buttons[ATTACK_BUTTON]->setText("Attack");
+			cout << "Player" << turn + 1 << " 's turn!!" << endl;
+			phase = PLACEMENT_PHASE;
+			GM->currentPlayer = turn;
+			wheel = false;
+			countForWheel = 0;
+			takeCastle = false;
+
 		}
 		else if (phase == END_TURN) {
-			if (page == 2)
-				phase = INITIAL_PHASE;
 		}
 
 		cout << "Phase: " << phase << endl;
 	}
+
 	else if (id == ATTACK_BUTTON) {
 		if (phase == ATTACKING_PHASE) {
 			if (isProvinceClicked == 2) {
 				if (GM->attack(player, second->getOwner(), first, second, soldierAmount)) {
+					wheel = true;
 					phase = POST_ATTACK; //change phase 
 					buttons[ATTACK_BUTTON]->setText("Place");
 					provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
@@ -2149,7 +2335,7 @@ void WindowManager::buttonClicked(int id) {
 					soldierAmount = first->getNumberOfSoldiers() - 1;
 				buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 				displayProvinceInfo(first);
-				
+
 			}
 		}
 		else if (phase == POST_ATTACK && second->getNumberOfSoldiers() == 0) {
@@ -2164,31 +2350,33 @@ void WindowManager::buttonClicked(int id) {
 			}
 		}
 		else if (phase == END_TURN) {
-			if (page == 1) {
-				if (turn == 0)
-					this->GM->sendAllProvincesFromHostString(&NM);
-				else {
 
-					if (userTurn == 0) {
-						this->GM->sendAllProvincesClientToHostString(&NM);
-						this->GM->sendAllProvincesFromHostString(&NM);
-					}
-					else
-						this->GM->sendAllProvincesFromHostString(&NM);
-				}
+
+			/*if (page == 1) {
+			if (turn == 0)
+			this->GM->sendAllProvincesFromHostString(&NM);
+			else {
+
+			if (userTurn == 0) {
+			this->GM->sendAllProvincesClientToHostString(&NM);
+			this->GM->sendAllProvincesFromHostString(&NM);
+			}
+			else
+			this->GM->sendAllProvincesFromHostString(&NM);
+			}
 			}
 			turn++;
-			if (turn = 3)
-				turn = 0;
+			if (turn == playerCount -1 )
+			turn = 0;
 			if (turn == userTurn) {
-				if (GM->getWorldMap()->ownerCount() < 42)
-					phase = INITIAL_PHASE;
-				else {
-					player->setLeftSoldier(player->getNumberOfProvinces() / 3);
-					phase = PLACEMENT_PHASE;
-				}
-
+			if (GM->getWorldMap()->ownerCount() < 42)
+			phase = INITIAL_PHASE;
+			else {
+			player->setLeftSoldier(player->getNumberOfProvinces() / 3);
+			phase = PLACEMENT_PHASE;
 			}
+
+			}*/
 		}
 	}
 
@@ -2200,7 +2388,7 @@ void WindowManager::buttonClicked(int id) {
 		}
 		else if (phase == POST_ATTACK || phase == FORTIFY_PHASE) {
 			if (first != NULL) {
-				if (soldierAmount < first->getNumberOfSoldiers() - 1 ) {
+				if (soldierAmount < first->getNumberOfSoldiers() - 1) {
 					soldierAmount++;
 				}
 			}
@@ -2221,11 +2409,72 @@ void WindowManager::buttonClicked(int id) {
 		}
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
-	else if (id == 9) {
+
+	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
+		countForWheel++;
+		string temp;
 		if (turnWheel) {
 			turnWheel = false;
-			int index =((int)(rotateAmount / 45) + 2) % 8;
-			cout << wheelStr[index] << endl;
+			int index =  ((int)(rotateAmount / 45)) % 8;
+			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
+			if (index == 0) {
+				//draw bonus card
+			}
+			else if (index == 1) {
+				//bankrupt
+				GM->getPlayerByID(turn, temp)->setMoney(0);
+			}
+			else if (index == 2) {
+				//250 gold
+				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
+			}
+			else if (index == 3) {
+				//pass
+			}
+			else if (index == 4) {
+				//build castle
+			
+				id = 3;
+				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
+				images[id]->inMove = true;
+				takeCastle = true;
+				
+			}
+			else if (index == 5) {
+				//take province
+				Die die(GM->getWorldMap()->getNumberOfProvinces());
+				int random = die.roll();
+				Province* prov = GM->getWorldMap()->getProvinceByID(random);
+				string pname;
+				GM->getPlayerByID(turn, pname);
+				while (prov->getOwner()->getName() == pname) {
+					int random = die.roll();
+					prov = GM->getWorldMap()->getProvinceByID(random);
+					GM->getPlayerByID(turn, pname);
+				}
+				prov->setOwner(GM->getPlayerByID(turn, pname));
+				cout << pname << "gets " << prov->getName() << endl;
+			}
+			else if (index == 6) {
+				//give province
+				Die die(GM->getWorldMap()->getNumberOfProvinces());
+				int random = die.roll();
+				Province* prov = GM->getWorldMap()->getProvinceByID(random);
+				string pname;
+				GM->getPlayerByID(turn, pname);
+				while (prov->getOwner()->getName() != pname) {
+					int random = die.roll();
+					prov = GM->getWorldMap()->getProvinceByID(random);
+					GM->getPlayerByID(turn, pname);
+				}
+				prov->setOwner(GM->getPlayerByID((turn+1)%3, pname));
+				cout << pname << "gets " << prov->getName() << endl;
+			}
+			else if (index == 7) {
+				//take 3 soldiers
+				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+			}
+
 		}
 		else {
 			turnWheel = true;
@@ -2241,6 +2490,16 @@ void WindowManager::imageClicked(int id) {
 
 void WindowManager::provinceClicked(int id) {
 	Province* city = GM->getWorldMap()->getProvinceByID(id);
+	if (isProvinceClicked == 0) {
+		for (int i = 0; i < listOfArmyBage.size(); i++) {
+			if (listOfArmyBage[i]->nameOfProvince == city->getName())
+				listOfArmyBage[i]->setScale(2, 2);
+			else
+				listOfArmyBage[i]->setScale(1, 1);
+		}
+	}
+
+
 	if (phase == ATTACKING_PHASE || phase == FORTIFY_PHASE) {
 		if (isProvinceClicked == 0) {
 			first = city;
@@ -2248,12 +2507,60 @@ void WindowManager::provinceClicked(int id) {
 			isProvinceClicked = 1;
 			if (page == 1)
 				provinceNameTxt.setString(first->getName());
+
+
+			//-------------------------------------------------
+			//This code is to Scale a square with army size of a province.
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == city->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else
+					listOfArmyBage[i]->setScale(1, 1);
+			}
+			//--------------------------------------------------
+
+
+			//----------------------------------
+			//This is when you release from the probince. Can be changed????
+			lineForProvinces->setVisible(false);
+			//-------------------------------
 		}
 		else if (isProvinceClicked == 1) {
+			cout << "we are here" << endl;
 			second = city;
 			isProvinceClicked = 2;
+
+			//------------------------------------------------------
+			//this part is to draw line between two provinces
+			Vector2f firstCoordinates, secondCoordinates;
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == first->getName())
+					firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+				if (listOfArmyBage[i]->nameOfProvince == second->getName())
+					secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+			}
+
+			lineForProvinces->setCoordinates(firstCoordinates, secondCoordinates);
+			lineForProvinces->setVisible(true);
+			//--------------------------------------------------------
+
+
+			//-------------------------------------------------
+			//This code is to Scale a square with army size of a province.
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == first->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else if (listOfArmyBage[i]->nameOfProvince == second->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else
+					listOfArmyBage[i]->setScale(1, 1);
+			}
+			//-------------------------------------------------
+
+
+
 			if (phase == ATTACKING_PHASE)
-				provinceNameTxt.setString(first->getName() + " attacks to " +second->getName());
+				provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
 			else
 				provinceNameTxt.setString("From " + first->getName() + " to " + second->getName());
 		}
@@ -2262,6 +2569,17 @@ void WindowManager::provinceClicked(int id) {
 			first = city;
 			isProvinceClicked = 1;
 			provinceNameTxt.setString(first->getName());
+			lineForProvinces->setVisible(false);
+			//-------------------------------------------------
+			//This code is to Scale a square with army size of a province.
+			for (int i = 0; i < listOfArmyBage.size(); i++) {
+				if (listOfArmyBage[i]->nameOfProvince == city->getName())
+					listOfArmyBage[i]->setScale(2, 2);
+				else
+					listOfArmyBage[i]->setScale(1, 1);
+			}
+			//-------------------------------------------------
+
 		}
 		if (phase != FORTIFY_PHASE) {
 			if (first->getNumberOfSoldiers() > 3)
@@ -2276,12 +2594,23 @@ void WindowManager::provinceClicked(int id) {
 	else if (phase == POST_ATTACK) {
 		soldierAmount = first->getNumberOfSoldiers() - 1;
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+
+		//-------------------------------------------------
+		//This code is to Scale a square with army size of a province.
+		for (int i = 0; i < listOfArmyBage.size(); i++) {
+			if (listOfArmyBage[i]->nameOfProvince == city->getName())
+				listOfArmyBage[i]->setScale(2, 2);
+			else
+				listOfArmyBage[i]->setScale(1, 1);
+		}
+		//-------------------------------------------------
 	}
 	displayProvinceInfo(city);
 }
 
 void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
-	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITIAL_PHASE))
+	string dummy;
+	if (id == 0 && !(phase == PLACEMENT_PHASE || phase == INITIAL_PHASE || phase == MARKET_PHASE) /*&& this->GM->getPlayerByID(turn, dummy)->getLeftSoldier() == 0*/)
 		return;
 	if (images[id]->inMove) {
 		images[id]->setScale(sf::Vector2f(0.5, 0.5));
@@ -2293,10 +2622,11 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			images[id]->inMove = true;
 		}
 	}
-	else if (event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove) {
+	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Right) && event.key.code == mouse.Right&& images[id]->inMove && id == 3)) {
 		sf::Vector2i PixelPos = mouse.getPosition(window);
 		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 		images[id]->inMove = false;
+		takeCastle = false;
 		images[id]->setPosition(images[id]->getInitialPosition());
 		images[id]->setScale(sf::Vector2f(1, 1));
 		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
@@ -2305,7 +2635,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				string provinceName = getProvinceName(window, mouse);
 				cout << provinceName << endl;
 				if (phase == INITIAL_PHASE) {
-					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
+					if (GM->placeSoldier(turn, provinceName, 1)) {
 						if (page == 1) {
 							if (turn = 0)
 								this->GM->sendAllProvincesFromHostString(&NM);
@@ -2313,34 +2643,76 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 								this->GM->sendAllProvincesClientToHostString(&NM);
 								this->GM->sendAllProvincesFromHostString(&NM);
 							}
+							phase = END_TURN;
 						}
-						turn++; 
-						if (turn = 3)
+
+						if (page == COMPUTER_GAME_SCREEN) {
+							if (GM->getWorldMap()->ownerCount() != 42)
+								phase = INITIAL_PHASE;
+							else
+								phase = PLACEMENT_PHASE;
+						}
+						turn++;
+						if (turn == playerCount)
 							turn = 0;
+
+
 						cout << turn << "**********************";
-						phase = END_TURN;
+						provinceNameTxt.setString("Player" + to_string(turn + 1) + "'s turn");
+
 					}
 				}
-				else if (phase == PLACEMENT_PHASE) {
-					if (GM->placeSoldier(GM->currentPlayer, provinceName, 1)) {
-						int dummy; Province* province;
+				else if (phase == PLACEMENT_PHASE || phase == MARKET_PHASE) {
+					if (GM->placeSoldier(turn, provinceName, 1)) {
+						int dummy; Province* province; string dum;
 						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
+						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() == 0 && phase == PLACEMENT_PHASE)
+							phase = ATTACKING_PHASE;
 					}
 					else {
 						provinceNameTxt.setString("It is not your city");
-					}			
+					}
 				}
 			}
 			else if (id == 3) {
-				castle = true;
 				string provinceName = getProvinceName(window, mouse);
-				int index = images.size();
-				images.push_back(new MyImage("castle.png"));
-				images[index]->setPosition(2190, 828);
+				int id; Province* ptr;
+				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
+				if (GM->buildCastle(turn, provinceName)) {
+					int index = castles.size();
+					castles.push_back(new MyImage("castle.png"));
+					castles[index]->setPosition(listOfArmyBage[id]->getPosition());
+				}
 			}
 		}
 	}
+}
+
+void WindowManager::drawAllCastles(RenderWindow & window, Event & e) {
+	for (int i = 0; i < listOfCastleBage.size(); i++) {
+		Province* ptr;
+		WorldMap* wmPtr = GM->getWorldMap();
+		int temp;
+		int playerId;
+		wmPtr->getProvinceByName(listOfCastleBage[i]->nameOfProvince, temp, ptr);
+		if (ptr != NULL && (ptr->getCastle())->isBuilt() ) {
+			if (ptr->getOwner() != NULL) {
+				playerId = ptr->getOwner()->getId();
+				if (playerId == 0)
+					listOfCastleBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
+				if (playerId == 1)
+					listOfCastleBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
+				if (playerId == 2)
+					listOfCastleBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
+				(listOfCastleBage[i])->draw(window);
+			}
+			
+		}
+	}
+
+
+
 }
 
 void WindowManager::drawAllArmies(RenderWindow & window, Event & e) {
@@ -2354,31 +2726,34 @@ void WindowManager::drawAllArmies(RenderWindow & window, Event & e) {
 			int sizeOfArmy = ptr->getNumberOfSoldiers();
 			if (sizeOfArmy < 100 && sizeOfArmy >= 0)
 				listOfArmyBage[i]->setSizeOfArmy(sizeOfArmy);
-			playerId = ptr->getOwner()->getId();
-			if (playerId == 0)
-				listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
-			if (playerId == 1)
-				listOfArmyBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
-			if (playerId == 2)
-				listOfArmyBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
-			(listOfArmyBage[i])->draw(window);
+			if (ptr->getOwner() != NULL) {
+				playerId = ptr->getOwner()->getId();
+				if (playerId == 0)
+					listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
+				if (playerId == 1)
+					listOfArmyBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
+				if (playerId == 2)
+					listOfArmyBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
+				(listOfArmyBage[i])->draw(window);
+			}
+
 		}
 	}
 
-	
-	
+
+
 }
 
 void WindowManager::displayProvinceInfo(Province* province) {
-	if (province->getOwner()!= NULL)
-	
-		infoText.setString("Name: " + province->getName() + "\nOwner: " + province->getOwner()->getName() + "\nSoldiers: " + to_string(province->getNumberOfSoldiers())+ "     Castle: "+ (to_string(province->getCastle()->getLevel())));
-	else 
-		infoText.setString("Name: " + province->getName() + "\nOwner: " + "None" + "\nSoldiers: " + to_string(province->getNumberOfSoldiers())+ "     Castle: " + (to_string(province->getCastle()->getLevel())));
+	if (province->getOwner() != NULL)
+
+		infoText.setString("Name: " + province->getName() + "\nOwner: " + province->getOwner()->getName() + "\nSoldiers: " + to_string(province->getNumberOfSoldiers()) + "     Castle: " + (to_string(province->getCastle()->getLevel())));
+	else
+		infoText.setString("Name: " + province->getName() + "\nOwner: " + "None" + "\nSoldiers: " + to_string(province->getNumberOfSoldiers()) + "     Castle: " + (to_string(province->getCastle()->getLevel())));
 }
 
 Button::Button() {
-	
+
 }
 
 Button::Button(sf::Font & font) {
@@ -2401,14 +2776,13 @@ void Button::draw(sf::RenderWindow & window) {
 
 void Button::setPosition(float x, float y) {
 	sf::RectangleShape::setPosition(x, y);
-	text.setPosition(x + this->getSize().x/2 - text.getGlobalBounds().width /2 , y + this->getSize().y/2 - text.getGlobalBounds().height /2 );
-	cout << "size:" << text.getCharacterSize() << endl;
+	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize()/2 ));
 	//text.setPosition(x + sf::RectangleShape().getPosition().x / 2, y + sf::RectangleShape().getPosition().y / 2);
 }
 
 void Button::setSize(int width, int height) {
 	sf::RectangleShape::setSize(sf::Vector2f(width, height));
-	
+	//text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getSize().y / 2 - text.getGlobalBounds().height / 2);
 	//text.setOrigin(width/2, height/2);
 }
 
@@ -2418,7 +2792,7 @@ void Button::setTextColor(sf::Color color) {
 
 void Button::setTextSize(int size) {
 	text.setCharacterSize(size);
-	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getSize().y / 2 - text.getGlobalBounds().height / 2);
+	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize()/2));
 }
 
 MyImage::MyImage() {
@@ -2453,7 +2827,7 @@ NetworkManager::NetworkManager(WindowManager * WM) {
 	this->WM = WM;
 }
 
-void NetworkManager::createNetwork(GameManager ** const GM , string _connectionType, string _name) {
+void NetworkManager::createNetwork(GameManager ** const GM, string _connectionType, string _name) {
 	ip = IpAddress::getLocalAddress();
 	string text = " ";
 	int playerCount = 0;
@@ -2527,7 +2901,7 @@ void NetworkManager::createNetwork(GameManager ** const GM , string _connectionT
 		} while (playerCount != 3);
 
 	}
-	
+
 	else if (connectionType == "c1" || connectionType == "c2") {
 		//cout << "Enter server ip: ";
 		//cin >> sIp;
@@ -2582,7 +2956,7 @@ void NetworkManager::startGame() {
 		map<unsigned short, IpAddress> ::iterator tempIterator;
 		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
 			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {
-		}
+			}
 	}
 	else {
 		cout << "You cannot start the game " << endl;
@@ -2602,9 +2976,9 @@ string NetworkManager::sendStringFromHost(string _sendText) {
 				if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {
 					packet >> sentText;
 					string  display = sentText;
-					cout << display  << "send string :::::::::" << endl;
+					cout << display << "send string :::::::::" << endl;
 				} // the socket send or not 
-			return "" ;
+			return "";
 		}
 
 		else if (connectionType == "c1" || connectionType == "c2") {
@@ -2625,7 +2999,7 @@ string NetworkManager::sendStringFromHost(string _sendText) {
 	}
 }
 
-void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, int _cityID, int _count, int _castleLevel) {
+void NetworkManager::sendDataFromHost(GameManager * const GM, int _playerID, int _cityID, int _count, int _castleLevel) {
 
 	while (true) {
 		if (connectionType == "h") {
@@ -2652,7 +3026,7 @@ void NetworkManager::sendDataFromHost ( GameManager * const GM, int _playerID, i
 
 				Uint16 receivedcastleLevel;
 				packet >> receivedPlayerID >> receivedCityID >> receivedCount >> receivedcastleLevel;
-				
+
 				string dummy;
 				int pId = receivedPlayerID;
 				int cId = receivedCityID;
@@ -2701,7 +3075,7 @@ void NetworkManager::sendDataFromClientToHost(GameManager * const GM, string _co
 				cID = receivedCityID;
 				cou = receivedCount;
 				cast = receivedcastleLevel;
-				
+
 				string dummy;
 				Player * playerChanged = GM->getPlayerByID(pID, dummy);
 				Province * provinceChanged = GM->getWorldMap()->getProvinceByID(cID);
@@ -2722,7 +3096,7 @@ void NetworkManager::sendDataFromClientToHost(GameManager * const GM, string _co
 void NetworkManager::buildNewtwork() {
 	IpAddress ip = IpAddress::getLocalAddress();
 	UdpSocket socket;
-	string connectionType ;
+	string connectionType;
 	string sIp;
 	int playerCount = 0;
 	map<unsigned short, IpAddress> computerID;
@@ -2764,8 +3138,8 @@ void NetworkManager::buildNewtwork() {
 		do {
 			cout << "Enter 'start' to create the game: ";
 			cin >> startGame;
-		} while (startGame != "start" );
-		
+		} while (startGame != "start");
+
 	}
 
 	// clients are the other player who joined the room
@@ -2816,8 +3190,8 @@ void NetworkManager::buildNewtwork() {
 	}
 }
 
-vector<string> NetworkManager ::split( string strToSplit, char delimeter){
-	stringstream ss (strToSplit);
+vector<string> NetworkManager::split(string strToSplit, char delimeter) {
+	stringstream ss(strToSplit);
 	string item;
 	vector<string> splittedStrings;
 	while (getline(ss, item, delimeter))
@@ -2860,31 +3234,32 @@ void MiniMap::draw(sf::RenderWindow & window) {
 }
 
 
-ArmyBage::ArmyBage(Image img, int x,int y, string nameOfProvince,Font &font) {
+ArmyBage::ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font) {
 	this->nameOfProvince = nameOfProvince;
 	this->text.setFont(font);
 	this->img = img;
 	tex.loadFromImage(img);
 	this->setTexture(tex);
-	this->setScale(1,1) ;
+	this->setScale(1, 1);
 	sizeOfArmy = 10;
 	string temp = to_string(sizeOfArmy);
 	text.setCharacterSize(20);
 	text.setString(String(temp));
+	centerCoordinates = Vector2f(x, y);
 
-	this->setPosition(x- this->getGlobalBounds().width / 2, y- this->getGlobalBounds().height / 2);
+	this->setPosition(x - this->getGlobalBounds().width / 2, y - this->getGlobalBounds().height / 2);
 	text.setPosition(this->getPosition().x + this->getGlobalBounds().width / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getGlobalBounds().height / 2 - text.getGlobalBounds().height);
 }
 
 ArmyBage::ArmyBage() {
-	
+
 }
 
 void ArmyBage::setSizeOfArmy(int size) {
 	sizeOfArmy = size;
 	string temp = to_string(sizeOfArmy);
 	text.setString(String(temp));
-	text.setPosition(this->getPosition().x + this->getGlobalBounds().width/2- text.getGlobalBounds().width/2 , this->getPosition().y+ this->getGlobalBounds().height / 2 - text.getGlobalBounds().height);
+	text.setPosition(this->getPosition().x + this->getGlobalBounds().width / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + this->getGlobalBounds().height / 2 - text.getGlobalBounds().height);
 }
 
 void ArmyBage::setBageColor(Color color) {
@@ -2898,7 +3273,219 @@ void ArmyBage::draw(sf::RenderWindow & window) {
 	text.setCharacterSize(20);
 	this->setColor(this->color);
 
-	text.setFillColor(Color(255, 255, 255,255));
+	text.setFillColor(Color(255, 255, 255, 255));
 	window.draw(*this);
 	window.draw(this->text);
+}
+
+
+
+CastleBage::CastleBage() {
+
+}
+
+
+CastleBage::CastleBage(Image img, int x, int y, string nameOfProvince) {
+	this->nameOfProvince = nameOfProvince;
+	this->img = img;
+	tex.loadFromImage(img);
+	this->setTexture(tex);
+	this->setScale(1, 1);
+	centerCoordinates = Vector2f(x, y);
+
+	this->setPosition(x - this->getGlobalBounds().width / 2, y - this->getGlobalBounds().height / 2);
+}
+
+
+void CastleBage::draw(sf::RenderWindow & window) {
+		this->setColor(this->color);
+		window.draw(*this);
+}
+void CastleBage::setBageColor(sf::Color color) {
+	this->setColor(color);
+	this->color = color;
+}
+
+
+
+
+
+
+
+
+LineBetweenProvinces::LineBetweenProvinces(Image &img) {
+	this->img = img;
+	tex.setRepeated(true);
+	this->setTexture(tex);
+	step = 0;
+	degree = 0;
+	visible = false;
+
+	this->setTextureRect(IntRect(step, 0, img.getSize().x, 100));
+	this->setPosition(Vector2f(0, 0));
+	first = Vector2f(0, 0);
+	second = Vector2f(0, 0);
+	this->setScale(1, 0.25);
+	this->setOrigin(0, 12.5);
+
+}
+
+LineBetweenProvinces::LineBetweenProvinces() {
+
+}
+
+void LineBetweenProvinces::setCoordinates(Vector2f first,Vector2f second) {
+	this->first = first;
+	this->second = second;
+
+	lenght = (int) sqrt(pow(first.x - second.x, 2) + pow(first.y - second.y, 2) );
+	degree = (float) atan2(second.y - first.y, second.x - first.x) * 180 / 3.14159;
+	
+	this->setOrigin(0, img.getSize().y/2);
+
+	this->setTextureRect(IntRect(step, 0, img.getSize().x, lenght));
+	this->setPosition(first);
+	
+	this->setRotation(degree);
+}
+
+void LineBetweenProvinces::draw(RenderWindow &window,float time) {
+	if (visible) {
+		step= step-0.1*time;
+		tex.loadFromImage(img);
+		tex.setRepeated(true);
+		this->setTexture(tex);
+
+		this->setTextureRect(IntRect((int)step, 0, max(0,lenght), img.getSize().y));
+		this->setOrigin(0, img.getSize().y / 2);
+		window.draw(*this);
+	}
+}
+
+void LineBetweenProvinces::setVisible(bool flag) {
+	this->visible = flag;
+}
+
+
+TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Image playerImage, Font &font) {
+	this->img = img;
+	this->coinImg = coinImg;
+	this->actionImg = actionImage;
+	this->turnImg = turnImage;
+	this->playerImg = playerImage;
+
+	int lenght = screenWidth;
+	float ratio = float(lenght) / img.getSize().x;
+
+	panelTexture.loadFromImage(this->img);
+	coinTexture.loadFromImage(this->coinImg);
+	actionTexture.loadFromImage(this->actionImg);
+	turnTexture.loadFromImage(this->turnImg);
+	playerTexture.loadFromImage(this->playerImg);
+
+	this->setTexture(panelTexture);
+	
+	coinSprite.setTexture(coinTexture);
+	coinSprite.setScale(ratio,ratio);
+	
+	actionSprite.setTexture(actionTexture);
+	actionSprite.setScale(ratio, ratio);
+
+	turnSprite.setTexture(turnTexture);
+	turnSprite.setScale(ratio, ratio);
+
+	playerSprite.setTexture(playerTexture);
+	playerSprite.setScale(ratio, ratio);
+
+	//---------------
+	coinText.setFont(font);
+	coinText.setCharacterSize(20);
+	coinText.setString("120");
+
+	actionText.setFont(font);
+	actionText.setCharacterSize(20);
+	actionText.setString("7");
+
+	turnText.setFont(font);
+	turnText.setCharacterSize(20);
+	turnText.setString("1");
+
+	playerText.setFont(font);
+	playerText.setCharacterSize(20);
+	playerText.setString("Elnur");
+	//-------------------------
+	coinField.setSize(Vector2f(100,50));
+	coinField.setFillColor(Color(0, 0, 0, 30));
+	
+	actionField.setSize(Vector2f(100, 50));
+	actionField.setFillColor(Color(0, 0, 0, 30));
+
+	turnField.setSize(Vector2f(100, 50));
+	turnField.setFillColor(Color(0, 0, 0, 30));
+	
+	playerField.setSize(Vector2f(120, 50));
+	playerField.setFillColor(Color(0, 0, 0, 30));
+
+	//this->setColor(Color(255, 255, 255, 100));
+	this->setPosition(0, 0);
+	this->setTextureRect(IntRect(0,0,panelTexture.getSize().x, 100));
+	this->setScale(float (lenght) /panelTexture.getSize().x, 0.65*ratio);
+
+
+
+	coinField.setPosition(195, 2);
+	coinSprite.setPosition(200, 5);
+	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10, coinSprite.getPosition().y+ coinSprite.getGlobalBounds().height/2- coinText.getGlobalBounds().height / 2);
+
+	actionField.setPosition(coinField.getPosition().x + coinField.getGlobalBounds().width + 35, 2);
+	actionSprite.setPosition(actionField.getPosition().x +5, 7);
+	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2- actionText.getGlobalBounds().height/2);
+
+	turnField.setPosition(actionField.getPosition().x + actionField.getGlobalBounds().width + 35, 2);
+	turnSprite.setPosition(turnField.getPosition().x +5, 7);
+	turnText.setPosition(turnSprite.getPosition().x + turnSprite.getGlobalBounds().width + 10, turnSprite.getPosition().y + turnSprite.getGlobalBounds().height / 2 - turnText.getGlobalBounds().height / 2);
+
+
+	playerField.setPosition(turnField.getPosition().x + turnField.getGlobalBounds().width + 35, 2);
+	playerSprite.setPosition(playerField.getPosition().x + 5, 7);
+	playerText.setPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width + 10, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 - playerText.getGlobalBounds().height / 2);
+
+
+
+
+
+}
+
+TopBar::TopBar() {
+
+}
+
+
+void TopBar::draw(RenderWindow & window) {
+	window.draw(*this);
+
+	window.draw(coinField);
+	window.draw(coinSprite);
+	window.draw(coinText);
+
+	window.draw(actionField);
+	window.draw(actionSprite);
+	window.draw(actionText);
+
+	window.draw(turnField);
+	window.draw(turnSprite);
+	window.draw(turnText);
+
+	window.draw(playerField);
+	window.draw(playerSprite);
+	window.draw(playerText);
+
+}
+
+void TopBar::update(int moneyAmount, int actionAmount, int currentTurn, string player) {
+	coinText.setString(to_string(moneyAmount));
+	actionText.setString(to_string(actionAmount));
+	turnText.setString(to_string(currentTurn));
+	playerText.setString(player);
+
 }
