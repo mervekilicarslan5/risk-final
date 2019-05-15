@@ -2246,12 +2246,14 @@ int WindowManager::getPixelColor(int x, int y) {
 }
 
 string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) {
+	
 	sf::Vector2i PixelPos = m.getPosition(window);
 	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 	if (MousePos.x <= mapImg.getSize().x && MousePos.y <= mapImg.getSize().y) {
 		cout << "XXX   " << MousePos.x << "      YYY " << MousePos.y << endl;
 		int colorInInt = (int)mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
 		cout << colorInInt << "**********************" << endl;
+		
 		auto it = GM->colorLookUpTable.find(colorInInt);
 		if (it != GM->colorLookUpTable.end())
 			return GM->colorLookUpTable[colorInInt];
@@ -2261,7 +2263,6 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 
 void WindowManager::checkClickEvents(sf::Event & e) {
 	int id = 0;
-
 
 	for (auto it = buttons.begin(); it != buttons.end(); it++) {
 		if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + (*it)->getSize().x &&
@@ -2480,6 +2481,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 			}*/
 		}
+		lineForProvinces->setVisible(false);
 	}
 
 	else if (id == INC_BUTTON) {
@@ -2524,9 +2526,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 	//  
-	else if (id == TURN_WHEEL_BUTTON && countForWheel < 2 && phase == MARKET_PHASE) {
+	else if (id == TURN_WHEEL_BUTTON && countForWheel < 1 && phase == MARKET_PHASE && wheel) {
 		countForWheel++;
-
+		buttons[TURN_WHEEL_BUTTON]->setFlag(false);
 		wonSoldier = false;
 		string temp;
 		
@@ -2569,9 +2571,8 @@ void WindowManager::handleWheel() {
 			else if (index == 4) {
 				//build castle
 			
-				id = 3;
 				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
-				images[id]->inMove = true;
+				images[3]->inMove = true;
 				takeCastle = true;
 				
 			}
@@ -2907,6 +2908,8 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 		{
 			if (id == 0) {
 				string provinceName = getProvinceName(window, mouse);
+				if (provinceName == "")
+					return;
 				cout << provinceName << endl;
 				if (phase == INITIAL_PHASE) {
 					cout << "*******" << buttons[NUMBER_TEXT]->getText() << endl;
@@ -2968,6 +2971,8 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			}
 			else if (id == 3 && phase == MARKET_PHASE) {
 				string provinceName = getProvinceName(window, mouse);
+				if (provinceName == "")
+					return;
 				int id; Province* ptr;
 				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
 				if (GM->buildCastle(turn, provinceName)) {
