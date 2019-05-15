@@ -30,6 +30,52 @@ class ArmyBage;
 class TopBar;
 class LineBetweenProvinces;
 
+class PhaseNotifier : public sf::Sprite {
+public:
+	Image img;
+	Texture tex;
+	Color color;
+	Vector2f bigCoordinates,smallCoordinates;
+	bool visible;
+	float moveTimer;
+	Clock ck;
+	int phaseId;
+
+	PhaseNotifier();
+	PhaseNotifier(int phaseId,Image img, int x, int y,int fx, int fy);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window,float time);
+	void activate();
+	void deactivate();
+};
+
+class BattleNotifier : public sf::Sprite {
+public:
+	Image imageOfBattle, imageOfDeath, warriorsImg;
+	Texture texureOfBattle, textureOfDeath,textureOfWarriors;
+	Sprite spriteOfDeath,spriteOfWarriors;
+	Text battleText, playerName1, playerName2, soldiers1, soldiers2, soldierLost1, soldierLost2;
+	string battleString, playerNameString1, playerNameString2, soldiersString1, soldiersString2, soldierLostString1,soldierLostString2;
+	Color color;
+	Vector2f centerCoordinates;
+	Font font;
+	bool visible;
+	float removeTimer;
+	Clock ckk;
+	float opacityParam;
+
+	BattleNotifier();
+	BattleNotifier(Image img1, Image img2, Image img3, int x, int y, Font font);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window, float time);
+	void activate();
+	void deactivate();
+	void setPositionCenter(int x, int y);
+	void updateData(string battleString, string playerNameString1, string playerNameString2, string soldiersString1, string soldiersString2, string soldierLostString1, string soldierLostString2);
+};
+
 
 
 class ArmyBage : public sf::Sprite {
@@ -317,7 +363,7 @@ public:
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
-	
+	WindowManager *windowManager;
 
 private:
 	vector<Player*> players;
@@ -357,7 +403,8 @@ public:
 	double zoom;
 
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
-	sf::Image mapImg, hoverImg, roundedSquare,lineImg, coinImg,actionImg,timerImg,topPanelImg, crownImg,castleImg;
+	sf::Image mapImg, hoverImg, roundedSquare, lineImg, coinImg, actionImg, timerImg, topPanelImg, crownImg, castleImg, sceleteImg, warriorImg;
+	sf::Image attackPhaseImg, placementPhaseImg,postAttackPhaseImg, fortifyPhaseImg, marketPhaseImg;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -376,6 +423,8 @@ public:
 	vector<string> wheelStr;
 	vector<ArmyBage*> listOfArmyBage;
 	vector<CastleBage*> listOfCastleBage;
+	vector<PhaseNotifier*> listOfPhaseNotifiers;
+	BattleNotifier* battleNotifier;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
