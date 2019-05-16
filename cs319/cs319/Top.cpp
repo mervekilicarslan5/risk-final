@@ -174,6 +174,62 @@ vector<int> Player::getProvinces()
 	return provinces;
 }
 
+
+int Player::howManyCont(int &res) {
+
+	int count = 0;
+	int earnedSold = 0;
+	res = 0;
+
+	sort(provinces.begin(), provinces.end());
+	
+
+	for (int i = 0; i < provinces.size()-1; i++) {
+		if (provinces.at(i)+1 == provinces.at(i + 1)) {
+			count++;
+		}
+		else
+			count = 0;
+
+		if (provinces.at(i) == 8 || provinces.at(i) == 12 || provinces.at(i) == 19 || provinces.at(i) == 25 || provinces.at(i) == 37  || provinces.at(i) == 41)
+			count = 0;
+
+		if (provinces.at(i) == 7 && count == 8) {
+			res++;
+			earnedSold += 5;
+		}
+
+		else if (provinces.at(i) == 11 && count == 3) {
+			res++;
+			earnedSold += 2;
+		}
+
+		else if (provinces.at(i) == 18 && count == 6) {
+			res++;
+			earnedSold += 5;
+		}
+
+		else if (provinces.at(i) == 24 && count == 5) {
+			res++;
+			earnedSold += 3;
+		}
+
+		else if (provinces.at(i) == 36 && count == 11) {
+			res++;
+			earnedSold += 7;
+		}
+
+		else if (provinces.at(i) == 40 && count == 3) {
+			count = 0;
+			res++;
+			earnedSold += 2;
+		}
+
+	}
+	return earnedSold;
+
+}
+
 vector<int> Player::getBonusCards()
 {
 	return bonusCards;
@@ -257,6 +313,7 @@ void Player::loseProvince(WorldMap* worldMap, Province* _province) {
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 {
+
 	int pricesold = 50;
 	if (leftSoldier < amount) {
 		if (money < (pricesold * amount)) {
@@ -1722,7 +1779,7 @@ WindowManager::WindowManager()
 
 
 	font;
-	if (!font.loadFromFile("assets/font.ttf"))
+	if (!font.loadFromFile("assets/font4.ttf"))
 	{
 		// error...
 	}
@@ -1924,6 +1981,7 @@ WindowManager::WindowManager()
 	buttons[0]->setPosition(buttons[2]->getPosition().x, buttons[2]->getPosition().y + buttons[2]->getSize().y + 20);
 	buttons[0]->setText("Next Phase");
 	buttons[0]->setTextSize(10);
+	//buttons[0]->setTexture("button.png");
 	buttons[0]->setTextColor(sf::Color::White);
 	buttons[0]->setFillColor(sf::Color::Blue);
 	buttons[0]->setOutlineThickness(2);
@@ -2050,6 +2108,7 @@ void WindowManager::menuScreen(RenderWindow& window, Event& event) {
 void WindowManager::menuEvents(sf::Event& e, int i) {
 	int id = 0;
 
+
 	if (i == 0) {
 		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
 			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
@@ -2089,6 +2148,7 @@ void WindowManager::changeButton(int id) {
 	cout << "bhange button" << endl;
 	//sf::SoundBuffer buffer;
 	//buffer.loadFromFile("assets/menuOp.wav");
+
 		//sf::Sound sound;
 		//sound.setBuffer(buffer);
 		//sound.play();
@@ -2096,6 +2156,7 @@ void WindowManager::changeButton(int id) {
 	window.draw(*menuButton[id + 3]);
 	window.display();
 }
+
 
 //void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 //	static int x = 0;
@@ -2133,7 +2194,6 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	time = time / 1200;
 	if (time > 20)
 		time = 20;
-
 	while (window.pollEvent(event))
 	{
 
@@ -2249,6 +2309,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 	drawAllArmies(window, event);
 	drawAllCastles(window, event);
+
 	//for (auto it = castles.begin(); it != castles.end(); it++) {
 	//	window.draw(*(*it));
 	//}
@@ -2322,6 +2383,7 @@ bool WindowManager::insideTheWindow(Vector2i mousePos) {
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
+
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
 	window.setPosition(Vector2i(0, 0));
 
@@ -2416,6 +2478,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 		if (it != GM->colorLookUpTable.end())
 			return GM->colorLookUpTable[colorInInt];
 	}
+
 	return "";
 }
 
@@ -2445,7 +2508,13 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 
 void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
 	cout << "button clicked" << endl;
+	if (!buffer.loadFromFile("assets/sounds/effects/click1.wav")) {
+		cout << "ERROR LOADING SOUND FILE" << endl;
+	}
+	sound.setBuffer(buffer);
+	sound.play();
 	if (page == MENU_SCREEN) {
+
 
 		if (id == 0) {
 			playerCount = 3; // will be taken from user
@@ -2551,12 +2620,20 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			turn++;
 			if (turn == playerCount) {
 				turn = 0;
+				for (int i = 0; i < playerCount; i++) {
+					string dummy;
+					int res = 0;
+					Player* player0 = GM->getPlayerByID(i, dummy);
+					player0->setLeftSoldier(player0->getNumberOfProvinces() / 3 + player0->howManyCont(res));
+					player0->setMoney(player0->getMoney() + 200);
+					cout << "player" << i + 1 << " has " << res << " Continents";
+				}
 				totalTurn++;
 			}
 			if (page == COMPUTER_GAME_SCREEN) {
 				string dummy;
 				for (int i = 0; i < playerCount; i++)
-					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getLeftSoldier());
 				phase = PLACEMENT_PHASE;
 			}
 			cout << "Player" << turn + 1 << " 's turn!!" << endl;
@@ -2564,7 +2641,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			buttons[TURN_WHEEL_BUTTON]->setFlag(false);
 			buttons[ATTACK_BUTTON]->setFlag(false);
 			buttons[NEXT_PHASE_BUTTON]->setFlag(false);
-
+			string dummy;
+			soldierAmount = GM->getPlayerByID(turn, dummy)->getLeftSoldier();
+			buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 			GM->currentPlayer = turn;
 			wheel = false;
 			countForWheel = 0;
@@ -2581,6 +2660,11 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	else if (id == ATTACK_BUTTON) {
 		if (phase == ATTACKING_PHASE) {
 			if (isProvinceClicked == 2) {
+				if (!buffer.loadFromFile("assets/sounds/attack.wav")) {
+					cout << "ERROR LOADING SOUND FILE" << endl;
+				}
+				sound.setBuffer(buffer);
+				sound.play();
 				if (GM->attack(player, second->getOwner(), first, second, soldierAmount)) {
 					wheel = true;
 					phase = POST_ATTACK; //change phase 
@@ -2588,7 +2672,6 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 					provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
 					soldierAmount = first->getNumberOfSoldiers() - 1;
 					buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-					cout << "lelelellelee" << endl;
 				}
 				else if (first->getNumberOfSoldiers() > 3) {
 					soldierAmount = 3;
@@ -2620,6 +2703,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				displayProvinceInfo(second);
 			}
 		}
+
 		else if (phase == END_TURN) {}
 		lineForProvinces->setVisible(false);
 	}
@@ -2669,6 +2753,11 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	else if (id == TURN_WHEEL_BUTTON && countForWheel < 1 && phase == MARKET_PHASE && wheel) {
 		countForWheel++;
 		buttons[TURN_WHEEL_BUTTON]->setFlag(false);
+		if (!buffer.loadFromFile("assets/sounds/effects/wheel.wav")) {
+			cout << "ERROR LOADING SOUND FILE" << endl;
+		}
+		sound.setBuffer(buffer);
+		sound.play();
 		wonSoldier = false;
 		string temp;
 
@@ -3010,16 +3099,29 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			images[id]->inMove = true;
 		}
 	}
-	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Right) && event.key.code == mouse.Right&& images[id]->inMove && id == 3)) {
+	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Left) && event.key.code == mouse.Left&& images[id]->inMove && id == 3)) {
 		sf::Vector2i PixelPos = mouse.getPosition(window);
 		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 		images[id]->inMove = false;
 		takeCastle = false;
+		int dummy; Province* province; string dum;
+		string filename;
+		if (id == 0)
+			filename = "soldier.wav";
+		else if (id == 3) {
+			filename = "castle.wav";
+		}
+		if (!buffer.loadFromFile("assets/sounds/effects/" + filename)) {
+			cout << "ERROR LOADING SOUND FILE" << endl;
+		}
+		sound.setBuffer(buffer);
+
 		images[id]->setPosition(images[id]->getInitialPosition());
 		images[id]->setScale(sf::Vector2f(1, 1));
 		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
 		{
 			if (id == 0) {
+				
 				string provinceName = getProvinceName(window, mouse);
 				if (provinceName == "")
 					return;
@@ -3061,11 +3163,15 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 					}
 				}
 				else if (phase == PLACEMENT_PHASE || phase == MARKET_PHASE) {
-					if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
+					if (buttons[NUMBER_TEXT]->getText() == 0) {
+
+					}
+					else if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
+						sound.play();
 						if (wonSoldier) {
 							wonSoldier = false;
 						}
-						int dummy; Province* province; string dum;
+
 						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
 						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() == 0 && phase == PLACEMENT_PHASE) {
@@ -3096,6 +3202,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				int id; Province* ptr;
 				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
 				if (GM->buildCastle(turn, provinceName)) {
+					sound.play();
 					int index = castles.size();
 					castles.push_back(new MyImage("castle.png"));
 					castles[index]->setPosition(listOfArmyBage[id]->getPosition());
@@ -3184,6 +3291,7 @@ Button::~Button() {
 void Button::setText(string text) {
 	this->text.setString(text);
 }
+
 
 void Button::draw(sf::RenderWindow & window) {
 	window.draw(*this);

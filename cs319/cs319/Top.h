@@ -247,6 +247,7 @@ public:
 	void setMoney(int _money);
 	void setBattlesWon(int _battlesWon);
 	void setBattlesLost(int _battlesLost);
+	int howManyCont(int &res);
 	void incBattlesWon();
 	void incBattlesLost();
 	void setName(string _name);
@@ -410,7 +411,8 @@ public:
 	GameManager * GM;
 	NetworkManager * NM;
 	double zoom;
-
+	sf::SoundBuffer buffer;
+	sf::Sound sound;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
 	sf::Image mapImg, hoverImg, roundedSquare, lineImg, coinImg, actionImg, timerImg, topPanelImg, crownImg, castleImg, sceleteImg, warriorImg, battleNotificationImg;
 	sf::Image attackPhaseImg, placementPhaseImg, postAttackPhaseImg, fortifyPhaseImg, marketPhaseImg;
@@ -536,7 +538,6 @@ public:
 	Button();
 	Button(sf::Font & font);
 	~Button();
-
 	void setText(string text);
 	void draw(sf::RenderWindow & window);
 	void setPosition(float x, float y);
