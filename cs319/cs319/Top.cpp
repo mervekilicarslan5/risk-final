@@ -147,7 +147,7 @@ void Continent::setProvinces(vector<int> _provinces)
 
 Player::Player()
 {
-	leftSoldier = 70;
+	leftSoldier = 14;
 	name = "";
 	id = -1;
 	battlesLost = 0;
@@ -157,7 +157,7 @@ Player::Player()
 
 Player::Player(string _name, int _id)
 {
-	leftSoldier = 70;
+	leftSoldier = 14;
 	name = _name;
 	id = _id;
 	battlesLost = 0;
@@ -1007,24 +1007,6 @@ void GameManager::startTurn(int id) {
 
 void GameManager::loadProvinces() {
 	cout << "Provinces are loading" << endl;
-	/*createProvince("ankara", "");
-	createProvince("istanbul", "");
-	createProvince("konya", "");
-	createProvince("antalya", "");
-	createProvince("eskisehir", "");
-	createProvince("edirne", "");
-	createProvince("kars", "");
-	createProvince("aksaray", "");
-	createProvince("kocaeli", "");
-
-	createNeighbor("ankara", "konya");
-	createNeighbor("ankara", "eskisehir");
-	createNeighbor("konya", "antalya");
-	createNeighbor("aksaray", "konya");
-	createNeighbor("istanbul", "edirne");
-	createNeighbor("istanbul", "kocaeli");
-	createNeighbor("eskisehir", "kocaeli");
-	*/
 	fstream file("assets/provinces.txt");
 
 	int color;
@@ -1123,26 +1105,6 @@ void GameManager::loadProvinces() {
 	createNeighbor("New Guinea", "Western Australia");
 	createNeighbor("New Guinea", "Eastern Australia");
 	createNeighbor("Western Australia", "Eastern Australia");
-
-
-	/*
-	createNeighbor("kars", "balikesir");
-	createNeighbor("kars", "antalya");
-	createNeighbor("kars", "istanbul");
-	createNeighbor("istanbul", "eskisehir");
-	createNeighbor("istanbul", "kocaeli");
-	createNeighbor("istanbul", "antalya");
-	createNeighbor("kocaeli", "ankara");
-	createNeighbor("kocaeli", "eskisehir");
-	createNeighbor("ankara", "afyon");
-	createNeighbor("kocaeli", "afyon");
-	createNeighbor("edirne", "afyon");
-	createNeighbor("nevsehir", "afyon");
-	createNeighbor("edirne", "konya");
-	createNeighbor("edirne", "ankara");
-	createNeighbor("konya", "antalya");*/
-
-	cout << "efsfsef" << endl;
 
 }
 
@@ -1708,8 +1670,6 @@ WindowManager::WindowManager()
 	GM = new GameManager();
 	NM = new NetworkManager(this);
 
-
-
 	zoom = 1;
 
 	phase = INITIAL_PHASE;
@@ -2077,38 +2037,39 @@ void WindowManager::displayPlayerStatus() {
 	}
 }
 
-void WindowManager::menuScreen(RenderWindow& window, Event& event) {
-	static int x = 0;
-	sf::Texture texture;
-	if (!texture.loadFromFile("assets/T2.jpg"));
-	// Assign it to a sprite
-	sf::Sprite sprite2;
-	sprite2.setTexture(texture);
-	// Draw the textured sprite
-	window.draw(sprite2);
+//void WindowManager::menuScreen(RenderWindow& window, Event& event) {
+//	static int x = 0;
+//	sf::Texture texture;
+//	if (!texture.loadFromFile("assets/T2.jpg"));
+//	// Assign it to a sprite
+//	sf::Sprite sprite2;
+//	sprite2.setTexture(texture);
+//	// Draw the textured sprite
+//	window.draw(sprite2);
+//
+//
+//
+//	while (window.pollEvent(event)) {
+//		if (event.type == sf::Event::Closed)
+//			window.close();
+//
+//		if (event.type == sf::Event::MouseMoved)
+//		{
+//
+//			menuEvents(event, 1);
+//
+//		}
+//		else if (event.type == sf::Event::MouseButtonPressed)
+//		{
+//			if (event.mouseButton.button == sf::Mouse::Left)
+//			{
+//				menuEvents(event, 0);
+//			}
+//		}
+//
+//	}
+//}
 
-
-
-	while (window.pollEvent(event)) {
-		if (event.type == sf::Event::Closed)
-			window.close();
-
-		if (event.type == sf::Event::MouseMoved)
-		{
-
-			menuEvents(event, 1);
-
-		}
-		else if (event.type == sf::Event::MouseButtonPressed)
-		{
-			if (event.mouseButton.button == sf::Mouse::Left)
-			{
-				menuEvents(event, 0);
-			}
-		}
-
-	}
-}
 void WindowManager::menuEvents(sf::Event& e, int i) {
 	int id = 0;
 
@@ -2157,33 +2118,33 @@ void WindowManager::changeButton(int id) {
 	window.display();
 }
 
-//void WindowManager::menuScreen(RenderWindow & window, Event & event) {
-//	static int x = 0;
-//	while (window.pollEvent(event)) {
-//		if (event.type == sf::Event::Closed)
-//			window.close();
-//		else if (event.type == sf::Event::MouseButtonPressed)
-//		{
-//			if (event.mouseButton.button == sf::Mouse::Left)
-//			{
-//				checkClickEvents(event);
-//			}
-//		}
-//	}
-//
-//	window.setView(mainView);
-//
-//	window.clear(sf::Color::Black);
-//
-//	window.setView(window.getDefaultView());
-//
-//	buttons[5]->draw(window);
-//	buttons[6]->draw(window);
-//	buttons[7]->draw(window);
-//	buttons[8]->draw(window);
-//
-//	window.display();
-//}
+void WindowManager::menuScreen(RenderWindow & window, Event & event) {
+	static int x = 0;
+	while (window.pollEvent(event)) {
+		if (event.type == sf::Event::Closed)
+			window.close();
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				checkClickEvents(event);
+			}
+		}
+	}
+
+	window.setView(mainView);
+
+	window.clear(sf::Color::Black);
+
+	window.setView(window.getDefaultView());
+
+	buttons[5]->draw(window);
+	buttons[6]->draw(window);
+	buttons[7]->draw(window);
+	buttons[8]->draw(window);
+
+	window.display();
+}
 
 
 void WindowManager::multGameComp(RenderWindow & window, Event & event) {
@@ -2416,7 +2377,8 @@ void WindowManager::createWindow() {
 				if (userTurn != 0 && GM->getAllProvincesFromHost(&NM)) {
 					if (!getInitialState) {
 						getInitialState = true;
-						continue;
+						if (_randomPlacement)
+							continue;
 					}
 					turn++;
 					GM->currentPlayer = turn;
@@ -2815,14 +2777,25 @@ void WindowManager::handleWheel() {
 	int index = ((int)(rotateAmount / 45)) % 8;
 	if (index == 0) {
 		//draw bonus card
+		if (GM->getPlayerByID(turn, temp)->getMoney() <= 250) {
+			GM->getPlayerByID(turn, temp)->setMoney(0);
+			provinceNameTxt.setString("You have lost all your money");
+		}
+		else {
+			GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() - 250);
+			provinceNameTxt.setString("You have lost 250 gold");
+		}
 	}
 	else if (index == 1) {
 		//bankrupt
 		GM->getPlayerByID(turn, temp)->setMoney(0);
+		provinceNameTxt.setString("You have lost all your money");
 	}
 	else if (index == 2) {
 		//250 gold
 		GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
+		provinceNameTxt.setString("You have earned 250 gold");
+
 	}
 	else if (index == 3) {
 		//pass
@@ -2833,7 +2806,7 @@ void WindowManager::handleWheel() {
 		GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
 		images[3]->inMove = true;
 		takeCastle = true;
-
+		provinceNameTxt.setString("You have a castle to build");
 	}
 	else if (index == 5) {
 		//take province
@@ -2847,8 +2820,10 @@ void WindowManager::handleWheel() {
 			prov = GM->getWorldMap()->getProvinceByID(random);
 			GM->getPlayerByID(turn, pname);
 		}
+		string from = prov->getOwner()->getName();
 		prov->setOwner(GM->getPlayerByID(turn, pname));
 		cout << pname << "gets " << prov->getName() << endl;
+		provinceNameTxt.setString("You got " + prov->getName() + " from " + from);
 	}
 	else if (index == 6) {
 		//give province
@@ -2856,14 +2831,14 @@ void WindowManager::handleWheel() {
 		int random = die.roll();
 		Province* prov = GM->getWorldMap()->getProvinceByID(random);
 		string pname;
-		GM->getPlayerByID(turn, pname);
+		GM->getPlayerByID(turn, pname);	
 		while (prov->getOwner()->getName() != pname) {
 			int random = die.roll();
 			prov = GM->getWorldMap()->getProvinceByID(random);
 			GM->getPlayerByID(turn, pname);
 		}
 		prov->setOwner(GM->getPlayerByID((turn + 1) % 3, pname));
-		cout << pname << "gets " << prov->getName() << endl;
+		provinceNameTxt.setString("You lost " + prov->getName() + " to " + pname);
 	}
 	else if (index == 7) {
 		//take 3 soldiers
@@ -2872,6 +2847,8 @@ void WindowManager::handleWheel() {
 		soldierAmount = GM->getPlayerByID(turn, dum)->getLeftSoldier();
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 		wonSoldier = true;
+		provinceNameTxt.setString("You have 3 soldiers to place");
+
 	}
 }
 
@@ -3167,11 +3144,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 							else {
 								this->GM->sendAllProvincesFromClientToHost(&NM);
 							}
-							if (GM->getWorldMap()->ownerCount() == 42) {
-								phase = PLACEMENT_PHASE;
-							}
-							else
-								phase = END_TURN;
+							phase = END_TURN;
 						}
 
 						if (page == COMPUTER_GAME_SCREEN) {
@@ -3404,12 +3377,7 @@ void NetworkManager::getNamesConnect(GameManager ** const GM) {
 			String name;
 			packet >> name;
 			string display = name;
-			if (port == 2001) {
-				cout << display << " has joined the room." << endl;
-				(*GM)->addPlayer(display);
-				playersName += name + ",";
-			}
-			else if (port == 2002) {
+			if (port == 2001 || port == 2002 || port == 2003 || port == 2004 || port == 2005) {
 				cout << display << " has joined the room." << endl;
 				(*GM)->addPlayer(display);
 				playersName += name + ",";
@@ -3466,6 +3434,12 @@ void NetworkManager::createNetwork(GameManager ** const GM, string _connectionTy
 		port = 2001;
 	else if (connectionType == "c2")
 		port = 2002;
+	else if (connectionType == "c3")
+		port = 2003;
+	else if (connectionType == "c4")
+		port = 2004;
+	else if (connectionType == "c5")
+		port = 2005;
 
 	if (socket.bind(port) != Socket::Done) {
 		cout << "Couldnt binded. ";
@@ -3480,7 +3454,7 @@ void NetworkManager::createNetwork(GameManager ** const GM, string _connectionTy
 		playersName += _name + ",";
 		(*GM)->addPlayer(_name);
 	}
-	if (connectionType == "c1" || connectionType == "c2") {
+	else {
 		//cout << "Enter server ip: ";
 		string name;
 		name = _name;
