@@ -2583,8 +2583,13 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	else if (id == ATTACK_BUTTON) {
 		if (phase == ATTACKING_PHASE) {
 			if (isProvinceClicked == 2) {
+				if (!buffer.loadFromFile("assets/attack.wav")) {
+					cout << "ERROR" << endl;
+				}
+				sound.setBuffer(buffer);
+				sound.play();
+				wheel = true;
 				if (GM->attack(player, second->getOwner(), first, second, soldierAmount)) {
-					wheel = true;
 					phase = POST_ATTACK; //change phase 
 					buttons[ATTACK_BUTTON]->setText("Place");
 					provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
@@ -2694,6 +2699,12 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	}
 	//  
 	else if (id == TURN_WHEEL_BUTTON && countForWheel < 1 && phase == MARKET_PHASE && wheel) {
+		if (!buffer.loadFromFile("assets/wheel.wav")) {
+			cout << "ERROR" << endl;
+		}
+		sound.setBuffer(buffer);
+		sound.play();
+		
 		countForWheel++;
 		buttons[TURN_WHEEL_BUTTON]->setFlag(false);
 		wonSoldier = false;
@@ -3062,11 +3073,21 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 		if (sf::IntRect(images[id]->getPosition().x, images[id]->getPosition().y, images[id]->getLocalBounds().width, images[id]->getLocalBounds().height).contains(mouse.getPosition(window))) {
 			images[id]->setPosition(sf::Vector2f(mouse.getPosition(window)));
 			images[id]->inMove = true;
+			if (!buffer.loadFromFile("assets/drag.wav")){
+				cout << "ERROR" << endl;
+			}
+			sound.setBuffer(buffer);
+			sound.play();
 		}
 	}
 	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Right) && event.key.code == mouse.Right&& images[id]->inMove && id == 3)) {
 		sf::Vector2i PixelPos = mouse.getPosition(window);
 		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
+		if (!buffer.loadFromFile("assets/drop.wav")) {
+			cout << "ERROR" << endl;
+		}
+		sound.setBuffer(buffer);
+		sound.play();
 		images[id]->inMove = false;
 		takeCastle = false;
 		images[id]->setPosition(images[id]->getInitialPosition());
@@ -3117,6 +3138,13 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
 						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() == 0 && phase == PLACEMENT_PHASE) {
 							phase = ATTACKING_PHASE;
+							int amount;
+							if (province->getNumberOfSoldiers() > 3) {
+								amount = 3;
+							}
+							else
+								amount = province->getNumberOfSoldiers()-1;
+							buttons[NUMBER_TEXT]->setText(to_string(amount));
 							buttons[ATTACK_BUTTON]->setText("Attack");
 							buttons[NEXT_PHASE_BUTTON]->setText("Fortify Phase");
 							buttons[ATTACK_BUTTON]->setFlag(true);

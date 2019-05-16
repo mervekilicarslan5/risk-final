@@ -401,7 +401,8 @@ public:
 	GameManager * GM;
 	NetworkManager * NM;
 	double zoom;
-
+	sf::SoundBuffer buffer;
+	sf::Sound sound;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
 	sf::Image mapImg, hoverImg, roundedSquare, lineImg, coinImg, actionImg, timerImg, topPanelImg, crownImg, castleImg, sceleteImg, warriorImg;
 	sf::Image attackPhaseImg, placementPhaseImg,postAttackPhaseImg, fortifyPhaseImg, marketPhaseImg;
