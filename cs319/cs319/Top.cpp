@@ -1651,6 +1651,9 @@ WindowManager::WindowManager()
 	if (!warriorImg.loadFromFile("assets/warrior.png")) {
 		cout << "Unable to open file" << endl;
 	}
+	if (!battleNotificationImg.loadFromFile("assets/armyNotifier.png")) {
+		cout << "Unable to open file" << endl;
+	}
 
 
 	font;
@@ -1688,7 +1691,7 @@ WindowManager::WindowManager()
 	listOfPhaseNotifiers.push_back(new PhaseNotifier(4,fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
 	listOfPhaseNotifiers.push_back(new PhaseNotifier(5,marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
 
-	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, screenWidth / 2, screenHeight / 2, font);
+	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, battleNotificationImg, screenWidth / 2, screenHeight / 2, font);
 
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
@@ -4030,10 +4033,12 @@ BattleNotifier::BattleNotifier() {
 
 }
 
-BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3, int x, int y,Font font) {
+BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3,Image back, int x, int y,Font font) {
 	imageOfBattle = img1;
 	imageOfDeath = img2;
 	warriorsImg = img3;
+	backPage = back;
+
 	this->font = font;
 	visible = false;
 
@@ -4041,44 +4046,49 @@ BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3, int x, int y,
 	texureOfBattle.loadFromImage(imageOfBattle);
 	textureOfDeath.loadFromImage(imageOfDeath);
 	textureOfWarriors.loadFromImage(warriorsImg);
+	backPageTexture.loadFromImage(backPage);
 
 	this->setTexture(texureOfBattle);
 	spriteOfDeath.setTexture(textureOfDeath);
 	spriteOfWarriors.setTexture(textureOfWarriors);
+	backPageSprite.setTexture(backPageTexture);
 
 	this->setPositionCenter(x, y);
+	backPageSprite.setScale(1,0.8);
+	backPageSprite.setPosition(x - backPageSprite.getGlobalBounds().width / 2, y - backPageSprite.getGlobalBounds().height / 2 + 10);
 
 	battleText.setFont(this->font);
 	battleText.setCharacterSize(40);
 	battleText.setString("Battle");
-	battleText.setFillColor(Color(0, 0, 0));
+	Color color = Color(255, 255, 255);
+	battleText.setFillColor(color);
 
 	playerName1.setFont(this->font);
 	playerName1.setCharacterSize(40);
 	playerName1.setStyle(1<<2);
-	playerName1.setFillColor(Color(0, 0, 0));
+	playerName1.setFillColor(color);
 
 	playerName2.setFont(this->font);
 	playerName2.setCharacterSize(40);
 	playerName2.setStyle(1 << 2);
-	playerName2.setFillColor(Color(0, 0, 0));
+	playerName2.setFillColor(color);
 
 	soldiers1.setFont(this->font);
 	soldiers1.setCharacterSize(40);
-	soldiers1.setFillColor(Color(0, 0, 0));
+	soldiers1.setFillColor(color);
 
 	soldiers2.setFont(this->font);
 	soldiers2.setCharacterSize(40);
-	soldiers2.setFillColor(Color(0, 0, 0));
+	soldiers2.setFillColor(color);
 
 
 	soldierLost1.setFont(this->font);
 	soldierLost1.setCharacterSize(40);
-	soldierLost1.setFillColor(Color(0, 0, 0));
+	soldierLost1.setFillColor(color);
 
 	soldierLost2.setFont(this->font);
 	soldierLost2.setCharacterSize(40);
-	soldierLost2.setFillColor(Color(0, 0, 0));
+	soldierLost2.setFillColor(color);
 
 }
 
@@ -4104,7 +4114,7 @@ void BattleNotifier::updateData(string battleString, string playerNameString1, s
 	soldierLost1.setString(soldierLostString1);
 	soldierLost2.setString(soldierLostString2);
 
-	battleText.setPosition(Vector2f(this->centerCoordinates.x - battleText.getGlobalBounds().width / 2, this->centerCoordinates.y - battleText.getGlobalBounds().height / 2 - this->getGlobalBounds().height) );
+	battleText.setPosition(Vector2f(this->centerCoordinates.x - battleText.getGlobalBounds().width / 2, this->centerCoordinates.y - battleText.getGlobalBounds().height / 2 - this->getGlobalBounds().height-25) );
 	playerName1.setPosition(this->centerCoordinates.x - this->getGlobalBounds().width - playerName1.getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
 	playerName2.setPosition(this->centerCoordinates.x + this->getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
 
@@ -4132,6 +4142,7 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 	if (removeTimer > 2) {
 		opacityParam = opacityParam - 0.3*time ;
 		this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
+		backPageSprite.setColor(Color(backPageSprite.getColor().r, backPageSprite.getColor().g, backPageSprite.getColor().b, (int)opacityParam));
 
 		battleText.setFillColor(Color(battleText.getFillColor().r, battleText.getFillColor().g, battleText.getFillColor().b, (int)opacityParam));
 		playerName1.setFillColor(Color(playerName1.getFillColor().r, playerName1.getFillColor().g, playerName1.getFillColor().b, (int)opacityParam));
@@ -4144,6 +4155,7 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 		soldierLost2.setFillColor(Color(soldierLost2.getFillColor().r, soldierLost2.getFillColor().g, soldierLost2.getFillColor().b, (int)opacityParam));
 	}
 
+	window.draw(backPageSprite);
 	window.draw(*this);
 	window.draw(battleText);
 
@@ -4169,6 +4181,7 @@ void BattleNotifier::activate() {
 	removeTimer = 0;
 	opacityParam = 255.f;
 	this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
+	backPageSprite.setColor(Color(backPageSprite.getColor().r, backPageSprite.getColor().g, backPageSprite.getColor().b, (int)opacityParam));
 
 	battleText.setFillColor(Color(battleText.getFillColor().r, battleText.getFillColor().g, battleText.getFillColor().b, (int)opacityParam));
 	playerName1.setFillColor(Color(playerName1.getFillColor().r, playerName1.getFillColor().g, playerName1.getFillColor().b, (int)opacityParam));
