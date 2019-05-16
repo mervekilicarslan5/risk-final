@@ -1755,11 +1755,11 @@ WindowManager::WindowManager()
 	string line;
 	ifstream myfile("assets/coordinates.txt");
 
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(1,placementPhaseImg, screenWidth/2,screenHeight/2, screenWidth *0.75, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(2,attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.70, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(4,fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(5,marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(1,placementPhaseImg, screenWidth/2,screenHeight/2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(2,attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.70, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(4,fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(5,marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
 
 	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, battleNotificationImg, screenWidth / 2, screenHeight / 2, font);
 
@@ -2405,16 +2405,8 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.setView(window.getDefaultView());
 	window.draw(lowerPanel);
 	battleNotifier->draw(window, time);
-	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
-		if (phase == listOfPhaseNotifiers[i]->phaseId)
-			listOfPhaseNotifiers[i]->activate();
-		else
-			listOfPhaseNotifiers[i]->deactivate();
-	}
 
-	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
-		listOfPhaseNotifiers[i]->draw(window,time);
-	}
+
 
 	dragObject(window, event, 3);
 	dragObject(window, event, 0);
@@ -2452,6 +2444,17 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), totalTurn, currentPlayerName);
 	topPanel->draw(window);
+
+	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
+		if (phase == listOfPhaseNotifiers[i]->phaseId)
+			listOfPhaseNotifiers[i]->activate();
+		else
+			listOfPhaseNotifiers[i]->deactivate();
+	}
+	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
+		listOfPhaseNotifiers[i]->draw(window, time);
+	}
+
 	//miniMap Staff
 	window.setView(miniMap);
 	miniMap.update(mainView);
@@ -4203,11 +4206,11 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 		return;
 	if (opacityParam < 100)
 		this->deactivate();
-	cout << removeTimer << endl;
+	//cout << removeTimer << endl;
 	removeTimer = this->ckk.getElapsedTime().asSeconds() + removeTimer;
 	this->ckk.restart();
 	
-	if (removeTimer > 2) {
+	if (removeTimer > 1) {
 		opacityParam = opacityParam - 0.3*time ;
 		this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
 		backPageSprite.setColor(Color(backPageSprite.getColor().r, backPageSprite.getColor().g, backPageSprite.getColor().b, (int)opacityParam));
