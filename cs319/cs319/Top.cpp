@@ -174,6 +174,62 @@ vector<int> Player::getProvinces()
 	return provinces;
 }
 
+
+int Player::howManyCont(int &res) {
+
+	int count = 0;
+	int earnedSold = 0;
+	res = 0;
+
+	sort(provinces.begin(), provinces.end());
+
+
+	for (int i = 0; i < provinces.size() - 1; i++) {
+		if (provinces.at(i) + 1 == provinces.at(i + 1)) {
+			count++;
+		}
+		else
+			count = 0;
+
+		if (provinces.at(i) == 8 || provinces.at(i) == 12 || provinces.at(i) == 19 || provinces.at(i) == 25 || provinces.at(i) == 37 || provinces.at(i) == 41)
+			count = 0;
+
+		if (provinces.at(i) == 7 && count == 8) {
+			res++;
+			earnedSold += 5;
+		}
+
+		else if (provinces.at(i) == 11 && count == 3) {
+			res++;
+			earnedSold += 2;
+		}
+
+		else if (provinces.at(i) == 18 && count == 6) {
+			res++;
+			earnedSold += 5;
+		}
+
+		else if (provinces.at(i) == 24 && count == 5) {
+			res++;
+			earnedSold += 3;
+		}
+
+		else if (provinces.at(i) == 36 && count == 11) {
+			res++;
+			earnedSold += 7;
+		}
+
+		else if (provinces.at(i) == 40 && count == 3) {
+			count = 0;
+			res++;
+			earnedSold += 2;
+		}
+
+	}
+	return earnedSold;
+
+}
+
 vector<int> Player::getBonusCards()
 {
 	return bonusCards;
@@ -257,6 +313,7 @@ void Player::loseProvince(WorldMap* worldMap, Province* _province) {
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 {
+
 	int pricesold = 50;
 	if (leftSoldier < amount) {
 		if (money < (pricesold * amount)) {
@@ -1495,7 +1552,7 @@ bool GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
 		}
 		int playersize = players.size();
 		for (int i = 0; i < playersize; i++) {
-			_provinces += to_string( players[i]->getMoney() )+ ",";
+			_provinces += to_string(players[i]->getMoney()) + ",";
 		}
 		if ((*NM)->sendStringFromHost(_provinces) != "")
 			return true;
@@ -1509,7 +1566,7 @@ bool GameManager::getAllProvincesFromHost(NetworkManager ** NM) {
 		string received = (*NM)->sendStringFromHost(_provinces);
 		if (received != "") {
 			vector<string> data = (*NM)->split(received, ',');
-			for (int i = 0; i < 168 ; i += 4) {
+			for (int i = 0; i < 168; i += 4) {
 
 				string dummy;
 				int pId = stoi(data[i]);
@@ -1525,7 +1582,7 @@ bool GameManager::getAllProvincesFromHost(NetworkManager ** NM) {
 				provinceChanged->setNumberOfSoldiers(count);
 				provinceChanged->getCastle()->setLevel(casLev);
 				if (casLev == 1) {
-					buildCastle(playerChanged,provinceChanged);
+					buildCastle(playerChanged, provinceChanged);
 				}
 
 			}
@@ -1558,7 +1615,7 @@ void GameManager::sendAllProvincesFromClientToHost(NetworkManager ** NM) {
 		for (int i = 0; i < playersize; i++) {
 			_provinces += to_string(players[i]->getMoney()) + ",";
 		}
-		
+
 		if ((*NM)->sendStringFromClientToHost(_provinces) == "") {}
 	}
 }
@@ -2091,6 +2148,7 @@ void WindowManager::menuEvents(sf::Event& e, int i) {
 void WindowManager::changeButton(int id) {
 	//sf::SoundBuffer buffer;
 	//buffer.loadFromFile("assets/menuOp.wav");
+
 		//sf::Sound sound;
 		//sound.setBuffer(buffer);
 		//sound.play();
@@ -2250,6 +2308,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 	drawAllArmies(window, event);
 	drawAllCastles(window, event);
+
 	//for (auto it = castles.begin(); it != castles.end(); it++) {
 	//	window.draw(*(*it));
 	//}
@@ -2290,7 +2349,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 		window.draw(*playerStatus[i]);
 	}
 
-	
+
 	int currentPlayer = GM->currentPlayer;
 	string currentPlayerName;
 	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
@@ -2354,7 +2413,7 @@ void WindowManager::createWindow() {
 			multGameComp(window, event);
 			if (this->phase == END_TURN) {
 
-				if (userTurn != 0 && GM->getAllProvincesFromHost(&NM) ) {
+				if (userTurn != 0 && GM->getAllProvincesFromHost(&NM)) {
 					if (!getInitialState) {
 						getInitialState = true;
 						continue;
@@ -2366,7 +2425,7 @@ void WindowManager::createWindow() {
 						GM->currentPlayer = turn;
 						totalTurn++;
 					}
-					
+
 					if (turn == userTurn) {
 						provinceNameTxt.setString("Your Turn");
 						if (!_randomPlacement && GM->getWorldMap()->ownerCount() != 42)
@@ -2375,7 +2434,7 @@ void WindowManager::createWindow() {
 							string dummy;
 							GM->getPlayerByID(userTurn, dummy)->setLeftSoldier(GM->getPlayerByID(userTurn, dummy)->getNumberOfProvinces() / 3);
 							phase = PLACEMENT_PHASE;
-						}		
+						}
 					}
 					else {
 						provinceNameTxt.setString("Waiting for opponent: " + (GM->getPlayers())[turn]->getName());
@@ -2384,18 +2443,18 @@ void WindowManager::createWindow() {
 				}
 
 				else if (userTurn == 0) {
-					
+
 					if (GM->getAllProvincesFromClient(&NM)) {
 						GM->sendAllProvincesFromHost(&NM);
 						turn++;
 						GM->currentPlayer = turn;
-						
+
 						if (turn == this->GM->getPlayers().size()) {
 							turn = 0;
 							GM->currentPlayer = turn;
 							totalTurn++;
 						}
-						
+
 						if (turn == userTurn) {
 							provinceNameTxt.setString("Your Turn");
 							if (!_randomPlacement && GM->getWorldMap()->ownerCount() != 42)
@@ -2405,7 +2464,7 @@ void WindowManager::createWindow() {
 								GM->getPlayerByID(userTurn, dummy)->setLeftSoldier(GM->getPlayerByID(userTurn, dummy)->getNumberOfProvinces() / 3);
 								phase = PLACEMENT_PHASE;
 							}
-								
+
 						}
 						else {
 							provinceNameTxt.setString("Waiting for opponent: " + (GM->getPlayers())[turn]->getName());
@@ -2446,6 +2505,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 		if (it != GM->colorLookUpTable.end())
 			return GM->colorLookUpTable[colorInInt];
 	}
+
 	return "";
 }
 
@@ -2474,6 +2534,12 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 }
 
 void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
+	cout << "button clicked" << endl;
+	if (!buffer.loadFromFile("assets/sounds/effects/click1.wav")) {
+		cout << "ERROR LOADING SOUND FILE" << endl;
+	}
+	sound.setBuffer(buffer);
+	sound.play();
 	if (page == MENU_SCREEN) {
 
 		if (id == 0) {
@@ -2572,7 +2638,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 		}
 		else if (phase == MARKET_PHASE) {
-			
+
 			if (page == COMPUTER_GAME_SCREEN) {
 				string dummy;
 				for (int i = 0; i < playerCount; i++)
@@ -2581,11 +2647,19 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				turn++;
 				if (turn == playerCount) {
 					turn = 0;
+					for (int i = 0; i < playerCount; i++) {
+						string dummy;
+						int res = 0;
+						Player* player0 = GM->getPlayerByID(i, dummy);
+						player0->setLeftSoldier(player0->getNumberOfProvinces() / 3 + player0->howManyCont(res));
+						player0->setMoney(player0->getMoney() + 200);
+						cout << "player" << i + 1 << " has " << res << " Continents";
+					}
 					totalTurn++;
 				}
 				GM->currentPlayer = turn;
 			}
-			
+
 			if (page == 1) {
 				if (userTurn == 0) {
 					this->GM->sendAllProvincesFromHost(&NM);
@@ -2608,7 +2682,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			countForWheel = 0;
 			takeCastle = false;
 			wonSoldier = false;
-			
+
 
 		}
 		else if (phase == END_TURN) {
@@ -2619,6 +2693,11 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	else if (id == ATTACK_BUTTON) {
 		if (phase == ATTACKING_PHASE) {
 			if (isProvinceClicked == 2) {
+				if (!buffer.loadFromFile("assets/sounds/attack.wav")) {
+					cout << "ERROR LOADING SOUND FILE" << endl;
+				}
+				sound.setBuffer(buffer);
+				sound.play();
 				if (GM->attack(player, second->getOwner(), first, second, soldierAmount)) {
 					wheel = true;
 					phase = POST_ATTACK; //change phase 
@@ -2706,6 +2785,11 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	else if (id == TURN_WHEEL_BUTTON && countForWheel < 1 && phase == MARKET_PHASE && wheel) {
 		countForWheel++;
 		buttons[TURN_WHEEL_BUTTON]->setFlag(false);
+		if (!buffer.loadFromFile("assets/sounds/effects/wheel.wav")) {
+			cout << "ERROR LOADING SOUND FILE" << endl;
+		}
+		sound.setBuffer(buffer);
+		sound.play();
 		wonSoldier = false;
 		string temp;
 
@@ -3045,11 +3129,23 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 			images[id]->inMove = true;
 		}
 	}
-	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Right) && event.key.code == mouse.Right&& images[id]->inMove && id == 3)) {
+	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Left) && event.key.code == mouse.Left&& images[id]->inMove && id == 3)) {
 		sf::Vector2i PixelPos = mouse.getPosition(window);
 		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 		images[id]->inMove = false;
 		takeCastle = false;
+		int dummy; Province* province; string dum;
+		string filename;
+		if (id == 0)
+			filename = "soldier.wav";
+		else if (id == 3) {
+			filename = "castle.wav";
+		}
+		if (!buffer.loadFromFile("assets/sounds/effects/" + filename)) {
+			cout << "ERROR LOADING SOUND FILE" << endl;
+		}
+		sound.setBuffer(buffer);
+
 		images[id]->setPosition(images[id]->getInitialPosition());
 		images[id]->setScale(sf::Vector2f(1, 1));
 		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
@@ -3094,7 +3190,11 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 					}
 				}
 				else if (phase == PLACEMENT_PHASE || phase == MARKET_PHASE) {
-					if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
+					if (buttons[NUMBER_TEXT]->getText() == 0) {
+
+					}
+					else if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
+						sound.play();
 						if (wonSoldier) {
 							wonSoldier = false;
 						}
@@ -3129,6 +3229,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				int id; Province* ptr;
 				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
 				if (GM->buildCastle(turn, provinceName)) {
+					sound.play();
 					int index = castles.size();
 					castles.push_back(new MyImage("castle.png"));
 					castles[index]->setPosition(listOfArmyBage[id]->getPosition());
