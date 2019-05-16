@@ -2370,8 +2370,8 @@ void WindowManager::createWindow() {
 					if (GM->getAllProvincesFromClient(&NM)) {
 						GM->sendAllProvincesFromHost(&NM);
 						turn++;
-						
-						if ( turn == this->GM->getPlayers().size()) {
+
+						if (turn == this->GM->getPlayers().size()) {
 							cout << "ALL PLAYERS HAVE BEEN PLAYED !!!!!!!!!!  HOOOOOOOOOOSSSSST" << endl;
 							turn = 0;
 							totalTurn++;
@@ -2437,7 +2437,7 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 			imageClicked(id);
 			return;
 		}
-		id++; 
+		id++;
 	}
 
 
@@ -3051,8 +3051,8 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 							if (turn == playerCount)
 								turn = 0;
 						}
-						
-						
+
+
 
 
 						cout << turn << "**********************";
