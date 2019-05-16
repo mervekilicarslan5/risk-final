@@ -460,7 +460,7 @@ void WorldMap::getProvinceByName(string name, int & index, Province* & ptr) {
 }
 
 void WorldMap::showProvinceStatus(Province* p) {
-	cout << "------------------------------------" << endl;
+	/*cout << "------------------------------------" << endl;
 	cout << "Province Name: " << p->getName() << endl;
 	if (p->getOwner() == NULL)
 		cout << "Current Owner: None" << endl;
@@ -473,7 +473,7 @@ void WorldMap::showProvinceStatus(Province* p) {
 	else if (p->getCastle()->getLevel() == 1)
 		cout << "1 " << endl;
 	else if (p->getCastle()->getLevel() == 2)
-		cout << "2 " << endl;
+		cout << "2 " << endl;*/
 }
 
 int WorldMap::getNumberOfProvinces() {
@@ -669,7 +669,7 @@ Player* GameManager::getPlayerByID(int id, string & name) {
 		}
 	}
 	name = "";
-	cout << "There is no such player with ID: " << id << endl;
+
 	return NULL;
 }
 
@@ -681,13 +681,11 @@ Player* GameManager::getPlayerByName(string name, int & id) {
 		}
 	}
 	id = -1;
-	cout << "There is no such player with name: " << name << endl;
 	return NULL;
 }
 
 bool GameManager::buildCastle(Player* player, Province* province) {
 	if (province->getOwner() != player) {
-		cout << "This province does not belong to the player." << endl;
 		return false;
 	}
 	int done = player->buildCastle(province);
@@ -751,17 +749,14 @@ bool GameManager::placeSoldier(int playerId, string provinceName, int amount)
 
 bool GameManager::fortify(Player* player, Province* from, Province * to, int amount) {
 	if (from->getNumberOfSoldiers() <= amount) {
-		cout << "There has to be at least one soldier in a province!" << endl;
 		return false;
 	}
 	if (!worldMap->hasPath(player, from, to)) {
-		cout << "No path between " << from->getName() << " and " << to->getName() << endl;
 		return false;
 	}
 
 	from->setNumberOfSoldiers(from->getNumberOfSoldiers() - amount);
 	to->setNumberOfSoldiers(to->getNumberOfSoldiers() + amount);
-	cout << amount << " soldiers have been fortified from " << from->getName() << " to " << to->getName() << endl;
 	return true;
 }
 
@@ -802,23 +797,18 @@ bool GameManager::fortify(string name, string fromStr, string toStr, int amount)
 
 bool GameManager::attack(Player* attacker, Player* defender, Province* from, Province * to, int amount) {
 	if (attacker == defender) {
-		cout << "You cannot attack yourself!" << endl;
 		return false;
 	}
 	if (from->getOwner() != attacker) {
-		cout << from->getName() << " does not belong to " << attacker->getName() << endl;
 		return false;
 	}
 	if (to->getOwner() != defender) {
-		cout << to->getName() << "does not belong to " << defender->getName() << endl;
 		return false;
 	}
 	if (!worldMap->isNeighbor(from, to)) {
-		cout << from->getName() << " and " << to->getName() << " are not neighbors!" << endl;
 		return false;
 	}
 	if (amount >= from->getNumberOfSoldiers()) {
-		cout << "There has to be at least one soldier left!" << endl;
 		return false;
 	}
 	vector<int> result;
@@ -828,8 +818,6 @@ bool GameManager::attack(Player* attacker, Player* defender, Province* from, Pro
 	else {
 		result = rollDice(amount, 2);
 	}
-	cout << "Attacker lost " << result[1] << " soldiers" << endl;
-	cout << "Defender lost " << result[0] << " soldiers" << endl;
 	if (result[1] != 0 || result[0] != 0) {
 		windowManager->battleNotifier->updateData("Battle of " + to->getName(), attacker->getName(), defender->getName(), to_string(from->getNumberOfSoldiers()), to_string(to->getNumberOfSoldiers()), to_string(result[1]), to_string(result[0]));
 		windowManager->battleNotifier->activate();
@@ -847,7 +835,6 @@ bool GameManager::attack(Player* attacker, Player* defender, Province* from, Pro
 	}
 
 	if (to->getNumberOfSoldiers() == 0) {
-		cout << attacker->getName() << " has captured the city " << to->getName() << endl;
 		attacker->captureProvince(worldMap, to);
 		return true;
 	}
@@ -859,18 +846,15 @@ bool GameManager::attack(string attackerName, string defenderName, string fromSt
 	Player* attacker = getPlayerByName(attackerName, i);
 	Player* defender = getPlayerByName(defenderName, i);
 	if (attacker == NULL || defender == NULL) {
-		cout << "No such players" << endl;
 		return false;
 	}
 	Province* from, *to;
 	worldMap->getProvinceByName(fromStr, i, from);
 	if (i == -1) {
-		cout << fromStr << " does not exist!" << endl;
 		return false;
 	}
 	worldMap->getProvinceByName(toStr, i, to);
 	if (i == -1) {
-		cout << toStr << " does not exist!" << endl;
 		return false;
 	}
 	return attack(attacker, defender, from, to, amount);
@@ -1509,6 +1493,10 @@ bool GameManager::sendAllProvincesFromHost(NetworkManager ** NM) {
 			_provinces += "," + to_string(pro->getNumberOfSoldiers());
 			_provinces += "," + to_string(pro->getCastle()->getLevel()) + ",";
 		}
+		int playersize = players.size();
+		for (int i = 0; i < playersize; i++) {
+			_provinces += to_string( players[i]->getMoney() )+ ",";
+		}
 		if ((*NM)->sendStringFromHost(_provinces) != "")
 			return true;
 		return false;
@@ -1521,7 +1509,7 @@ bool GameManager::getAllProvincesFromHost(NetworkManager ** NM) {
 		string received = (*NM)->sendStringFromHost(_provinces);
 		if (received != "") {
 			vector<string> data = (*NM)->split(received, ',');
-			for (int i = 0; i < data.size(); i += 4) {
+			for (int i = 0; i < 168 ; i += 4) {
 
 				string dummy;
 				int pId = stoi(data[i]);
@@ -1536,7 +1524,14 @@ bool GameManager::getAllProvincesFromHost(NetworkManager ** NM) {
 					playerChanged->captureProvince(this->getWorldMap(), provinceChanged);
 				provinceChanged->setNumberOfSoldiers(count);
 				provinceChanged->getCastle()->setLevel(casLev);
+				if (casLev == 1) {
+					buildCastle(playerChanged,provinceChanged);
+				}
 
+			}
+			int a = 0;
+			for (int j = 168; j < data.size(); j++) {
+				players[a++]->setMoney(stoi(data[j]));
 			}
 			return true;
 		}
@@ -1559,6 +1554,11 @@ void GameManager::sendAllProvincesFromClientToHost(NetworkManager ** NM) {
 			_provinces += "," + to_string(pro->getNumberOfSoldiers());
 			_provinces += "," + to_string(pro->getCastle()->getLevel()) + ",";
 		}
+		int playersize = players.size();
+		for (int i = 0; i < playersize; i++) {
+			_provinces += to_string(players[i]->getMoney()) + ",";
+		}
+		
 		if ((*NM)->sendStringFromClientToHost(_provinces) == "") {}
 	}
 }
@@ -1569,7 +1569,7 @@ bool GameManager::getAllProvincesFromClient(NetworkManager ** NM) {
 		string received = (*NM)->getStringFromClient();
 		if (received != "") {
 			vector<string> data = (*NM)->split(received, ',');
-			for (int i = 0; i < data.size(); i += 4) {
+			for (int i = 0; i < 168; i += 4) {
 
 				string dummy;
 				int pId = stoi(data[i]);
@@ -1583,7 +1583,13 @@ bool GameManager::getAllProvincesFromClient(NetworkManager ** NM) {
 					playerChanged->captureProvince(this->getWorldMap(), provinceChanged);
 				provinceChanged->setNumberOfSoldiers(count);
 				provinceChanged->getCastle()->setLevel(casLev);
-
+				if (casLev == 1) {
+					buildCastle(playerChanged, provinceChanged);
+				}
+			}
+			int a = 0;
+			for (int j = 168; j < data.size(); j++) {
+				players[a++]->setMoney(stoi(data[j]));
 			}
 			return true;
 		}
@@ -2027,7 +2033,6 @@ void WindowManager::menuScreen(RenderWindow& window, Event& event) {
 
 
 	while (window.pollEvent(event)) {
-		cout << "we are checking" << x++ << endl;
 		if (event.type == sf::Event::Closed)
 			window.close();
 
@@ -2054,7 +2059,6 @@ void WindowManager::menuEvents(sf::Event& e, int i) {
 		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
 			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
 				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y) / 2) {
-				cout << "Menu Events BUTTON" << id << endl;
 				buttonClicked(id, e, window);
 				return;
 			}
@@ -2066,7 +2070,6 @@ void WindowManager::menuEvents(sf::Event& e, int i) {
 		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
 			if ((*it)->getPosition().x < e.mouseMove.x && e.mouseMove.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
 				(*it)->getPosition().y < e.mouseMove.y && e.mouseMove.y < (*it)->getPosition().y + ((*it)->getSize().y) / 2) {
-				cout << id << endl;
 				changeButton(id);
 				return;
 			}
@@ -2086,7 +2089,6 @@ void WindowManager::menuEvents(sf::Event& e, int i) {
 }
 
 void WindowManager::changeButton(int id) {
-	cout << "bhange button" << endl;
 	//sf::SoundBuffer buffer;
 	//buffer.loadFromFile("assets/menuOp.wav");
 		//sf::Sound sound;
@@ -2100,7 +2102,6 @@ void WindowManager::changeButton(int id) {
 //void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 //	static int x = 0;
 //	while (window.pollEvent(event)) {
-//		cout << "we are checking" << x++ << endl;
 //		if (event.type == sf::Event::Closed)
 //			window.close();
 //		else if (event.type == sf::Event::MouseButtonPressed)
@@ -2289,12 +2290,18 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 		window.draw(*playerStatus[i]);
 	}
 
+	
 	int currentPlayer = GM->currentPlayer;
 	string currentPlayerName;
 	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
 
-
-	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), totalTurn, currentPlayerName);
+	if (page == 2) {
+		topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), totalTurn, currentPlayerName);
+	}
+	else if (page == 1) {
+		Player * me = GM->getPlayerByID(userTurn, currentPlayerName);
+		topPanel->update(me->getMoney(), me->getLeftSoldier(), totalTurn, currentPlayerName);
+	}
 	topPanel->draw(window);
 
 	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
@@ -2333,6 +2340,7 @@ void WindowManager::createWindow() {
 			menuScreen(window, event);
 			if (create_game_clicked) {
 				NM->getNamesConnect(&GM);
+				provinceNameTxt.setString("Your Turn");
 				if (playerCount == 2) {
 					create_game_clicked = false;
 				}
@@ -2346,41 +2354,63 @@ void WindowManager::createWindow() {
 			multGameComp(window, event);
 			if (this->phase == END_TURN) {
 
-				if (userTurn != 0 && GM->getAllProvincesFromHost(&NM)) {
+				if (userTurn != 0 && GM->getAllProvincesFromHost(&NM) ) {
+					if (!getInitialState) {
+						getInitialState = true;
+						continue;
+					}
 					turn++;
+					GM->currentPlayer = turn;
 					if (turn == this->GM->getPlayers().size()) {
-						cout << "ALL PLAYERS HAVE BEEN PLAYED !!!!!!!!!!  " << endl;
 						turn = 0;
+						GM->currentPlayer = turn;
 						totalTurn++;
 					}
-
-					cout << "NEXT TURN :::  " << turn << endl;
-					cout << "PLAYER COUNT  :::  " << playerCount << endl;
+					
 					if (turn == userTurn) {
+						provinceNameTxt.setString("Your Turn");
 						if (!_randomPlacement && GM->getWorldMap()->ownerCount() != 42)
 							phase = INITIAL_PHASE;
-						else
+						else {
+							string dummy;
+							GM->getPlayerByID(userTurn, dummy)->setLeftSoldier(GM->getPlayerByID(userTurn, dummy)->getNumberOfProvinces() / 3);
 							phase = PLACEMENT_PHASE;
+						}		
 					}
-					//cout << "ALL PROVINCES TAKEN FROM HOST" << endl;
+					else {
+						provinceNameTxt.setString("Waiting for opponent: " + (GM->getPlayers())[turn]->getName());
+					}
+					displayPlayerStatus();
 				}
 
 				else if (userTurn == 0) {
-					//cout << "WAITING FOR CLIENT TURN !!!!!!!!!!" << endl;
+					
 					if (GM->getAllProvincesFromClient(&NM)) {
 						GM->sendAllProvincesFromHost(&NM);
 						turn++;
-
+						GM->currentPlayer = turn;
+						
 						if (turn == this->GM->getPlayers().size()) {
-							cout << "ALL PLAYERS HAVE BEEN PLAYED !!!!!!!!!!  HOOOOOOOOOOSSSSST" << endl;
 							turn = 0;
+							GM->currentPlayer = turn;
 							totalTurn++;
 						}
-						cout << "PLAYER COUNT  :::  HOOOOOOOOOOOOOOOOST " << playerCount << endl;
-						cout << "NEXT TURN ::: HOOOOOOOOSSSSSSTTT " << turn << endl;
+						
 						if (turn == userTurn) {
-							phase = INITIAL_PHASE;
+							provinceNameTxt.setString("Your Turn");
+							if (!_randomPlacement && GM->getWorldMap()->ownerCount() != 42)
+								phase = INITIAL_PHASE;
+							else {
+								string dummy;
+								GM->getPlayerByID(userTurn, dummy)->setLeftSoldier(GM->getPlayerByID(userTurn, dummy)->getNumberOfProvinces() / 3);
+								phase = PLACEMENT_PHASE;
+							}
+								
 						}
+						else {
+							provinceNameTxt.setString("Waiting for opponent: " + (GM->getPlayers())[turn]->getName());
+						}
+						displayPlayerStatus();
 					}
 				}
 			}
@@ -2444,7 +2474,6 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 }
 
 void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
-	cout << "button clicked" << endl;
 	if (page == MENU_SCREEN) {
 
 		if (id == 0) {
@@ -2463,7 +2492,6 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			else {
 				phase = INITIAL_PHASE;
 			}
-			cout << "clickked weghwioefng" << endl;
 			turn = 0;
 			page = COMPUTER_GAME_SCREEN;
 		}
@@ -2487,7 +2515,6 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		else if (id == 8) {
 			NM->startGame();
 			userTurn = GM->getPlayerTurn(userName);
-			cout << "MY TURN " << userTurn << endl;
 			if (_randomPlacement) {
 				GM->randomPlacement();
 				GM->sendAllProvincesFromHost(&NM);
@@ -2495,10 +2522,8 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			}
 			else {
 				phase = INITIAL_PHASE;
-
 			}
 
-			cout << "THE GAME IS STARTIN" << endl;
 
 			page = 1;
 		}
@@ -2537,7 +2562,6 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			buttons[ATTACK_BUTTON]->setFlag(false);
 			// ------------------------------ CASTLE ATTACKS BEGINS
 			string dum;
-			cout << "End of turn : " << turn << endl;
 			GM->castleAttacks(GM->getPlayerByID(turn, dum));
 			// ------------------------------ CASTLE ATTACKS ENDS
 
@@ -2548,34 +2572,48 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 		}
 		else if (phase == MARKET_PHASE) {
-			turn++;
-			if (turn == playerCount) {
-				turn = 0;
-				totalTurn++;
-			}
+			
 			if (page == COMPUTER_GAME_SCREEN) {
 				string dummy;
 				for (int i = 0; i < playerCount; i++)
 					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
 				phase = PLACEMENT_PHASE;
+				turn++;
+				if (turn == playerCount) {
+					turn = 0;
+					totalTurn++;
+				}
+				GM->currentPlayer = turn;
 			}
-			cout << "Player" << turn + 1 << " 's turn!!" << endl;
-			phase = PLACEMENT_PHASE;
+			
+			if (page == 1) {
+				if (userTurn == 0) {
+					this->GM->sendAllProvincesFromHost(&NM);
+					turn++;
+					GM->currentPlayer = turn;
+					provinceNameTxt.setString("Waiting for opponent: " + (GM->getPlayers())[turn]->getName());
+				}
+				else {
+					this->GM->sendAllProvincesFromClientToHost(&NM);
+				}
+
+				phase = END_TURN;
+			}
+
 			buttons[TURN_WHEEL_BUTTON]->setFlag(false);
 			buttons[ATTACK_BUTTON]->setFlag(false);
 			buttons[NEXT_PHASE_BUTTON]->setFlag(false);
 
-			GM->currentPlayer = turn;
 			wheel = false;
 			countForWheel = 0;
 			takeCastle = false;
 			wonSoldier = false;
+			
 
 		}
 		else if (phase == END_TURN) {
 		}
 
-		cout << "Phase: " << phase << endl;
 	}
 
 	else if (id == ATTACK_BUTTON) {
@@ -2588,7 +2626,6 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 					provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
 					soldierAmount = first->getNumberOfSoldiers() - 1;
 					buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-					cout << "lelelellelee" << endl;
 				}
 				else if (first->getNumberOfSoldiers() > 3) {
 					soldierAmount = 3;
@@ -2686,14 +2723,12 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 void WindowManager::imageClicked(int id) {
 	if (id == 0) {
-		cout << "Image clicked" << endl;
 	}
 }
 
 void WindowManager::handleWheel() {
 	string temp;
 	int index = ((int)(rotateAmount / 45)) % 8;
-	cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
 	if (index == 0) {
 		//draw bonus card
 	}
@@ -3023,14 +3058,15 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				string provinceName = getProvinceName(window, mouse);
 				if (provinceName == "")
 					return;
-				cout << provinceName << endl;
 				if (phase == INITIAL_PHASE) {
-					cout << "*******" << buttons[NUMBER_TEXT]->getText() << endl;
+
 					if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
 						if (page == 1) {
 							if (userTurn == 0) {
 								this->GM->sendAllProvincesFromHost(&NM);
+								GM->currentPlayer = turn;
 								turn++;
+								provinceNameTxt.setString("Waiting for opponent: " + (GM->getPlayers())[turn]->getName());
 							}
 							else {
 								this->GM->sendAllProvincesFromClientToHost(&NM);
@@ -3053,10 +3089,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 						}
 
 
-
-
-						cout << turn << "**********************";
-						provinceNameTxt.setString("Player" + to_string(turn + 1) + "'s turn");
+						//provinceNameTxt.setString("Player" + to_string(turn + 1) + "'s turn");
 
 					}
 				}
@@ -3295,7 +3328,6 @@ void NetworkManager::getAllNames(GameManager ** const GM) {
 		String received;
 		packet >> received;
 		string str = received;
-		cout << "The Game is starting" << endl;
 		players = split(str, ',');
 
 		for (int i = 0; i < players.size(); i++) {
@@ -3304,11 +3336,14 @@ void NetworkManager::getAllNames(GameManager ** const GM) {
 		if (WM != NULL) {
 			WM->page = WM->GAME_SCREEN;
 			WM->userTurn = WM->GM->getPlayerTurn(WM->userName);
-			cout << "MY TURN " << WM->userTurn << endl;
-			if (WM->_randomPlacement)
-				WM->GM->getAllProvincesFromHost(&(WM->NM));
+			/*if (WM->_randomPlacement) {
+				if (WM->GM->getAllProvincesFromHost(&(WM->NM))) {
+					WM->join_game_clicked = false;
+					cout << "ALL PROVINCES GOT BEFORE THE game !!!!!!!!" << endl;
+				}
+			}*/
 			WM->phase = WM->END_TURN;
-			cout << "MY PHAAASSEEE " << WM->phase << endl;
+			WM->provinceNameTxt.setString("Waiting for opponent: " + ((*GM)->getPlayers())[0]->getName());
 		}
 	}
 }
@@ -3319,7 +3354,6 @@ void NetworkManager::createNetwork(GameManager ** const GM, string _connectionTy
 
 	Packet packet;
 
-	cout << "(h) for server, (c) for client: ";
 	connectionType = _connectionType;
 
 	unsigned short port = 2000;
@@ -3331,13 +3365,6 @@ void NetworkManager::createNetwork(GameManager ** const GM, string _connectionTy
 		port = 2001;
 	else if (connectionType == "c2")
 		port = 2002;
-	//else if (connectionType == "c3")
-	//	port = 2003;
-	//else if (connectionType == "c4")
-	//	port = 2004;
-	//else if (connectionType == "c5")
-	//	port = 2005;
-
 
 	if (socket.bind(port) != Socket::Done) {
 		cout << "Couldnt binded. ";
@@ -3349,22 +3376,19 @@ void NetworkManager::createNetwork(GameManager ** const GM, string _connectionTy
 
 	if (connectionType == "h") {
 		playersName = "";
-		cout << "Enter your name(HOST): ";
 		playersName += _name + ",";
 		(*GM)->addPlayer(_name);
 	}
 	if (connectionType == "c1" || connectionType == "c2") {
 		//cout << "Enter server ip: ";
-		//cin >> sIp;
 		string name;
-		cout << "Enter your name: ";
 		name = _name;
 		String playerName = name;
 		packet << playerName;
 		IpAddress sendIP(sIP);
 		if (socket.send(packet, sendIP, 2000) == Socket::Done)
 			cout << "You have joined the room." << endl;
-		//cout << sIP << endl;
+
 
 
 	}
@@ -3378,13 +3402,11 @@ void NetworkManager::startGame() {
 		Packet packet;
 		packet << sendPlayersName;
 		string display = sendPlayersName;
-		cout << display << endl;
 		map<unsigned short, IpAddress> ::iterator tempIterator;
 		for (tempIterator = computerID.begin(); tempIterator != computerID.end(); tempIterator++)
 			if (socket.send(packet, tempIterator->second, tempIterator->first) == Socket::Done) {}
 	}
 	else {
-		cout << "You cannot start the game " << endl;
 		return;
 	}
 }
@@ -3399,7 +3421,6 @@ string NetworkManager::getStringFromClient() {
 			String receivedString;
 			packet >> receivedString;
 			string stringRec = receivedString;
-			cout << "The received string : ************ " << stringRec << endl;
 			return stringRec;
 		}
 		return "";
@@ -3431,7 +3452,6 @@ string NetworkManager::sendStringFromHost(string _sendText) {
 			String receivedString;
 			packet >> receivedString;
 			string stringRec = receivedString;
-			cout << "The received string : ************ " << stringRec << endl;
 			return stringRec;
 		}
 		return "";
@@ -3449,7 +3469,6 @@ string NetworkManager::sendStringFromClientToHost(string _sendText) {
 	if (socket.send(packet, sendIP, 2000) == Socket::Done) {
 		packet >> sentText;
 		string  display = sentText;
-		cout << display << "send string :::::::::" << endl;
 		return display;
 	} // the socket send or not 
 	return "";
@@ -3779,7 +3798,6 @@ void PhaseNotifier::draw(sf::RenderWindow & window, float time) {
 	if (moveTimer > 0.7) {
 
 
-
 		if (this->getPosition().x < smallCoordinates.x)
 			this->setPosition(this->getPosition().x + 2 * time, this->getPosition().y);
 
@@ -3924,7 +3942,6 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 		return;
 	if (opacityParam < 100)
 		this->deactivate();
-	//cout << removeTimer << endl;
 	removeTimer = this->ckk.getElapsedTime().asSeconds() + removeTimer;
 	this->ckk.restart();
 

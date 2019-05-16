@@ -487,7 +487,8 @@ public:
 	int userTurn;
 	int turn = 0;
 
-	bool _randomPlacement = false;
+	bool _randomPlacement = true;
+	bool getInitialState = false;
 	bool castle = false;
 
 	float rotateAmount = 22.5;
