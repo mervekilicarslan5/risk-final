@@ -30,7 +30,48 @@ class ArmyBage;
 class TopBar;
 class LineBetweenProvinces;
 
-
+class PhaseNotifier : public sf::Sprite {
+public:
+	Image img;
+	Texture tex;
+	Color color;
+	Vector2f bigCoordinates, smallCoordinates;
+	bool visible;
+	float moveTimer;
+	Clock ck;
+	int phaseId;
+	PhaseNotifier();
+	PhaseNotifier(int phaseId, Image img, int x, int y, int fx, int fy);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window, float time);
+	void activate();
+	void deactivate();
+};
+class BattleNotifier : public sf::Sprite {
+public:
+	Image imageOfBattle, imageOfDeath, warriorsImg, backPage;
+	Texture texureOfBattle, textureOfDeath, textureOfWarriors, backPageTexture;
+	Sprite spriteOfDeath, spriteOfWarriors, backPageSprite;
+	Text battleText, playerName1, playerName2, soldiers1, soldiers2, soldierLost1, soldierLost2;
+	string battleString, playerNameString1, playerNameString2, soldiersString1, soldiersString2, soldierLostString1, soldierLostString2;
+	Color color;
+	Vector2f centerCoordinates;
+	Font font;
+	bool visible;
+	float removeTimer;
+	Clock ckk;
+	float opacityParam;
+	BattleNotifier();
+	BattleNotifier(Image img1, Image img2, Image img3, Image back, int x, int y, Font font);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window, float time);
+	void activate();
+	void deactivate();
+	void setPositionCenter(int x, int y);
+	void updateData(string battleString, string playerNameString1, string playerNameString2, string soldiersString1, string soldiersString2, string soldierLostString1, string soldierLostString2);
+};
 
 class ArmyBage : public sf::Sprite {
 public:
