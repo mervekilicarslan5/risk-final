@@ -354,10 +354,13 @@ public:
 	void startMarket(int id);
 	void startFortifyPhase(int id);
 	void randomPlacement();
-	void sendAllProvincesFromHost(NetworkManager ** NM);
-	void sendAllProvincesFromHostString(NetworkManager ** NM);
-	void sendAllProvincesClientToHostString(NetworkManager ** NM);
-	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
+
+	bool sendAllProvincesFromHost(NetworkManager ** NM);
+	bool getAllProvincesFromHost(NetworkManager ** NM);
+
+	void sendAllProvincesFromClientToHost(NetworkManager ** NM);
+	bool getAllProvincesFromClient(NetworkManager ** NM);
+
 	int getPlayerTurn(string _name);
 	vector<string> split(std::string strToSplit, char delimeter);
 	void destroyNearSoldier(Province* province);
@@ -380,22 +383,26 @@ public:
 	WindowManager * WM;
 	NetworkManager(WindowManager * WM);
 	void createNetwork(GameManager ** const GM, string _connectionType, string name);
+
+	string getStringFromClient();
 	string sendStringFromHost(string _sendText);
-	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count, int _castleLevel);
-	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
-	void buildNewtwork();
+	string sendStringFromClientToHost(string _sendText);
 	vector<string> split(std::string strToSplit, char delimeter);
 	void startGame();
+	void getNamesConnect(GameManager ** const GM);
+	void getAllNames(GameManager ** const GM);
 	string connectionType;
+	UdpSocket socket;
 
 private:
 	IpAddress ip;
-	IpAddress sIP;
+	IpAddress sIP = "139.179.210.187";
 	map<unsigned short, IpAddress> computerID;
-	UdpSocket socket;
+
 	vector<string> players;
 	string playersName;
 	Packet packet;
+	int playerCount = 0;
 };
 
 class WindowManager {
@@ -464,6 +471,9 @@ public:
 	const int start = 8;
 	const int TURN_WHEEL_BUTTON = 9;
 
+	bool create_game_clicked = false;
+	bool join_game_clicked = false;
+
 	int playerCount = 0;
 	int countForWheel = 0;
 	bool wheel = false;
@@ -479,8 +489,9 @@ public:
 	int userTurn;
 	int turn = 0;
 
-	bool _randomPlacement = true;
+	bool _randomPlacement = false;
 	bool castle = false;
+
 	float rotateAmount = 22.5;
 	float rotateStep = 2.5;
 	int rotateRandom = 250;
@@ -492,7 +503,7 @@ public:
 	~WindowManager();
 	void createWindow();
 	void menuScreen(RenderWindow & window, Event & e);
-	void multGameLan(RenderWindow & window, Event & event);
+
 	void multGameComp(RenderWindow & window, Event & event);
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
