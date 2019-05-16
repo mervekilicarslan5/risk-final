@@ -174,6 +174,62 @@ vector<int> Player::getProvinces()
 	return provinces;
 }
 
+
+int Player::howManyCont(int &res) {
+
+	int count = 0;
+	int earnedSold = 0;
+	res = 0;
+
+	sort(provinces.begin(), provinces.end());
+	
+
+	for (int i = 0; i < provinces.size()-1; i++) {
+		if (provinces.at(i)+1 == provinces.at(i + 1)) {
+			count++;
+		}
+		else
+			count = 0;
+
+		if (provinces.at(i) == 8 || provinces.at(i) == 12 || provinces.at(i) == 19 || provinces.at(i) == 25 || provinces.at(i) == 37  || provinces.at(i) == 41)
+			count = 0;
+
+		if (provinces.at(i) == 7 && count == 8) {
+			res++;
+			earnedSold += 5;
+		}
+
+		else if (provinces.at(i) == 11 && count == 3) {
+			res++;
+			earnedSold += 2;
+		}
+
+		else if (provinces.at(i) == 18 && count == 6) {
+			res++;
+			earnedSold += 5;
+		}
+
+		else if (provinces.at(i) == 24 && count == 5) {
+			res++;
+			earnedSold += 3;
+		}
+
+		else if (provinces.at(i) == 36 && count == 11) {
+			res++;
+			earnedSold += 7;
+		}
+
+		else if (provinces.at(i) == 40 && count == 3) {
+			count = 0;
+			res++;
+			earnedSold += 2;
+		}
+
+	}
+	return earnedSold;
+
+}
+
 vector<int> Player::getBonusCards()
 {
 	return bonusCards;
@@ -257,6 +313,7 @@ void Player::loseProvince(WorldMap* worldMap, Province* _province) {
 
 bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 {
+
 	int pricesold = 50;
 	if (leftSoldier < amount) {
 		if (money < (pricesold * amount)) {
@@ -270,7 +327,7 @@ bool Player::placeSoldier(WorldMap * worldMap, int amount, Province * _province)
 			return true;
 		}
 	}
-		
+
 	if (!hasProvince(worldMap, _province))
 		return false;
 	_province->setNumberOfSoldiers(_province->getNumberOfSoldiers() + amount);
@@ -1656,7 +1713,7 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth =  GetSystemMetrics(SM_CXSCREEN) / 2; // 1920; //
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2; // 1920; //
 	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2; // 1080; //
 
 	cout << screenHeight << ", " << screenWidth << endl;
@@ -1727,7 +1784,7 @@ WindowManager::WindowManager()
 
 
 	font;
-	if (!font.loadFromFile("assets/font.ttf"))
+	if (!font.loadFromFile("assets/font4.ttf"))
 	{
 		// error...
 	}
@@ -1740,7 +1797,7 @@ WindowManager::WindowManager()
 	lowerPanel.setPosition(0, bottomUpperMargin);
 	lowerPanel.setFillColor(sf::Color(255, 255, 255));
 	miniMap = MiniMap(mapTex);
-	topPanel = new TopBar(topPanelImg, coinImg, actionImg, timerImg, crownImg,font);
+	topPanel = new TopBar(topPanelImg, coinImg, actionImg, timerImg, crownImg, font);
 
 
 	mapSprite.setPosition(0, 0);
@@ -1755,11 +1812,11 @@ WindowManager::WindowManager()
 	string line;
 	ifstream myfile("assets/coordinates.txt");
 
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(1,placementPhaseImg, screenWidth/2,screenHeight/2, screenWidth *0.75, 5));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(2,attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(1, placementPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(2, attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
 	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.70, 5));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(4,fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(5,marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(4, fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(5, marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
 
 	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, battleNotificationImg, screenWidth / 2, screenHeight / 2, font);
 
@@ -1808,11 +1865,11 @@ WindowManager::WindowManager()
 	menuButton[0]->setPosition(menuButton[0]->getInitialPosition());
 	menuButton[0]->setScale(0.5, 0.5);
 
-	menuButton[1]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + screenHeight/ 6);
+	menuButton[1]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + screenHeight / 6);
 	menuButton[1]->setPosition(menuButton[1]->getInitialPosition());
 	menuButton[1]->setScale(0.5, 0.5);
 
-	menuButton[2]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4  + screenHeight / 6);
+	menuButton[2]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 6);
 
 	menuButton[2]->setPosition(menuButton[2]->getInitialPosition());
 	menuButton[2]->setScale(0.5, 0.5);
@@ -1926,9 +1983,10 @@ WindowManager::WindowManager()
 
 
 	buttons[0]->setSize(100, 40);
-	buttons[0]->setPosition(buttons[2]->getPosition().x , buttons[2]->getPosition().y +buttons[2]->getSize().y + 20);
+	buttons[0]->setPosition(buttons[2]->getPosition().x, buttons[2]->getPosition().y + buttons[2]->getSize().y + 20);
 	buttons[0]->setText("Next Phase");
 	buttons[0]->setTextSize(10);
+	//buttons[0]->setTexture("button.png");
 	buttons[0]->setTextColor(sf::Color::White);
 	buttons[0]->setFillColor(sf::Color::Blue);
 	buttons[0]->setOutlineThickness(2);
@@ -1941,7 +1999,7 @@ WindowManager::WindowManager()
 	buttons[1]->setText("Attack");
 	buttons[1]->setPosition(buttons[0]->getPosition().x + buttons[0]->getSize().x + 20, buttons[2]->getPosition().y);
 	//buttons[1]->setPosition(buttons[3]->getPosition().x + buttons[3]->getSize().x + 20, lowerPanel.getPosition().y + lowerPanel.getSize().y / 2 + 10);
-	buttons[1]->setTextSize(numberTextSize-2);
+	buttons[1]->setTextSize(numberTextSize - 2);
 	buttons[1]->setTextColor(sf::Color::White);
 	buttons[1]->setFillColor(sf::Color::Red);
 	buttons[1]->setOutlineThickness(2);
@@ -2094,41 +2152,41 @@ void WindowManager::changeButton(int id) {
 	cout << "bhange button" << endl;
 	//sf::SoundBuffer buffer;
 	//buffer.loadFromFile("assets/menuOp.wav");
-		//sf::Sound sound;
-		//sound.setBuffer(buffer);
-		//sound.play();
-	
+	//sf::Sound sound;
+	//sound.setBuffer(buffer);
+	//sound.play();
+
 	window.draw(*menuButton[id + 3]);
 	window.display();
 }
 
 /*void WindowManager::menuScreen(RenderWindow & window, Event & event) {
-	static int x = 0;
-	while (window.pollEvent(event)) {
-		cout << "we are checking" << x++ << endl;
-		if (event.type == sf::Event::Closed)
-			window.close();
-		else if (event.type == sf::Event::MouseButtonPressed)
-		{
-			if (event.mouseButton.button == sf::Mouse::Left)
-			{
-				checkClickEvents(event);
-			}
-		}
-	}
+static int x = 0;
+while (window.pollEvent(event)) {
+cout << "we are checking" << x++ << endl;
+if (event.type == sf::Event::Closed)
+window.close();
+else if (event.type == sf::Event::MouseButtonPressed)
+{
+if (event.mouseButton.button == sf::Mouse::Left)
+{
+checkClickEvents(event);
+}
+}
+}
 
-	window.setView(mainView);
+window.setView(mainView);
 
-	window.clear(sf::Color::Black);
+window.clear(sf::Color::Black);
 
-	window.setView(window.getDefaultView());
+window.setView(window.getDefaultView());
 
-	buttons[5]->draw(window);
-	buttons[6]->draw(window);
-	buttons[7]->draw(window);
-	buttons[8]->draw(window);
+buttons[5]->draw(window);
+buttons[6]->draw(window);
+buttons[7]->draw(window);
+buttons[8]->draw(window);
 
-	window.display();
+window.display();
 }
 */
 
@@ -2163,7 +2221,7 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 					if (event.mouseButton.y < bottomUpperMargin)
 						provinceClicked(index);
 				}
-				
+
 			}
 		}
 	}
@@ -2220,7 +2278,7 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 	drawAllArmies(window, event);
 	drawAllCastles(window, event);
 	/*for (auto it = castles.begin(); it != castles.end(); it++) {
-		window.draw(*(*it));
+	window.draw(*(*it));
 	}*/
 
 
@@ -2261,7 +2319,7 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 	miniMap.setViewport(FloatRect(float(0.8), float(0.8), 0.2, 0.2));
 	window.draw(mapSprite);
 	window.draw(miniMapRectangle);
-*/
+	*/
 
 	window.display();
 
@@ -2273,12 +2331,12 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	time = time / 1200;
 	if (time > 20)
 		time = 20;
-	
+
 	while (window.pollEvent(event))
 	{
 		screenWidth = window.getSize().x; // 1920; //
-		screenHeight = window.getSize().y ; // 1080; //
-		//::ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
+		screenHeight = window.getSize().y; // 1080; //
+										   //::ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
 		leftMargin = screenWidth / 10;
 		rightMargin = (screenWidth * 9) / 10;
 		topMargin = screenHeight / 10;
@@ -2312,7 +2370,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 					if (event.mouseButton.y < bottomUpperMargin)
 						provinceClicked(index);
 				}
-				else if (event.mouseButton.y < bottomUpperMargin){
+				else if (event.mouseButton.y < bottomUpperMargin) {
 					resetHighlights();
 					resetLines();
 					first = NULL;
@@ -2322,7 +2380,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 					provinceNameTxt.setString("");
 				}
 			}
-			
+
 		}
 	}
 
@@ -2339,12 +2397,12 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 				turnWheel = false;
 				handleWheel();
 			}
-				
+
 		}
 		else {
 			rotateRandom--;
 		}
-		
+
 		if (turnWheel) {
 			images[1]->rotate(rotateStep);
 			rotateAmount += rotateStep;
@@ -2389,7 +2447,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.clear(sf::Color(224, 253, 255));
 
 	window.draw(mapSprite);
-	lineForProvinces->draw(window,time);
+	lineForProvinces->draw(window, time);
 
 	for (auto it = lines.begin(); it != lines.end(); it++) {
 		(*it)->draw(window, time);
@@ -2428,7 +2486,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 	for (int i = 0; i < buttons.size(); i++) {
 		if (i != 5 && i != 6 && i != 7 && i != 8) {
-			if(buttons[i]->getFlag())
+			if (buttons[i]->getFlag())
 				buttons[i]->draw(window);
 		}
 	}
@@ -2470,8 +2528,8 @@ bool WindowManager::insideTheWindow(Vector2i mousePos) {
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
-	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk",Style::Default);
-	window.setPosition(Vector2i(0,0))  ;
+	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk", Style::Default);
+	window.setPosition(Vector2i(0, 0));
 
 
 	while (window.isOpen()) {
@@ -2505,14 +2563,14 @@ int WindowManager::getPixelColor(int x, int y) {
 }
 
 string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) {
-	
+
 	sf::Vector2i PixelPos = m.getPosition(window);
 	sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
 	if (MousePos.x <= mapImg.getSize().x && MousePos.y <= mapImg.getSize().y) {
 		cout << "XXX   " << MousePos.x << "      YYY " << MousePos.y << endl;
 		int colorInInt = (int)mapImg.getPixel(MousePos.x, MousePos.y).toInteger();
 		cout << colorInInt << "**********************" << endl;
-		
+
 		auto it = GM->colorLookUpTable.find(colorInInt);
 		if (it != GM->colorLookUpTable.end())
 			return GM->colorLookUpTable[colorInInt];
@@ -2547,6 +2605,11 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 
 void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
 	cout << "button clicked" << endl;
+	if (!buffer.loadFromFile("assets/sounds/effects/click1.wav")) {
+		cout << "ERROR LOADING SOUND FILE" << endl;
+	}
+	sound.setBuffer(buffer);
+	sound.play();
 	if (page == MENU_SCREEN) {
 		cout << "clickked weghwioefng" << endl;
 		if (id == 2) {
@@ -2601,7 +2664,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			phase = PLACEMENT_PHASE; //YOU WILL NOT BE ABLE TO CLICK ANYTHING IN INITIAL PHASE JUST SOLDIER */
 		}
 		else if (phase == PLACEMENT_PHASE) {
-			if(player->getLeftSoldier() == 0)
+			if (player->getLeftSoldier() == 0)
 				phase = ATTACKING_PHASE;
 			buttons[ATTACK_BUTTON]->setText("Attack");
 			buttons[NEXT_PHASE_BUTTON]->setText("Fortify Phase");
@@ -2640,18 +2703,26 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			int soldierPrice = 50;
 			soldierAmount = player->getMoney() / soldierPrice;
 			buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-			
+
 		}
-		else if(phase == MARKET_PHASE) {
+		else if (phase == MARKET_PHASE) {
 			turn++;
 			if (turn == playerCount) {
 				turn = 0;
+				for (int i = 0; i < playerCount; i++) {
+					string dummy;
+					int res = 0;
+					Player* player0 = GM->getPlayerByID(i, dummy);
+					player0->setLeftSoldier(player0->getNumberOfProvinces() / 3 + player0->howManyCont(res));
+					player0->setMoney(player0->getMoney() + 200);
+					cout << "player" << i + 1 << " has " << res << " Continents";
+				}
 				totalTurn++;
 			}
 			if (page == COMPUTER_GAME_SCREEN) {
 				string dummy;
 				for (int i = 0; i < playerCount; i++)
-					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getLeftSoldier());
 				phase = PLACEMENT_PHASE;
 
 			}
@@ -2664,7 +2735,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			buttons[TURN_WHEEL_BUTTON]->setFlag(false);
 			buttons[ATTACK_BUTTON]->setFlag(false);
 			buttons[NEXT_PHASE_BUTTON]->setFlag(false);
-			
+			string dummy;
+			soldierAmount = GM->getPlayerByID(turn, dummy)->getLeftSoldier();
+			buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 			GM->currentPlayer = turn;
 			wheel = false;
 			countForWheel = 0;
@@ -2681,19 +2754,19 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	else if (id == ATTACK_BUTTON) {
 		if (phase == ATTACKING_PHASE) {
 			if (isProvinceClicked == 2) {
-				if (!buffer.loadFromFile("assets/attack.wav")) {
-					cout << "ERROR" << endl;
+				if (!buffer.loadFromFile("assets/sounds/attack.wav")) {
+					cout << "ERROR LOADING SOUND FILE" << endl;
 				}
 				sound.setBuffer(buffer);
 				sound.play();
-				wheel = true;
 				if (GM->attack(player, second->getOwner(), first, second, soldierAmount)) {
+					wheel = true;
 					phase = POST_ATTACK; //change phase 
 					buttons[ATTACK_BUTTON]->setText("Place");
 					provinceNameTxt.setString("Enter the number of soldiers you want to place on this city:");
 					soldierAmount = first->getNumberOfSoldiers() - 1;
-					buttons[NUMBER_TEXT]->setText(to_string(soldierAmount)); 
-					cout << "lelelellelee" << endl;
+					buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+	
 				}
 				else if (first->getNumberOfSoldiers() > 3) {
 					soldierAmount = 3;
@@ -2705,7 +2778,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 					buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 					displayProvinceInfo(first);
 				}
-				
+
 
 			}
 		}
@@ -2754,7 +2827,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 			}*/
 		}
-		
+
 	}
 
 	else if (id == INC_BUTTON) {
@@ -2799,18 +2872,17 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 	//  
-	else if (id == TURN_WHEEL_BUTTON && countForWheel < 1 && phase == MARKET_PHASE && wheel) {
-		if (!buffer.loadFromFile("assets/wheel.wav")) {
-			cout << "ERROR" << endl;
+	else if (id == TURN_WHEEL_BUTTON && wheel && countForWheel < 1 && phase == MARKET_PHASE ) {
+		countForWheel++;
+		buttons[TURN_WHEEL_BUTTON]->setFlag(false);
+		if (!buffer.loadFromFile("assets/sounds/effects/wheel.wav")) {
+			cout << "ERROR LOADING SOUND FILE" << endl;
 		}
 		sound.setBuffer(buffer);
 		sound.play();
-		
-		countForWheel++;
-		buttons[TURN_WHEEL_BUTTON]->setFlag(false);
 		wonSoldier = false;
 		string temp;
-		
+
 		if (turnWheel) {
 			turnWheel = false;
 		}
@@ -2832,79 +2904,79 @@ void WindowManager::imageClicked(int id) {
 void WindowManager::handleWheel() {
 	string temp;
 	int index = ((int)(rotateAmount / 45)) % 8;
-			cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
-			if (index == 0) {
-				//draw bonus card
-			}
-			else if (index == 1) {
-				//bankrupt
-				GM->getPlayerByID(turn, temp)->setMoney(0);
-			}
-			else if (index == 2) {
-				//250 gold
-				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
-			}
-			else if (index == 3) {
-				//pass
-			}
-			else if (index == 4) {
-				//build castle
-			
-				GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
-				images[3]->inMove = true;
-				takeCastle = true;
-				
-			}
-			else if (index == 5) {
-				//take province
-				Die die(GM->getWorldMap()->getNumberOfProvinces());
-				int random = die.roll();
-				Province* prov = GM->getWorldMap()->getProvinceByID(random);
-				string pname;
-				GM->getPlayerByID(turn, pname);
-				while (prov->getOwner()->getName() == pname) {
-					int random = die.roll();
-					prov = GM->getWorldMap()->getProvinceByID(random);
-					GM->getPlayerByID(turn, pname);
-				}
-				prov->setOwner(GM->getPlayerByID(turn, pname));
-				cout << pname << "gets " << prov->getName() << endl;
-			}
-			else if (index == 6) {
-				//give province
-				Die die(GM->getWorldMap()->getNumberOfProvinces());
-				int random = die.roll();
-				Province* prov = GM->getWorldMap()->getProvinceByID(random);
-				string pname;
-				GM->getPlayerByID(turn, pname);
-				while (prov->getOwner()->getName() != pname) {
-					int random = die.roll();
-					prov = GM->getWorldMap()->getProvinceByID(random);
-					GM->getPlayerByID(turn, pname);
-				}
-				prov->setOwner(GM->getPlayerByID((turn+1)%3, pname));
-				cout << pname << "gets " << prov->getName() << endl;
-			}
-			else if (index == 7) {
-				//take 3 soldiers
-				GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
-				string dum;
-				soldierAmount = GM->getPlayerByID(turn, dum)->getLeftSoldier();
-				buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-				wonSoldier = true;
-			}
+	cout << "Rotation: " << rotateAmount << wheelStr[index] << endl;
+	if (index == 0) {
+		//draw bonus card
+	}
+	else if (index == 1) {
+		//bankrupt
+		GM->getPlayerByID(turn, temp)->setMoney(0);
+	}
+	else if (index == 2) {
+		//250 gold
+		GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 250);
+	}
+	else if (index == 3) {
+		//pass
+	}
+	else if (index == 4) {
+		//build castle
+
+		GM->getPlayerByID(turn, temp)->setMoney(GM->getPlayerByID(turn, temp)->getMoney() + 50);
+		images[3]->inMove = true;
+		takeCastle = true;
+
+	}
+	else if (index == 5) {
+		//take province
+		Die die(GM->getWorldMap()->getNumberOfProvinces());
+		int random = die.roll();
+		Province* prov = GM->getWorldMap()->getProvinceByID(random);
+		string pname;
+		GM->getPlayerByID(turn, pname);
+		while (prov->getOwner()->getName() == pname) {
+			int random = die.roll();
+			prov = GM->getWorldMap()->getProvinceByID(random);
+			GM->getPlayerByID(turn, pname);
+		}
+		prov->setOwner(GM->getPlayerByID(turn, pname));
+		cout << pname << "gets " << prov->getName() << endl;
+	}
+	else if (index == 6) {
+		//give province
+		Die die(GM->getWorldMap()->getNumberOfProvinces());
+		int random = die.roll();
+		Province* prov = GM->getWorldMap()->getProvinceByID(random);
+		string pname;
+		GM->getPlayerByID(turn, pname);
+		while (prov->getOwner()->getName() != pname) {
+			int random = die.roll();
+			prov = GM->getWorldMap()->getProvinceByID(random);
+			GM->getPlayerByID(turn, pname);
+		}
+		prov->setOwner(GM->getPlayerByID((turn + 1) % 3, pname));
+		cout << pname << "gets " << prov->getName() << endl;
+	}
+	else if (index == 7) {
+		//take 3 soldiers
+		GM->getPlayerByID(turn, temp)->setLeftSoldier(GM->getPlayerByID(turn, temp)->getLeftSoldier() + 3);
+		string dum;
+		soldierAmount = GM->getPlayerByID(turn, dum)->getLeftSoldier();
+		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
+		wonSoldier = true;
+	}
 }
 
 void WindowManager::provinceClicked(int id) {
 	Province* city = GM->getWorldMap()->getProvinceByID(id);
 	Player* player = GM->getPlayers()[turn];
-	
+
 	if (city == first)
 		return;
 
-	if (phase == PLACEMENT_PHASE){}
-	else if (phase == ATTACKING_PHASE){
-		if (isProvinceClicked == 0){
+	if (phase == PLACEMENT_PHASE) {}
+	else if (phase == ATTACKING_PHASE) {
+		if (isProvinceClicked == 0) {
 			if (city->getOwner() == player) {
 				first = city;
 				second = NULL;
@@ -2925,8 +2997,8 @@ void WindowManager::provinceClicked(int id) {
 			}
 			lineForProvinces->setVisible(false);
 		}
-		else if (isProvinceClicked == 1){
-			if (city->getOwner() != player){
+		else if (isProvinceClicked == 1) {
+			if (city->getOwner() != player) {
 				if (GM->getWorldMap()->isNeighbor(city, first)) {
 					second = city;
 					isProvinceClicked = 2;
@@ -2954,10 +3026,10 @@ void WindowManager::provinceClicked(int id) {
 					soldierAmount = 3;
 				else
 					soldierAmount = first->getNumberOfSoldiers() - 1;
-				
+
 			}
 		}
-		else if (isProvinceClicked == 2){
+		else if (isProvinceClicked == 2) {
 			if (city->getOwner() == player) {
 				first = city;
 				second = NULL;
@@ -3053,7 +3125,7 @@ void WindowManager::provinceClicked(int id) {
 				soldierAmount = 0;
 			}
 		}
-		
+
 	}
 	else if (phase == MARKET_PHASE) {
 	}
@@ -3117,13 +3189,13 @@ void WindowManager::drawShortestPath(Province* from, Province* to) {
 
 	int size = test.size();
 	for (int k = size - 1; k > 0; k--) {
-		
+
 		LineBetweenProvinces* line = new LineBetweenProvinces(lineImg);
 		Vector2f firstCoordinates, secondCoordinates;
 		for (int i = 0; i < listOfArmyBage.size(); i++) {
 			if (listOfArmyBage[i]->nameOfProvince == test[k]->getName())
 				firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
-			if (listOfArmyBage[i]->nameOfProvince == test[k-1]->getName())
+			if (listOfArmyBage[i]->nameOfProvince == test[k - 1]->getName())
 				secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
 		}
 
@@ -3147,28 +3219,31 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 		if (sf::IntRect(images[id]->getPosition().x, images[id]->getPosition().y, images[id]->getLocalBounds().width, images[id]->getLocalBounds().height).contains(mouse.getPosition(window))) {
 			images[id]->setPosition(sf::Vector2f(mouse.getPosition(window)));
 			images[id]->inMove = true;
-			if (!buffer.loadFromFile("assets/drag.wav")){
-				cout << "ERROR" << endl;
-			}
-			sound.setBuffer(buffer);
-			sound.play();
 		}
 	}
-	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Right) && event.key.code == mouse.Right&& images[id]->inMove && id == 3)) {
+	else if ((event.type == event.MouseButtonReleased&& event.key.code == mouse.Left&& images[id]->inMove && !takeCastle) || (takeCastle && mouse.isButtonPressed(sf::Mouse::Left) && event.key.code == mouse.Left&& images[id]->inMove && id == 3)) {
 		sf::Vector2i PixelPos = mouse.getPosition(window);
 		sf::Vector2f MousePos = window.mapPixelToCoords(PixelPos, mainView);
-		if (!buffer.loadFromFile("assets/drop.wav")) {
-			cout << "ERROR" << endl;
-		}
-		sound.setBuffer(buffer);
-		sound.play();
 		images[id]->inMove = false;
 		takeCastle = false;
+		int dummy; Province* province; string dum;
+		string filename;
+		if (id == 0)
+			filename = "soldier.wav";
+		else if (id == 3) {
+			filename = "castle.wav";
+		}
+		if (!buffer.loadFromFile("assets/sounds/effects/" + filename)) {
+			cout << "ERROR LOADING SOUND FILE" << endl;
+		}
+		sound.setBuffer(buffer);
+
 		images[id]->setPosition(images[id]->getInitialPosition());
 		images[id]->setScale(sf::Vector2f(1, 1));
 		if (sf::IntRect(0, 0, mapImg.getSize().x, mapImg.getSize().y).contains(sf::Vector2i(MousePos.x, MousePos.y)) && mouse.getPosition(window).y < 500)
 		{
 			if (id == 0) {
+				
 				string provinceName = getProvinceName(window, mouse);
 				if (provinceName == "")
 					return;
@@ -3203,22 +3278,19 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 					}
 				}
 				else if (phase == PLACEMENT_PHASE || phase == MARKET_PHASE) {
-					if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
+					if (buttons[NUMBER_TEXT]->getText() == 0) {
+
+					}
+					else if (GM->placeSoldier(turn, provinceName, (buttons[NUMBER_TEXT]->getText()))) {
+						sound.play();
 						if (wonSoldier) {
 							wonSoldier = false;
 						}
-						int dummy; Province* province; string dum;
+
 						GM->getWorldMap()->getProvinceByName(provinceName, dummy, province);
 						provinceNameTxt.setString(provinceName + "\nSoldier number: " + to_string(province->getNumberOfSoldiers()));
 						if (GM->getPlayerByID(turn, dum)->getLeftSoldier() == 0 && phase == PLACEMENT_PHASE) {
 							phase = ATTACKING_PHASE;
-							int amount;
-							if (province->getNumberOfSoldiers() > 3) {
-								amount = 3;
-							}
-							else
-								amount = province->getNumberOfSoldiers()-1;
-							buttons[NUMBER_TEXT]->setText(to_string(amount));
 							buttons[ATTACK_BUTTON]->setText("Attack");
 							buttons[NEXT_PHASE_BUTTON]->setText("Fortify Phase");
 							buttons[ATTACK_BUTTON]->setFlag(true);
@@ -3245,6 +3317,7 @@ void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int
 				int id; Province* ptr;
 				GM->getWorldMap()->getProvinceByName(provinceName, id, ptr);
 				if (GM->buildCastle(turn, provinceName)) {
+					sound.play();
 					int index = castles.size();
 					castles.push_back(new MyImage("castle.png"));
 					castles[index]->setPosition(listOfArmyBage[id]->getPosition());
@@ -3261,7 +3334,7 @@ void WindowManager::drawAllCastles(RenderWindow & window, Event & e) {
 		int temp;
 		int playerId;
 		wmPtr->getProvinceByName(listOfCastleBage[i]->nameOfProvince, temp, ptr);
-		if (ptr != NULL && (ptr->getCastle())->isBuilt() ) {
+		if (ptr != NULL && (ptr->getCastle())->isBuilt()) {
 			if (ptr->getOwner() != NULL) {
 				playerId = ptr->getOwner()->getId();
 				if (playerId == 0)
@@ -3272,7 +3345,7 @@ void WindowManager::drawAllCastles(RenderWindow & window, Event & e) {
 					listOfCastleBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
 				(listOfCastleBage[i])->draw(window);
 			}
-			
+
 		}
 	}
 
@@ -3334,6 +3407,7 @@ void Button::setText(string text) {
 	this->text.setString(text);
 }
 
+
 void Button::draw(sf::RenderWindow & window) {
 	window.draw(*this);
 	window.draw(text);
@@ -3341,7 +3415,7 @@ void Button::draw(sf::RenderWindow & window) {
 
 void Button::setPosition(float x, float y) {
 	sf::RectangleShape::setPosition(x, y);
-	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize()/2 ));
+	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize() / 2));
 	//text.setPosition(x + sf::RectangleShape().getPosition().x / 2, y + sf::RectangleShape().getPosition().y / 2);
 }
 
@@ -3370,7 +3444,7 @@ void Button::setTextColor(sf::Color color) {
 
 void Button::setTextSize(int size) {
 	text.setCharacterSize(size);
-	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize()/2));
+	text.setPosition(this->getPosition().x + this->getSize().x / 2 - text.getGlobalBounds().width / 2, this->getPosition().y + (this->getSize().y / 2) - (text.getCharacterSize() / 2));
 }
 
 MyImage::MyImage() {
@@ -3875,8 +3949,8 @@ CastleBage::CastleBage(Image img, int x, int y, string nameOfProvince) {
 
 
 void CastleBage::draw(sf::RenderWindow & window) {
-		this->setColor(this->color);
-		window.draw(*this);
+	this->setColor(this->color);
+	window.draw(*this);
 }
 void CastleBage::setBageColor(sf::Color color) {
 	this->setColor(color);
@@ -3904,29 +3978,29 @@ LineBetweenProvinces::LineBetweenProvinces() {
 
 }
 
-void LineBetweenProvinces::setCoordinates(Vector2f first,Vector2f second) {
+void LineBetweenProvinces::setCoordinates(Vector2f first, Vector2f second) {
 	this->first = first;
 	this->second = second;
 
-	lenght = (int) sqrt(pow(first.x - second.x, 2) + pow(first.y - second.y, 2) );
-	degree = (float) atan2(second.y - first.y, second.x - first.x) * 180 / 3.14159;
-	
-	this->setOrigin(0, img.getSize().y/2);
+	lenght = (int)sqrt(pow(first.x - second.x, 2) + pow(first.y - second.y, 2));
+	degree = (float)atan2(second.y - first.y, second.x - first.x) * 180 / 3.14159;
+
+	this->setOrigin(0, img.getSize().y / 2);
 
 	this->setTextureRect(IntRect(step, 0, img.getSize().x, lenght));
 	this->setPosition(first);
-	
+
 	this->setRotation(degree);
 }
 
-void LineBetweenProvinces::draw(RenderWindow &window,float time) {
+void LineBetweenProvinces::draw(RenderWindow &window, float time) {
 	if (visible) {
-		step= step-0.1*time;
+		step = step - 0.1*time;
 		tex.loadFromImage(img);
 		tex.setRepeated(true);
 		this->setTexture(tex);
 
-		this->setTextureRect(IntRect((int)step, 0, max(0,lenght), img.getSize().y));
+		this->setTextureRect(IntRect((int)step, 0, max(0, lenght), img.getSize().y));
 		this->setOrigin(0, img.getSize().y / 2);
 		window.draw(*this);
 	}
@@ -3937,7 +4011,7 @@ void LineBetweenProvinces::setVisible(bool flag) {
 }
 
 
-TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Image playerImage, Font &font) {
+TopBar::TopBar(Image img, Image coinImg, Image actionImage, Image turnImage, Image playerImage, Font &font) {
 	this->img = img;
 	this->coinImg = coinImg;
 	this->actionImg = actionImage;
@@ -3954,10 +4028,10 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 	playerTexture.loadFromImage(this->playerImg);
 
 	this->setTexture(panelTexture);
-	
+
 	coinSprite.setTexture(coinTexture);
-	coinSprite.setScale(ratio,ratio);
-	
+	coinSprite.setScale(ratio, ratio);
+
 	actionSprite.setTexture(actionTexture);
 	actionSprite.setScale(ratio, ratio);
 
@@ -3984,35 +4058,35 @@ TopBar::TopBar(Image img, Image coinImg, Image actionImage,  Image turnImage, Im
 	playerText.setCharacterSize(20);
 	playerText.setString("Elnur");
 	//-------------------------
-	coinField.setSize(Vector2f(100 * ratio,55*ratio));
+	coinField.setSize(Vector2f(100 * ratio, 55 * ratio));
 	coinField.setFillColor(Color(0, 0, 0, 30));
-	
+
 	actionField.setSize(Vector2f(100 * ratio, 55 * ratio));
 	actionField.setFillColor(Color(0, 0, 0, 30));
 
-	turnField.setSize(Vector2f(100*ratio, 55 * ratio));
+	turnField.setSize(Vector2f(100 * ratio, 55 * ratio));
 	turnField.setFillColor(Color(0, 0, 0, 30));
-	
-	playerField.setSize(Vector2f(180*ratio, 55 * ratio));
+
+	playerField.setSize(Vector2f(180 * ratio, 55 * ratio));
 	playerField.setFillColor(Color(0, 0, 0, 30));
 
 	//this->setColor(Color(255, 255, 255, 100));
 	this->setPosition(0, 0);
-	this->setTextureRect(IntRect(0,0,panelTexture.getSize().x, 100));
-	this->setScale(float (lenght) /panelTexture.getSize().x, 0.65*ratio);
+	this->setTextureRect(IntRect(0, 0, panelTexture.getSize().x, 100));
+	this->setScale(float(lenght) / panelTexture.getSize().x, 0.65*ratio);
 
 
 
-	coinField.setPosition(195*ratio, 2 * ratio);
-	coinSprite.setPosition(coinField.getPosition().x + 5, 5*ratio);
-	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10*ratio, coinSprite.getPosition().y+ coinSprite.getGlobalBounds().height/2- coinText.getGlobalBounds().height / 2);
+	coinField.setPosition(195 * ratio, 2 * ratio);
+	coinSprite.setPosition(coinField.getPosition().x + 5, 5 * ratio);
+	coinText.setPosition(coinSprite.getPosition().x + coinSprite.getGlobalBounds().width + 10 * ratio, coinSprite.getPosition().y + coinSprite.getGlobalBounds().height / 2 - coinText.getGlobalBounds().height / 2);
 
 	actionField.setPosition(coinField.getPosition().x + coinField.getGlobalBounds().width + 35, 2 * ratio);
-	actionSprite.setPosition(actionField.getPosition().x +5, 7 * ratio);
-	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10 * ratio, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2- actionText.getGlobalBounds().height/2);
+	actionSprite.setPosition(actionField.getPosition().x + 5, 7 * ratio);
+	actionText.setPosition(actionSprite.getPosition().x + actionSprite.getGlobalBounds().width + 10 * ratio, actionSprite.getPosition().y + actionSprite.getGlobalBounds().height / 2 - actionText.getGlobalBounds().height / 2);
 
 	turnField.setPosition(actionField.getPosition().x + actionField.getGlobalBounds().width + 35, 2 * ratio);
-	turnSprite.setPosition(turnField.getPosition().x +5, 7 * ratio);
+	turnSprite.setPosition(turnField.getPosition().x + 5, 7 * ratio);
 	turnText.setPosition(turnSprite.getPosition().x + turnSprite.getGlobalBounds().width + 10 * ratio, turnSprite.getPosition().y + turnSprite.getGlobalBounds().height / 2 - turnText.getGlobalBounds().height / 2);
 
 
@@ -4064,14 +4138,14 @@ PhaseNotifier::PhaseNotifier() {
 
 }
 
-PhaseNotifier::PhaseNotifier(int phaseId,Image img, int x, int y, int fx,int fy) {
+PhaseNotifier::PhaseNotifier(int phaseId, Image img, int x, int y, int fx, int fy) {
 	this->phaseId = phaseId;
 	this->img = img;
 	this->tex.loadFromImage(img);
 	this->setTexture(this->tex);
 	visible = false;
 	moveTimer = 0;
-	this->setPosition( x - img.getSize().x/2,  y- img.getSize().y / 2);
+	this->setPosition(x - img.getSize().x / 2, y - img.getSize().y / 2);
 
 	this->bigCoordinates = Vector2f(x - img.getSize().x / 2, y - img.getSize().y / 2);
 	this->smallCoordinates = Vector2f(fx, fy);
@@ -4080,11 +4154,11 @@ PhaseNotifier::PhaseNotifier(int phaseId,Image img, int x, int y, int fx,int fy)
 }
 
 
-void PhaseNotifier::draw(sf::RenderWindow & window,float time) {
+void PhaseNotifier::draw(sf::RenderWindow & window, float time) {
 	if (!visible)
 		return;
 	window.draw(*this);
-	moveTimer = this->ck.getElapsedTime().asSeconds()+moveTimer;
+	moveTimer = this->ck.getElapsedTime().asSeconds() + moveTimer;
 	this->ck.restart();
 
 	if (moveTimer > 0.7) {
@@ -4092,8 +4166,8 @@ void PhaseNotifier::draw(sf::RenderWindow & window,float time) {
 
 
 		if (this->getPosition().x < smallCoordinates.x)
-			this->setPosition(this->getPosition().x + 2*time, this->getPosition().y);
-		
+			this->setPosition(this->getPosition().x + 2 * time, this->getPosition().y);
+
 		if (this->bigCoordinates.y < this->smallCoordinates.y) {
 			if (this->getPosition().y < smallCoordinates.y)
 				this->setPosition(this->getPosition().x, this->getPosition().y + 2 * time);
@@ -4133,7 +4207,7 @@ BattleNotifier::BattleNotifier() {
 
 }
 
-BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3,Image back, int x, int y,Font font) {
+BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3, Image back, int x, int y, Font font) {
 	imageOfBattle = img1;
 	imageOfDeath = img2;
 	warriorsImg = img3;
@@ -4154,7 +4228,7 @@ BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3,Image back, in
 	backPageSprite.setTexture(backPageTexture);
 
 	this->setPositionCenter(x, y);
-	backPageSprite.setScale(1,0.8);
+	backPageSprite.setScale(1, 0.8);
 	backPageSprite.setPosition(x - backPageSprite.getGlobalBounds().width / 2, y - backPageSprite.getGlobalBounds().height / 2 + 10);
 
 	battleText.setFont(this->font);
@@ -4165,7 +4239,7 @@ BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3,Image back, in
 
 	playerName1.setFont(this->font);
 	playerName1.setCharacterSize(40);
-	playerName1.setStyle(1<<2);
+	playerName1.setStyle(1 << 2);
 	playerName1.setFillColor(color);
 
 	playerName2.setFont(this->font);
@@ -4194,7 +4268,7 @@ BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3,Image back, in
 
 void BattleNotifier::setPositionCenter(int x, int y) {
 	this->setPosition(x - this->getGlobalBounds().width / 2, y - this->getGlobalBounds().height / 2);
-	centerCoordinates = Vector2f(x,y);
+	centerCoordinates = Vector2f(x, y);
 }
 
 void BattleNotifier::updateData(string battleString, string playerNameString1, string playerNameString2, string soldiersString1, string soldiersString2, string soldierLostString1, string soldierLostString2) {
@@ -4214,7 +4288,7 @@ void BattleNotifier::updateData(string battleString, string playerNameString1, s
 	soldierLost1.setString(soldierLostString1);
 	soldierLost2.setString(soldierLostString2);
 
-	battleText.setPosition(Vector2f(this->centerCoordinates.x - battleText.getGlobalBounds().width / 2, this->centerCoordinates.y - battleText.getGlobalBounds().height / 2 - this->getGlobalBounds().height-25) );
+	battleText.setPosition(Vector2f(this->centerCoordinates.x - battleText.getGlobalBounds().width / 2, this->centerCoordinates.y - battleText.getGlobalBounds().height / 2 - this->getGlobalBounds().height - 25));
 	playerName1.setPosition(this->centerCoordinates.x - this->getGlobalBounds().width - playerName1.getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
 	playerName2.setPosition(this->centerCoordinates.x + this->getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
 
@@ -4230,7 +4304,7 @@ void BattleNotifier::updateData(string battleString, string playerNameString1, s
 
 }
 void BattleNotifier::draw(sf::RenderWindow & window, float time) {
-	
+
 	if (!visible)
 		return;
 	if (opacityParam < 100)
@@ -4238,9 +4312,9 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 	//cout << removeTimer << endl;
 	removeTimer = this->ckk.getElapsedTime().asSeconds() + removeTimer;
 	this->ckk.restart();
-	
+
 	if (removeTimer > 1) {
-		opacityParam = opacityParam - 0.3*time ;
+		opacityParam = opacityParam - 0.3*time;
 		this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
 		backPageSprite.setColor(Color(backPageSprite.getColor().r, backPageSprite.getColor().g, backPageSprite.getColor().b, (int)opacityParam));
 

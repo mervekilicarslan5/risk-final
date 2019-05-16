@@ -35,28 +35,28 @@ public:
 	Image img;
 	Texture tex;
 	Color color;
-	Vector2f bigCoordinates,smallCoordinates;
+	Vector2f bigCoordinates, smallCoordinates;
 	bool visible;
 	float moveTimer;
 	Clock ck;
 	int phaseId;
 
 	PhaseNotifier();
-	PhaseNotifier(int phaseId,Image img, int x, int y,int fx, int fy);
+	PhaseNotifier(int phaseId, Image img, int x, int y, int fx, int fy);
 	void setSizeOfArmy(int size);
 	void setBageColor(sf::Color color);
-	void draw(sf::RenderWindow & window,float time);
+	void draw(sf::RenderWindow & window, float time);
 	void activate();
 	void deactivate();
 };
 
 class BattleNotifier : public sf::Sprite {
 public:
-	Image imageOfBattle, imageOfDeath, warriorsImg,backPage;
-	Texture texureOfBattle, textureOfDeath,textureOfWarriors,backPageTexture;
-	Sprite spriteOfDeath,spriteOfWarriors, backPageSprite;
+	Image imageOfBattle, imageOfDeath, warriorsImg, backPage;
+	Texture texureOfBattle, textureOfDeath, textureOfWarriors, backPageTexture;
+	Sprite spriteOfDeath, spriteOfWarriors, backPageSprite;
 	Text battleText, playerName1, playerName2, soldiers1, soldiers2, soldierLost1, soldierLost2;
-	string battleString, playerNameString1, playerNameString2, soldiersString1, soldiersString2, soldierLostString1,soldierLostString2;
+	string battleString, playerNameString1, playerNameString2, soldiersString1, soldiersString2, soldierLostString1, soldierLostString2;
 	Color color;
 	Vector2f centerCoordinates;
 	Font font;
@@ -112,7 +112,7 @@ public:
 	//void setCoordinatesOfProvince1(Vector2f coord);
 	//void setCoordinatesOfProvince2(Vector2f coord);
 	void setCoordinates(Vector2f first, Vector2f second);
-	void draw(RenderWindow & window,float time);
+	void draw(RenderWindow & window, float time);
 	void setVisible(bool flag);
 
 };
@@ -165,10 +165,10 @@ public:
 
 class TopBar : public sf::Sprite {
 public:
-	Image img, coinImg, actionImg, turnImg,playerImg;
-	Texture panelTexture, coinTexture, actionTexture, turnTexture,playerTexture;
+	Image img, coinImg, actionImg, turnImg, playerImg;
+	Texture panelTexture, coinTexture, actionTexture, turnTexture, playerTexture;
 
-	Sprite coinSprite, actionSprite, turnSprite,playerSprite;
+	Sprite coinSprite, actionSprite, turnSprite, playerSprite;
 	Text coinText, actionText, turnText, playerText;
 	RectangleShape coinField, actionField, turnField, playerField;
 
@@ -177,7 +177,7 @@ public:
 	Vector2f centerCoordinates;
 
 	TopBar();
-	TopBar(Image img, Image coinImg, Image actionImage, Image turnImage,Image playerImage,Font &font);
+	TopBar(Image img, Image coinImg, Image actionImage, Image turnImage, Image playerImage, Font &font);
 	void update(int moneyAmount, int actionAmount, int currentTurn, string player);
 	void draw(RenderWindow & window);
 	//void setSizeOfArmy(int size);
@@ -247,13 +247,14 @@ public:
 	void setMoney(int _money);
 	void setBattlesWon(int _battlesWon);
 	void setBattlesLost(int _battlesLost);
+	int howManyCont(int &res);
 	void incBattlesWon();
 	void incBattlesLost();
 	void setName(string _name);
 	void setId(int _id);
 	void captureProvince(WorldMap* worldMap, Province* _province);
 	void loseProvince(WorldMap* worldMap, Province* _province);
-	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province );
+	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
 	bool hasProvince(WorldMap * worldMap, Province* _province);
 	int buildCastle(Province* province);
 	int getNumberOfProvinces();
@@ -407,7 +408,7 @@ public:
 	sf::Sound sound;
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
 	sf::Image mapImg, hoverImg, roundedSquare, lineImg, coinImg, actionImg, timerImg, topPanelImg, crownImg, castleImg, sceleteImg, warriorImg, battleNotificationImg;
-	sf::Image attackPhaseImg, placementPhaseImg,postAttackPhaseImg, fortifyPhaseImg, marketPhaseImg;
+	sf::Image attackPhaseImg, placementPhaseImg, postAttackPhaseImg, fortifyPhaseImg, marketPhaseImg;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -526,7 +527,6 @@ public:
 	Button();
 	Button(sf::Font & font);
 	~Button();
-
 	void setText(string text);
 	void draw(sf::RenderWindow & window);
 	void setPosition(float x, float y);
