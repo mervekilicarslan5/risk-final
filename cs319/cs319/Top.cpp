@@ -416,6 +416,35 @@ bool WorldMap::hasPath(Player * player, Province * from, Province * to)
 
 }
 
+vector<Province*> WorldMap::getPossiblePaths(Province* city) {
+	vector<Province*> result;
+	Player* player = city->getOwner();
+	bool mark[100];
+	for (int i = 0; i < 100; i++) {
+		mark[i] = false;
+	}
+	int first = findIndex(city);
+	queue<int> q;
+	q.push(first);
+	mark[first] = true;
+
+	while (!q.empty()) {
+		int cur = q.front();
+		q.pop();
+
+		for (auto it = map[cur].begin(); it != map[cur].end(); it++) {
+			if (mark[*it] || provinceList[*it]->getOwner() != player)
+				continue;
+			q.push(*it);
+			mark[*it] = true;
+			result.push_back(provinceList[*it]);
+		}
+
+	}
+
+	return result;
+}
+
 void WorldMap::getProvinceByName(string name, int & index, Province* & ptr) {
 	int i = 0;
 	for (auto it = provinceList.begin(); it != provinceList.end(); it++) {
@@ -479,6 +508,47 @@ vector<Province*> WorldMap::getNeighbors(Province* _province) {
 	for (auto it = map[index].begin(); it != map[index].end(); it++) {
 		result.push_back(provinceList[(*it)]);
 	}
+	return result;
+}
+
+vector<Province* > WorldMap::getShortestPath(Province* from, Province * to) {
+	vector<Province*> result;
+	Player* player = from->getOwner();
+	int parent[100];
+	bool mark[100];
+	for (int i = 0; i < 100; i++) {
+		mark[i] = false;
+		parent[i] = -1;
+	}
+	int first = findIndex(from);
+	queue<int> q;
+	q.push(first);
+	mark[first] = true;
+
+	while (!q.empty()) {
+		int cur = q.front();
+		q.pop();
+
+		if (cur == findIndex(to)) {
+			break;
+		}
+
+		for (auto it = map[cur].begin(); it != map[cur].end(); it++) {
+			if (mark[*it] || provinceList[*it]->getOwner() != player)
+				continue;
+			q.push(*it);
+			parent[*it] = cur;
+			mark[*it] = true;
+			//result.push_back(provinceList[*it]);
+		}
+	}
+	int cur = findIndex(to);
+	while (parent[cur] != -1) {
+		result.push_back(provinceList[cur]);
+		cur = parent[cur];
+	}
+	result.push_back(from);
+
 	return result;
 }
 
@@ -1651,6 +1721,9 @@ WindowManager::WindowManager()
 	if (!warriorImg.loadFromFile("assets/warrior.png")) {
 		cout << "Unable to open file" << endl;
 	}
+	if (!battleNotificationImg.loadFromFile("assets/armyNotifier.png")) {
+		cout << "Unable to open file" << endl;
+	}
 
 
 	font;
@@ -1682,13 +1755,13 @@ WindowManager::WindowManager()
 	string line;
 	ifstream myfile("assets/coordinates.txt");
 
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(1,placementPhaseImg, screenWidth/2,screenHeight/2, screenWidth *0.75, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(2,attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.70, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(4,fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(5,marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 400));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(1,placementPhaseImg, screenWidth/2,screenHeight/2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(2,attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.70, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(4,fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(5,marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
 
-	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, screenWidth / 2, screenHeight / 2, font);
+	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, battleNotificationImg, screenWidth / 2, screenHeight / 2, font);
 
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
@@ -2090,6 +2163,7 @@ void WindowManager::multGameLan(RenderWindow & window, Event & event) {
 					if (event.mouseButton.y < bottomUpperMargin)
 						provinceClicked(index);
 				}
+				
 			}
 		}
 	}
@@ -2238,7 +2312,17 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 					if (event.mouseButton.y < bottomUpperMargin)
 						provinceClicked(index);
 				}
+				else if (event.mouseButton.y < bottomUpperMargin){
+					resetHighlights();
+					resetLines();
+					first = NULL;
+					second = NULL;
+					isProvinceClicked = 0;
+					cout << "Not a city" << endl;
+					provinceNameTxt.setString("");
+				}
 			}
+			
 		}
 	}
 
@@ -2306,6 +2390,11 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 	window.draw(mapSprite);
 	lineForProvinces->draw(window,time);
+
+	for (auto it = lines.begin(); it != lines.end(); it++) {
+		(*it)->draw(window, time);
+	}
+
 	drawAllArmies(window, event);
 	drawAllCastles(window, event);
 	//for (auto it = castles.begin(); it != castles.end(); it++) {
@@ -2316,16 +2405,8 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.setView(window.getDefaultView());
 	window.draw(lowerPanel);
 	battleNotifier->draw(window, time);
-	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
-		if (phase == listOfPhaseNotifiers[i]->phaseId)
-			listOfPhaseNotifiers[i]->activate();
-		else
-			listOfPhaseNotifiers[i]->deactivate();
-	}
 
-	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
-		listOfPhaseNotifiers[i]->draw(window,time);
-	}
+
 
 	dragObject(window, event, 3);
 	dragObject(window, event, 0);
@@ -2363,6 +2444,17 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 
 	topPanel->update(curPlayer->getMoney(), curPlayer->getLeftSoldier(), totalTurn, currentPlayerName);
 	topPanel->draw(window);
+
+	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
+		if (phase == listOfPhaseNotifiers[i]->phaseId)
+			listOfPhaseNotifiers[i]->activate();
+		else
+			listOfPhaseNotifiers[i]->deactivate();
+	}
+	for (int i = 0; i < listOfPhaseNotifiers.size(); i++) {
+		listOfPhaseNotifiers[i]->draw(window, time);
+	}
+
 	//miniMap Staff
 	window.setView(miniMap);
 	miniMap.update(mainView);
@@ -2425,6 +2517,7 @@ string WindowManager::getProvinceName(sf::RenderWindow & window, sf::Mouse & m) 
 		if (it != GM->colorLookUpTable.end())
 			return GM->colorLookUpTable[colorInInt];
 	}
+
 	return "";
 }
 
@@ -2512,16 +2605,21 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				phase = ATTACKING_PHASE;
 			buttons[ATTACK_BUTTON]->setText("Attack");
 			buttons[NEXT_PHASE_BUTTON]->setText("Fortify Phase");
+			lineForProvinces->setVisible(false);
+			resetHighlights();
 
 		}
 		else if (phase == ATTACKING_PHASE) {
 			phase = FORTIFY_PHASE;
-
+			lineForProvinces->setVisible(false);
 			buttons[NEXT_PHASE_BUTTON]->setText("Market Phase");
 			buttons[ATTACK_BUTTON]->setText("Fortify");
+			lineForProvinces->setVisible(false);
+			resetHighlights();
 		}
 		else if (phase == FORTIFY_PHASE) {
 			phase = MARKET_PHASE;
+			lineForProvinces->setVisible(false);
 			buttons[TURN_WHEEL_BUTTON]->setFlag(true);
 			buttons[ATTACK_BUTTON]->setFlag(false);
 			if (page == 1) {
@@ -2616,8 +2714,11 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			buttons[ATTACK_BUTTON]->setText("Attack");
 			phase = ATTACKING_PHASE;
 			displayProvinceInfo(second);
+			lineForProvinces->setVisible(false);
+			resetHighlights();
 		}
 		else if (phase == FORTIFY_PHASE) {
+			lineForProvinces->setVisible(false);
 			soldierAmount = first->getNumberOfSoldiers() - 1;
 			buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 			if (GM->fortify(player, first, second, soldierAmount)) {
@@ -2653,7 +2754,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 			}*/
 		}
-		lineForProvinces->setVisible(false);
+		
 	}
 
 	else if (id == INC_BUTTON) {
@@ -2798,115 +2899,8 @@ void WindowManager::provinceClicked(int id) {
 	Province* city = GM->getWorldMap()->getProvinceByID(id);
 	Player* player = GM->getPlayers()[turn];
 	
-	//
-	//if (isProvinceClicked == 0) {
-	//	for (int i = 0; i < listOfArmyBage.size(); i++) {
-	//		if (listOfArmyBage[i]->nameOfProvince == city->getName())
-	//			listOfArmyBage[i]->setScale(2, 2);
-	//		else
-	//			listOfArmyBage[i]->setScale(1, 1);
-	//	}
-	//}
-
-	//if (phase == ATTACKING_PHASE || phase == FORTIFY_PHASE) {
-	//	if (isProvinceClicked == 0) {
-	//		first = city;
-	//		second = NULL;
-	//		isProvinceClicked = 1;
-	//		if (page == 1)
-	//			provinceNameTxt.setString(first->getName());
-
-	//		//-------------------------------------------------
-	//		//This code is to Scale a square with army size of a province.
-	//		highlight(city);
-	//		//--------------------------------------------------
-
-
-	//		//----------------------------------
-	//		//This is when you release from the probince. Can be changed????
-	//		lineForProvinces->setVisible(false);
-	//		//-------------------------------
-	//	}
-	//	else if (isProvinceClicked == 1) {
-	//		cout << "we are here" << endl;
-	//		second = city;
-	//		isProvinceClicked = 2;
-
-	//		//------------------------------------------------------
-	//		//this part is to draw line between two provinces
-	//		Vector2f firstCoordinates, secondCoordinates;
-	//		for (int i = 0; i < listOfArmyBage.size(); i++) {
-	//			if (listOfArmyBage[i]->nameOfProvince == first->getName())
-	//				firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
-	//			if (listOfArmyBage[i]->nameOfProvince == second->getName())
-	//				secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
-	//		}
-
-	//		lineForProvinces->setCoordinates(firstCoordinates, secondCoordinates);
-	//		lineForProvinces->setVisible(true);
-	//		//--------------------------------------------------------
-
-
-	//		//-------------------------------------------------
-	//		//This code is to Scale a square with army size of a province.
-	//		for (int i = 0; i < listOfArmyBage.size(); i++) {
-	//			if (listOfArmyBage[i]->nameOfProvince == first->getName())
-	//				listOfArmyBage[i]->setScale(2, 2);
-	//			else if (listOfArmyBage[i]->nameOfProvince == second->getName())
-	//				listOfArmyBage[i]->setScale(2, 2);
-	//			else
-	//				listOfArmyBage[i]->setScale(1, 1);
-	//		}
-	//		//-------------------------------------------------
-
-
-
-	//		if (phase == ATTACKING_PHASE)
-	//			provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
-	//		else
-	//			provinceNameTxt.setString("From " + first->getName() + " to " + second->getName());
-	//	}
-	//	else if (isProvinceClicked == 2) {
-	//		second = NULL;
-	//		first = city;
-	//		isProvinceClicked = 1;
-	//		provinceNameTxt.setString(first->getName());
-	//		lineForProvinces->setVisible(false);
-	//		//-------------------------------------------------
-	//		//This code is to Scale a square with army size of a province.
-	//		for (int i = 0; i < listOfArmyBage.size(); i++) {
-	//			if (listOfArmyBage[i]->nameOfProvince == city->getName())
-	//				listOfArmyBage[i]->setScale(2, 2);
-	//			else
-	//				listOfArmyBage[i]->setScale(1, 1);
-	//		}
-	//		//-------------------------------------------------
-
-	//	}
-	//	if (phase != FORTIFY_PHASE) {
-	//		if (first->getNumberOfSoldiers() > 3)
-	//			soldierAmount = 3;
-	//		else
-	//			soldierAmount = first->getNumberOfSoldiers() - 1;
-	//	}
-	//	else
-	//		soldierAmount = first->getNumberOfSoldiers() - 1;
-	//	buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-	//}
-	//else if (phase == POST_ATTACK) {
-	//	soldierAmount = first->getNumberOfSoldiers() - 1;
-	//	buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
-
-	//	//-------------------------------------------------
-	//	//This code is to Scale a square with army size of a province.
-	//	for (int i = 0; i < listOfArmyBage.size(); i++) {
-	//		if (listOfArmyBage[i]->nameOfProvince == city->getName())
-	//			listOfArmyBage[i]->setScale(2, 2);
-	//		else
-	//			listOfArmyBage[i]->setScale(1, 1);
-	//	}
-	//	//-------------------------------------------------
-	//}
+	if (city == first)
+		return;
 
 	if (phase == PLACEMENT_PHASE){}
 	else if (phase == ATTACKING_PHASE){
@@ -2919,21 +2913,32 @@ void WindowManager::provinceClicked(int id) {
 					provinceNameTxt.setString(first->getName());
 				resetHighlights();
 				highlight(city);
+				highlightNeighbors(city);
+				if (first->getNumberOfSoldiers() > 3)
+					soldierAmount = 3;
+				else
+					soldierAmount = first->getNumberOfSoldiers() - 1;
 			}
 			else {
 				resetHighlights();
+				soldierAmount = 0;
 			}
 			lineForProvinces->setVisible(false);
 		}
 		else if (isProvinceClicked == 1){
-			if (city->getOwner() != player) {
-				second = city;
-				isProvinceClicked = 2;
-				resetHighlights();
-				highlight(first);
-				highlight(second);
-				drawLine(first, second);
-				provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
+			if (city->getOwner() != player){
+				if (GM->getWorldMap()->isNeighbor(city, first)) {
+					second = city;
+					isProvinceClicked = 2;
+					resetHighlights();
+					highlight(first);
+					highlight(second);
+					drawLine(first, second);
+					provinceNameTxt.setString(first->getName() + " attacks to " + second->getName());
+				}
+				else {
+
+				}
 			}
 			else {
 				first = city;
@@ -2943,7 +2948,12 @@ void WindowManager::provinceClicked(int id) {
 					provinceNameTxt.setString(first->getName());
 				resetHighlights();
 				highlight(city);
+				highlightNeighbors(city);
 				lineForProvinces->setVisible(false);
+				if (first->getNumberOfSoldiers() > 3)
+					soldierAmount = 3;
+				else
+					soldierAmount = first->getNumberOfSoldiers() - 1;
 				
 			}
 		}
@@ -2957,6 +2967,10 @@ void WindowManager::provinceClicked(int id) {
 				resetHighlights();
 				highlight(city);
 				lineForProvinces->setVisible(false);
+				if (first->getNumberOfSoldiers() > 3)
+					soldierAmount = 3;
+				else
+					soldierAmount = first->getNumberOfSoldiers() - 1;
 			}
 			else {
 				first = NULL;
@@ -2965,8 +2979,10 @@ void WindowManager::provinceClicked(int id) {
 				provinceNameTxt.setString("");
 				resetHighlights();
 				lineForProvinces->setVisible(false);
+				soldierAmount = 0;
 			}
 		}
+		buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	}
 	else if (phase == FORTIFY_PHASE) {
 		if (isProvinceClicked == 0) {
@@ -2978,21 +2994,30 @@ void WindowManager::provinceClicked(int id) {
 					provinceNameTxt.setString(first->getName());
 				resetHighlights();
 				highlight(city);
+				highlightPossiblePaths(city);
+				soldierAmount = first->getNumberOfSoldiers() - 1;
 			}
 			else {
 				resetHighlights();
+				soldierAmount = 0;
 			}
 			lineForProvinces->setVisible(false);
 		}
 		else if (isProvinceClicked == 1) {
 			if (city->getOwner() == player) {
-				second = city;
-				isProvinceClicked = 2;
-				resetHighlights();
-				highlight(first);
-				highlight(second);
-				drawLine(first, second);
-				provinceNameTxt.setString("From " + first->getName() + " to " + second->getName());
+				if (GM->getWorldMap()->hasPath(player, city, first)) {
+					second = city;
+					isProvinceClicked = 2;
+					resetHighlights();
+					highlight(first);
+					highlight(second);
+					//drawLine(first, second);
+					drawShortestPath(first, second);
+					provinceNameTxt.setString("From " + first->getName() + " to " + second->getName());
+				}
+				else {
+
+				}
 			}
 			else {
 				first = NULL;
@@ -3002,6 +3027,7 @@ void WindowManager::provinceClicked(int id) {
 					provinceNameTxt.setString("");
 				resetHighlights();
 				lineForProvinces->setVisible(false);
+				soldierAmount = 0;
 			}
 		}
 		else if (isProvinceClicked == 2) {
@@ -3013,7 +3039,9 @@ void WindowManager::provinceClicked(int id) {
 					provinceNameTxt.setString(first->getName());
 				resetHighlights();
 				highlight(city);
+				highlightPossiblePaths(city);
 				lineForProvinces->setVisible(false);
+				soldierAmount = first->getNumberOfSoldiers() - 1;
 			}
 			else {
 				first = NULL;
@@ -3022,12 +3050,14 @@ void WindowManager::provinceClicked(int id) {
 				provinceNameTxt.setString("");
 				resetHighlights();
 				lineForProvinces->setVisible(false);
+				soldierAmount = 0;
 			}
 		}
+		
 	}
 	else if (phase == MARKET_PHASE) {
 	}
-
+	buttons[NUMBER_TEXT]->setText(to_string(soldierAmount));
 	displayProvinceInfo(city);
 }
 
@@ -3040,10 +3070,32 @@ void WindowManager::highlight(Province* city) {
 	}
 }
 
+void WindowManager::highlightNeighbors(Province* city) {
+	vector<Province*> neighbors = GM->getWorldMap()->getNeighbors(city);
+	Player* player = GM->getPlayers()[turn];
+	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+		if ((*it)->getOwner() != player) {
+			highlight((*it));
+		}
+	}
+}
+
+void WindowManager::highlightPossiblePaths(Province* city) {
+	vector<Province*> cities = GM->getWorldMap()->getPossiblePaths(city);
+	for (auto it = cities.begin(); it != cities.end(); it++) {
+		highlight((*it));
+	}
+}
+
 void WindowManager::resetHighlights() {
 	for (int i = 0; i < listOfArmyBage.size(); i++) {
 		listOfArmyBage[i]->setScale(1, 1);
 	}
+}
+
+void WindowManager::resetLines() {
+	lineForProvinces->setVisible(false);
+	lines.clear();
 }
 
 void WindowManager::drawLine(Province* from, Province* to) {
@@ -3057,6 +3109,28 @@ void WindowManager::drawLine(Province* from, Province* to) {
 
 	lineForProvinces->setCoordinates(firstCoordinates, secondCoordinates);
 	lineForProvinces->setVisible(true);
+}
+
+void WindowManager::drawShortestPath(Province* from, Province* to) {
+	lines.clear();
+	vector<Province*> test = GM->getWorldMap()->getShortestPath(from, to);
+
+	int size = test.size();
+	for (int k = size - 1; k > 0; k--) {
+		
+		LineBetweenProvinces* line = new LineBetweenProvinces(lineImg);
+		Vector2f firstCoordinates, secondCoordinates;
+		for (int i = 0; i < listOfArmyBage.size(); i++) {
+			if (listOfArmyBage[i]->nameOfProvince == test[k]->getName())
+				firstCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+			if (listOfArmyBage[i]->nameOfProvince == test[k-1]->getName())
+				secondCoordinates = Vector2f(listOfArmyBage[i]->centerCoordinates);
+		}
+
+		line->setCoordinates(firstCoordinates, secondCoordinates);
+		line->setVisible(true);
+		lines.push_back(line);
+	}
 }
 
 void WindowManager::dragObject(sf::RenderWindow & window, sf::Event & event, int id) {
@@ -4031,7 +4105,7 @@ void PhaseNotifier::draw(sf::RenderWindow & window,float time) {
 
 		if (this->getScale().x > 0.4)
 			this->setScale(this->getScale().x - 0.01*time, this->getScale().x - 0.01*time);
-
+		this->setColor(Color(255, 255, 255, 255));
 	}
 
 
@@ -4045,6 +4119,7 @@ void PhaseNotifier::activate() {
 	this->setScale(1, 1);
 	this->setPosition(this->bigCoordinates);
 	ck.restart();
+	this->setColor(Color(0, 0, 0, 255));
 }
 void PhaseNotifier::deactivate() {
 	if (!visible)
@@ -4058,10 +4133,12 @@ BattleNotifier::BattleNotifier() {
 
 }
 
-BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3, int x, int y,Font font) {
+BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3,Image back, int x, int y,Font font) {
 	imageOfBattle = img1;
 	imageOfDeath = img2;
 	warriorsImg = img3;
+	backPage = back;
+
 	this->font = font;
 	visible = false;
 
@@ -4069,44 +4146,49 @@ BattleNotifier::BattleNotifier(Image img1, Image img2, Image img3, int x, int y,
 	texureOfBattle.loadFromImage(imageOfBattle);
 	textureOfDeath.loadFromImage(imageOfDeath);
 	textureOfWarriors.loadFromImage(warriorsImg);
+	backPageTexture.loadFromImage(backPage);
 
 	this->setTexture(texureOfBattle);
 	spriteOfDeath.setTexture(textureOfDeath);
 	spriteOfWarriors.setTexture(textureOfWarriors);
+	backPageSprite.setTexture(backPageTexture);
 
 	this->setPositionCenter(x, y);
+	backPageSprite.setScale(1,0.8);
+	backPageSprite.setPosition(x - backPageSprite.getGlobalBounds().width / 2, y - backPageSprite.getGlobalBounds().height / 2 + 10);
 
 	battleText.setFont(this->font);
 	battleText.setCharacterSize(40);
 	battleText.setString("Battle");
-	battleText.setFillColor(Color(0, 0, 0));
+	Color color = Color(255, 255, 255);
+	battleText.setFillColor(color);
 
 	playerName1.setFont(this->font);
 	playerName1.setCharacterSize(40);
 	playerName1.setStyle(1<<2);
-	playerName1.setFillColor(Color(0, 0, 0));
+	playerName1.setFillColor(color);
 
 	playerName2.setFont(this->font);
 	playerName2.setCharacterSize(40);
 	playerName2.setStyle(1 << 2);
-	playerName2.setFillColor(Color(0, 0, 0));
+	playerName2.setFillColor(color);
 
 	soldiers1.setFont(this->font);
 	soldiers1.setCharacterSize(40);
-	soldiers1.setFillColor(Color(0, 0, 0));
+	soldiers1.setFillColor(color);
 
 	soldiers2.setFont(this->font);
 	soldiers2.setCharacterSize(40);
-	soldiers2.setFillColor(Color(0, 0, 0));
+	soldiers2.setFillColor(color);
 
 
 	soldierLost1.setFont(this->font);
 	soldierLost1.setCharacterSize(40);
-	soldierLost1.setFillColor(Color(0, 0, 0));
+	soldierLost1.setFillColor(color);
 
 	soldierLost2.setFont(this->font);
 	soldierLost2.setCharacterSize(40);
-	soldierLost2.setFillColor(Color(0, 0, 0));
+	soldierLost2.setFillColor(color);
 
 }
 
@@ -4132,7 +4214,7 @@ void BattleNotifier::updateData(string battleString, string playerNameString1, s
 	soldierLost1.setString(soldierLostString1);
 	soldierLost2.setString(soldierLostString2);
 
-	battleText.setPosition(Vector2f(this->centerCoordinates.x - battleText.getGlobalBounds().width / 2, this->centerCoordinates.y - battleText.getGlobalBounds().height / 2 - this->getGlobalBounds().height) );
+	battleText.setPosition(Vector2f(this->centerCoordinates.x - battleText.getGlobalBounds().width / 2, this->centerCoordinates.y - battleText.getGlobalBounds().height / 2 - this->getGlobalBounds().height-25) );
 	playerName1.setPosition(this->centerCoordinates.x - this->getGlobalBounds().width - playerName1.getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
 	playerName2.setPosition(this->centerCoordinates.x + this->getGlobalBounds().width, this->centerCoordinates.y - this->getGlobalBounds().height / 2);
 
@@ -4153,13 +4235,14 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 		return;
 	if (opacityParam < 100)
 		this->deactivate();
-	cout << removeTimer << endl;
+	//cout << removeTimer << endl;
 	removeTimer = this->ckk.getElapsedTime().asSeconds() + removeTimer;
 	this->ckk.restart();
 	
-	if (removeTimer > 2) {
+	if (removeTimer > 1) {
 		opacityParam = opacityParam - 0.3*time ;
 		this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
+		backPageSprite.setColor(Color(backPageSprite.getColor().r, backPageSprite.getColor().g, backPageSprite.getColor().b, (int)opacityParam));
 
 		battleText.setFillColor(Color(battleText.getFillColor().r, battleText.getFillColor().g, battleText.getFillColor().b, (int)opacityParam));
 		playerName1.setFillColor(Color(playerName1.getFillColor().r, playerName1.getFillColor().g, playerName1.getFillColor().b, (int)opacityParam));
@@ -4172,6 +4255,7 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 		soldierLost2.setFillColor(Color(soldierLost2.getFillColor().r, soldierLost2.getFillColor().g, soldierLost2.getFillColor().b, (int)opacityParam));
 	}
 
+	window.draw(backPageSprite);
 	window.draw(*this);
 	window.draw(battleText);
 
@@ -4197,6 +4281,7 @@ void BattleNotifier::activate() {
 	removeTimer = 0;
 	opacityParam = 255.f;
 	this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
+	backPageSprite.setColor(Color(backPageSprite.getColor().r, backPageSprite.getColor().g, backPageSprite.getColor().b, (int)opacityParam));
 
 	battleText.setFillColor(Color(battleText.getFillColor().r, battleText.getFillColor().g, battleText.getFillColor().b, (int)opacityParam));
 	playerName1.setFillColor(Color(playerName1.getFillColor().r, playerName1.getFillColor().g, playerName1.getFillColor().b, (int)opacityParam));
