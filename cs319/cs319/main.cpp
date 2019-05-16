@@ -1,23 +1,21 @@
-#include <SFML\Graphics.hpp>
+
+#include "Top.h"
+
+
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
 
 int main() {
-	sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::White);
+	WindowManager* WM = new WindowManager();
 
-	while (window.isOpen())
-	{
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				window.close();
-		}
+	WM->GM->loadProvinces();
 
-		window.clear();
-		window.draw(shape);
-		window.display();
-	}
+	WM->createWindow();
+
 
 	return 0;
 }

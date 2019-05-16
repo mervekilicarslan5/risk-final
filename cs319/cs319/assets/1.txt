@@ -1,0 +1,11 @@
+ankara -428033
+konya -1713771777
+antalya -10197761
+edirne 522548479
+eskisehir -1061109505
+istanbul 1061735679
+kocaeli 325332223
+kars -1616969473
+balikesir 909522687
+nevsehir 582044927
+afyon -8443905
