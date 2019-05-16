@@ -30,6 +30,52 @@ class ArmyBage;
 class TopBar;
 class LineBetweenProvinces;
 
+class PhaseNotifier : public sf::Sprite {
+public:
+	Image img;
+	Texture tex;
+	Color color;
+	Vector2f bigCoordinates, smallCoordinates;
+	bool visible;
+	float moveTimer;
+	Clock ck;
+	int phaseId;
+
+	PhaseNotifier();
+	PhaseNotifier(int phaseId, Image img, int x, int y, int fx, int fy);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window, float time);
+	void activate();
+	void deactivate();
+};
+
+class BattleNotifier : public sf::Sprite {
+public:
+	Image imageOfBattle, imageOfDeath, warriorsImg, backPage;
+	Texture texureOfBattle, textureOfDeath, textureOfWarriors, backPageTexture;
+	Sprite spriteOfDeath, spriteOfWarriors, backPageSprite;
+	Text battleText, playerName1, playerName2, soldiers1, soldiers2, soldierLost1, soldierLost2;
+	string battleString, playerNameString1, playerNameString2, soldiersString1, soldiersString2, soldierLostString1, soldierLostString2;
+	Color color;
+	Vector2f centerCoordinates;
+	Font font;
+	bool visible;
+	float removeTimer;
+	Clock ckk;
+	float opacityParam;
+
+	BattleNotifier();
+	BattleNotifier(Image img1, Image img2, Image img3, Image back, int x, int y, Font font);
+	void setSizeOfArmy(int size);
+	void setBageColor(sf::Color color);
+	void draw(sf::RenderWindow & window, float time);
+	void activate();
+	void deactivate();
+	void setPositionCenter(int x, int y);
+	void updateData(string battleString, string playerNameString1, string playerNameString2, string soldiersString1, string soldiersString2, string soldierLostString1, string soldierLostString2);
+};
+
 
 
 class ArmyBage : public sf::Sprite {
@@ -66,7 +112,7 @@ public:
 	//void setCoordinatesOfProvince1(Vector2f coord);
 	//void setCoordinatesOfProvince2(Vector2f coord);
 	void setCoordinates(Vector2f first, Vector2f second);
-	void draw(RenderWindow & window,float time);
+	void draw(RenderWindow & window, float time);
 	void setVisible(bool flag);
 
 };
@@ -119,10 +165,10 @@ public:
 
 class TopBar : public sf::Sprite {
 public:
-	Image img, coinImg, actionImg, turnImg,playerImg;
-	Texture panelTexture, coinTexture, actionTexture, turnTexture,playerTexture;
+	Image img, coinImg, actionImg, turnImg, playerImg;
+	Texture panelTexture, coinTexture, actionTexture, turnTexture, playerTexture;
 
-	Sprite coinSprite, actionSprite, turnSprite,playerSprite;
+	Sprite coinSprite, actionSprite, turnSprite, playerSprite;
 	Text coinText, actionText, turnText, playerText;
 	RectangleShape coinField, actionField, turnField, playerField;
 
@@ -131,7 +177,7 @@ public:
 	Vector2f centerCoordinates;
 
 	TopBar();
-	TopBar(Image img, Image coinImg, Image actionImage, Image turnImage,Image playerImage,Font &font);
+	TopBar(Image img, Image coinImg, Image actionImage, Image turnImage, Image playerImage, Font &font);
 	void update(int moneyAmount, int actionAmount, int currentTurn, string player);
 	void draw(RenderWindow & window);
 	//void setSizeOfArmy(int size);
@@ -207,7 +253,7 @@ public:
 	void setId(int _id);
 	void captureProvince(WorldMap* worldMap, Province* _province);
 	void loseProvince(WorldMap* worldMap, Province* _province);
-	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province );
+	bool placeSoldier(WorldMap* worldMap, int amount, Province* _province);
 	bool hasProvince(WorldMap * worldMap, Province* _province);
 	int buildCastle(Province* province);
 	int getNumberOfProvinces();
@@ -234,6 +280,7 @@ public:
 	void printNeighbors(Province* _province);
 	bool isNeighbor(Province* first, Province* second);
 	bool hasPath(Player* player, Province* from, Province* to);
+	vector<Province*> getPossiblePaths(Province* city);
 	int findIndex(Province* _province);
 	void getProvinceByName(string name, int & index, Province* & ptr);
 	void showWorldStatus();
@@ -242,6 +289,7 @@ public:
 	Province* getProvinceByID(int id);
 	int ownerCount();
 	vector<Province*> getNeighbors(Province* _province);
+	vector<Province*> getShortestPath(Province* from, Province* to);
 private:
 	int numberOfProvinces;
 	vector< Province* > provinceList;
@@ -305,10 +353,13 @@ public:
 	void startMarket(int id);
 	void startFortifyPhase(int id);
 	void randomPlacement();
-	void sendAllProvincesFromHost(NetworkManager ** NM);
-	void sendAllProvincesFromHostString(NetworkManager ** NM);
-	void sendAllProvincesClientToHostString(NetworkManager ** NM);
-	void sendAllProvincesClientToHost(string _connectionType, NetworkManager ** NM);
+
+	bool sendAllProvincesFromHost(NetworkManager ** NM);
+	bool getAllProvincesFromHost(NetworkManager ** NM);
+
+	void sendAllProvincesFromClientToHost(NetworkManager ** NM);
+	bool getAllProvincesFromClient(NetworkManager ** NM);
+
 	int getPlayerTurn(string _name);
 	vector<string> split(std::string strToSplit, char delimeter);
 	void destroyNearSoldier(Province* province);
@@ -317,7 +368,7 @@ public:
 
 	map<int, string> colorLookUpTable;
 	int currentPlayer;
-	
+	WindowManager *windowManager;
 
 private:
 	vector<Player*> players;
@@ -331,22 +382,26 @@ public:
 	WindowManager * WM;
 	NetworkManager(WindowManager * WM);
 	void createNetwork(GameManager ** const GM, string _connectionType, string name);
+
+	string getStringFromClient();
 	string sendStringFromHost(string _sendText);
-	void sendDataFromHost(GameManager * const GM, int playerID, int _cityID, int count, int _castleLevel);
-	void sendDataFromClientToHost(GameManager * const GM, string _connectionType, int _playerID, int _cityID, int _count, int _castleLevel);
-	void buildNewtwork();
+	string sendStringFromClientToHost(string _sendText);
 	vector<string> split(std::string strToSplit, char delimeter);
 	void startGame();
+	void getNamesConnect(GameManager ** const GM);
+	void getAllNames(GameManager ** const GM);
 	string connectionType;
+	UdpSocket socket;
 
 private:
 	IpAddress ip;
-	IpAddress sIP;
+	IpAddress sIP = "139.179.210.187";
 	map<unsigned short, IpAddress> computerID;
-	UdpSocket socket;
+
 	vector<string> players;
 	string playersName;
 	Packet packet;
+	int playerCount = 0;
 };
 
 class WindowManager {
@@ -357,7 +412,8 @@ public:
 	double zoom;
 
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
-	sf::Image mapImg, hoverImg, roundedSquare,lineImg, coinImg,actionImg,timerImg,topPanelImg, crownImg,castleImg;
+	sf::Image mapImg, hoverImg, roundedSquare, lineImg, coinImg, actionImg, timerImg, topPanelImg, crownImg, castleImg, sceleteImg, warriorImg, battleNotificationImg;
+	sf::Image attackPhaseImg, placementPhaseImg, postAttackPhaseImg, fortifyPhaseImg, marketPhaseImg;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;
@@ -368,7 +424,9 @@ public:
 	sf::Font font;
 	TopBar *topPanel;
 	MiniMap miniMap;
+	vector<MyImage*> menuButton;
 	LineBetweenProvinces *lineForProvinces;
+	vector<LineBetweenProvinces*> lines;
 	vector<Button*> buttons;
 	vector<Text*> playerStatus;
 	vector<MyImage*> images;
@@ -376,6 +434,8 @@ public:
 	vector<string> wheelStr;
 	vector<ArmyBage*> listOfArmyBage;
 	vector<CastleBage*> listOfCastleBage;
+	vector<PhaseNotifier*> listOfPhaseNotifiers;
+	BattleNotifier* battleNotifier;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
@@ -409,6 +469,9 @@ public:
 	const int start = 8;
 	const int TURN_WHEEL_BUTTON = 9;
 
+	bool create_game_clicked = false;
+	bool join_game_clicked = false;
+
 	int playerCount = 0;
 	int countForWheel = 0;
 	bool wheel = false;
@@ -426,6 +489,7 @@ public:
 
 	bool _randomPlacement = true;
 	bool castle = false;
+
 	float rotateAmount = 22.5;
 	float rotateStep = 2.5;
 	int rotateRandom = 250;
@@ -437,7 +501,7 @@ public:
 	~WindowManager();
 	void createWindow();
 	void menuScreen(RenderWindow & window, Event & e);
-	void multGameLan(RenderWindow & window, Event & event);
+
 	void multGameComp(RenderWindow & window, Event & event);
 	string getProvinceByColor(int color);
 	int getPixelColor(int x, int y);
@@ -449,13 +513,19 @@ public:
 	void imageClicked(int id);
 	void handleWheel();
 	void highlight(Province* city);
+	void highlightNeighbors(Province* city);
+	void highlightPossiblePaths(Province* city);
 	void drawLine(Province* from, Province* to);
+	void drawShortestPath(Province* from, Province* second);
 	void resetHighlights();
+	void resetLines();
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
 	void displayPlayerStatus();
 	void drawAllArmies(RenderWindow & window, Event & e);
 	void drawAllCastles(RenderWindow & window, Event & e);
+	void menuEvents(sf::Event& e, int i);
+	void changeButton(int id);
 };
 
 class Button : public sf::RectangleShape {
