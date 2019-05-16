@@ -4077,7 +4077,7 @@ void PhaseNotifier::draw(sf::RenderWindow & window,float time) {
 
 		if (this->getScale().x > 0.4)
 			this->setScale(this->getScale().x - 0.01*time, this->getScale().x - 0.01*time);
-
+		this->setColor(Color(255, 255, 255, 255));
 	}
 
 
@@ -4091,6 +4091,7 @@ void PhaseNotifier::activate() {
 	this->setScale(1, 1);
 	this->setPosition(this->bigCoordinates);
 	ck.restart();
+	this->setColor(Color(0, 0, 0, 255));
 }
 void PhaseNotifier::deactivate() {
 	if (!visible)
