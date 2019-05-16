@@ -280,6 +280,7 @@ public:
 	void printNeighbors(Province* _province);
 	bool isNeighbor(Province* first, Province* second);
 	bool hasPath(Player* player, Province* from, Province* to);
+	vector<Province*> getPossiblePaths(Province* city);
 	int findIndex(Province* _province);
 	void getProvinceByName(string name, int & index, Province* & ptr);
 	void showWorldStatus();
@@ -288,6 +289,7 @@ public:
 	Province* getProvinceByID(int id);
 	int ownerCount();
 	vector<Province*> getNeighbors(Province* _province);
+	vector<Province*> getShortestPath(Province* from, Province* to);
 private:
 	int numberOfProvinces;
 	vector< Province* > provinceList;
@@ -417,6 +419,7 @@ public:
 	MiniMap miniMap;
 	vector<MyImage*> menuButton;
 	LineBetweenProvinces *lineForProvinces;
+	vector<LineBetweenProvinces*> lines;
 	vector<Button*> buttons;
 	vector<Text*> playerStatus;
 	vector<MyImage*> images;
@@ -499,8 +502,12 @@ public:
 	void imageClicked(int id);
 	void handleWheel();
 	void highlight(Province* city);
+	void highlightNeighbors(Province* city);
+	void highlightPossiblePaths(Province* city);
 	void drawLine(Province* from, Province* to);
+	void drawShortestPath(Province* from, Province* second);
 	void resetHighlights();
+	void resetLines();
 	void dragObject(sf::RenderWindow & window, sf::Event & event, int id);
 	void displayProvinceInfo(Province * province);
 	void displayPlayerStatus();
