@@ -7,6 +7,13 @@
 *.userosscache
 *.sln.docstates
 
+# ignore a single file
+
+
+# ignore a file type
+
+
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
