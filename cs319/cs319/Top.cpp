@@ -1813,37 +1813,52 @@ WindowManager::WindowManager()
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 
-	menuButton.push_back(new MyImage("B2.png"));
+	menuButton.push_back(new MyImage("B1.png"));
+	menuButton.push_back(new MyImage("B4.png"));
 	menuButton.push_back(new MyImage("B3.png"));
-	menuButton.push_back(new MyImage("B0.png"));
-	menuButton.push_back(new MyImage("settingsK.png"));
+	menuButton.push_back(new MyImage("B1K.png"));
+	menuButton.push_back(new MyImage("B4K.png"));
 	menuButton.push_back(new MyImage("creditsK.png"));
-	menuButton.push_back(new MyImage("playK.png"));
+
+	createGameButtons.push_back(new Button(font));
+	createGameButtons.push_back(new Button(font));
+	createGameButtons.push_back(new Button(font));
+	createGameButtons.push_back(new Button(font));
+	createGameButtons.push_back(new Button(font));//start game
+	createGameButtons.push_back(new Button(font));//random placement
+
+	joinGameButtons.push_back(new Button(font));
+	joinGameButtons.push_back(new Button(font));
+
+	namesOfRulers.push_back(new Button(font));
+	namesOfRulers.push_back(new Button(font));
+	namesOfRulers.push_back(new Button(font));
+	namesOfRulers.push_back(new Button(font));
+	namesOfRulers.push_back(new Button(font));
+	namesOfRulers.push_back(new Button(font));
 
 
-
-	menuButton[0]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 6);
+	menuButton[0]->setInitialPosition(screenWidth / 9, 3 * (screenHeight / 8));
 	menuButton[0]->setPosition(menuButton[0]->getInitialPosition());
 	menuButton[0]->setScale(0.5, 0.5);
 
-	menuButton[1]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + screenHeight / 6);
+	menuButton[1]->setInitialPosition((screenWidth / 9), 4 * (screenHeight / 8));
 	menuButton[1]->setPosition(menuButton[1]->getInitialPosition());
 	menuButton[1]->setScale(0.5, 0.5);
 
-	menuButton[2]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 6);
-
+	menuButton[2]->setInitialPosition((screenWidth / 9), 5 * (screenHeight / 8));
 	menuButton[2]->setPosition(menuButton[2]->getInitialPosition());
 	menuButton[2]->setScale(0.5, 0.5);
 
-	menuButton[3]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + +screenHeight / 6);
+	menuButton[3]->setInitialPosition(screenWidth / 9, 3 * (screenHeight / 8));
 	menuButton[3]->setPosition(menuButton[3]->getInitialPosition());
 	menuButton[3]->setScale(0.5, 0.5);
 
-	menuButton[4]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 8 + screenHeight / 6);
+	menuButton[4]->setInitialPosition(screenWidth / 9, 4 * (screenHeight / 8));
 	menuButton[4]->setPosition(menuButton[4]->getInitialPosition());
 	menuButton[4]->setScale(0.5, 0.5);
 
-	menuButton[5]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 6);
+	menuButton[5]->setInitialPosition(screenWidth / 9, 5 * (screenHeight / 8));
 	menuButton[5]->setPosition(menuButton[5]->getInitialPosition());
 	menuButton[5]->setScale(0.5, 0.5);
 	//MENU BUTTON
@@ -2018,6 +2033,181 @@ WindowManager::WindowManager()
 	infoText.setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, bottomUpperMargin + 40);
 
 	GM->windowManager = this;
+
+
+
+
+
+
+
+	//CreateGame page
+	this->backForCreateGame = RectangleShape(Vector2f(screenWidth / 2, screenHeight / 2));
+	this->backForCreateGame.setFillColor(Color(0, 0, 0, 120));
+	//this->backForCreateGame.setSize();
+	this->backForCreateGame.setPosition(screenWidth / 2 - backForCreateGame.getSize().x / 2, screenHeight / 2 - backForCreateGame.getSize().y / 2);
+
+	if (!this->backGround.loadFromFile("assets/background2.png")) {
+		cout << "Unable to open file" << endl;
+	}
+	this->textureOfBackGround.loadFromImage(backGround);
+	this->spriteOfBackground.setTexture(textureOfBackGround);
+	this->spriteOfBackground.setTextureRect(IntRect(0, 0, (int)textureOfBackGround.getSize().x, (int)textureOfBackGround.getSize().y));
+	this->spriteOfBackground.setPosition(0, 0);
+	this->spriteOfBackground.setScale(backGround.getSize().x / screenWidth, backGround.getSize().y / screenHeight);
+
+
+	createGameButtons[1]->setTextSize(numberTextSize);
+	createGameButtons[1]->setSize(numberTextSize, numberTextSize);
+	createGameButtons[1]->setText("1");
+	createGameButtons[1]->setPosition(screenWidth / 2 - createGameButtons[1]->getGlobalBounds().width / 2, screenHeight / 2);
+	createGameButtons[1]->setTextColor(sf::Color::Black);
+	createGameButtons[1]->setFillColor(sf::Color::Red);
+	createGameButtons[1]->setOutlineThickness(2);
+	createGameButtons[1]->setOutlineColor(Color::Black);
+	createGameButtons[1]->setFlag(true);
+
+	createGameButtons[0]->setTextSize(numberTextSize);
+	createGameButtons[0]->setSize(numberTextSize, numberTextSize);
+	createGameButtons[0]->setText("-");
+	createGameButtons[0]->setPosition(createGameButtons[1]->getPosition().x - createGameButtons[1]->getGlobalBounds().width, screenHeight / 2);
+	createGameButtons[0]->setTextColor(sf::Color::Black);
+	createGameButtons[0]->setFillColor(sf::Color::Red);
+	createGameButtons[0]->setOutlineThickness(2);
+	createGameButtons[0]->setOutlineColor(Color::Black);
+	createGameButtons[0]->setFlag(true);
+
+
+	createGameButtons[2]->setTextSize(numberTextSize);
+	createGameButtons[2]->setSize(numberTextSize, numberTextSize);
+	createGameButtons[2]->setText("+");
+	createGameButtons[2]->setPosition(createGameButtons[1]->getPosition().x + createGameButtons[1]->getGlobalBounds().width, screenHeight / 2);
+	createGameButtons[2]->setTextColor(sf::Color::Black);
+	createGameButtons[2]->setFillColor(sf::Color::Red);
+	createGameButtons[2]->setOutlineThickness(2);
+	createGameButtons[2]->setOutlineColor(Color::Black);
+	createGameButtons[2]->setFlag(true);
+
+	createGameButtons[3]->setTextSize(numberTextSize);
+	createGameButtons[3]->setSize(100, numberTextSize);
+	createGameButtons[3]->setText("Back");
+	createGameButtons[3]->setPosition(0, 0);
+	createGameButtons[3]->setTextColor(sf::Color::White);
+	createGameButtons[3]->setFillColor(sf::Color::Black);
+	createGameButtons[3]->setOutlineThickness(2);
+	createGameButtons[3]->setOutlineColor(Color::Black);
+	createGameButtons[3]->setFlag(true);
+
+	createGameButtons[4]->setTextSize(numberTextSize);
+	createGameButtons[4]->setSize(200, numberTextSize);
+	createGameButtons[4]->setText("Create Game");
+	createGameButtons[4]->setPosition(screenWidth / 2 - createGameButtons[4]->getGlobalBounds().width / 2, createGameButtons[2]->getPosition().y + 40);
+	createGameButtons[4]->setTextColor(sf::Color::White);
+	createGameButtons[4]->setFillColor(sf::Color::Black);
+	createGameButtons[4]->setOutlineThickness(2);
+	createGameButtons[4]->setOutlineColor(Color::Black);
+	createGameButtons[4]->setFlag(true);
+
+	createGameButtons[5]->setTextSize(numberTextSize);
+	createGameButtons[5]->setSize(300, numberTextSize);
+	createGameButtons[5]->setText("Random Placement");
+	createGameButtons[5]->setPosition(screenWidth / 2 - createGameButtons[5]->getGlobalBounds().width / 2, createGameButtons[2]->getPosition().y - 40);
+	createGameButtons[5]->setTextColor(sf::Color::White);
+	if (_randomPlacement)
+		createGameButtons[5]->setFillColor(sf::Color::Green);
+	else
+		createGameButtons[5]->setFillColor(sf::Color::Red);
+	createGameButtons[5]->setOutlineThickness(2);
+	createGameButtons[5]->setOutlineColor(Color::Black);
+	createGameButtons[5]->setFlag(true);
+
+
+	joinGameButtons[0]->setTextSize(numberTextSize);
+	joinGameButtons[0]->setSize(100, numberTextSize);
+	joinGameButtons[0]->setText("Back");
+	joinGameButtons[0]->setPosition(0, 0);
+	joinGameButtons[0]->setTextColor(sf::Color::White);
+	joinGameButtons[0]->setFillColor(sf::Color::Black);
+	joinGameButtons[0]->setOutlineThickness(2);
+	joinGameButtons[0]->setOutlineColor(Color::Black);
+	joinGameButtons[0]->setFlag(true);
+
+	joinGameButtons[1]->setTextSize(numberTextSize);
+	joinGameButtons[1]->setSize(200, numberTextSize);
+	joinGameButtons[1]->setText("Join Game");
+	joinGameButtons[1]->setPosition(screenWidth / 2 - joinGameButtons[1]->getGlobalBounds().width / 2, screenHeight / 2);
+	joinGameButtons[1]->setTextColor(sf::Color::White);
+	joinGameButtons[1]->setFillColor(sf::Color::Black);
+	joinGameButtons[1]->setOutlineThickness(2);
+	joinGameButtons[1]->setOutlineColor(Color::Black);
+	joinGameButtons[1]->setFlag(true);
+
+	namesOfRulers[0]->setTextSize(numberTextSize);
+	namesOfRulers[0]->setSize(250, numberTextSize);
+	namesOfRulers[0]->setText("Napoleon");
+	namesOfRulers[0]->setPosition(0, screenHeight * 0.2);
+	namesOfRulers[0]->setTextColor(sf::Color::White);
+	namesOfRulers[0]->setFillColor(sf::Color::Black);
+	namesOfRulers[0]->setOutlineThickness(2);
+	namesOfRulers[0]->setOutlineColor(Color::Black);
+	namesOfRulers[0]->setFlag(true);
+
+
+	namesOfRulers[1]->setTextSize(numberTextSize);
+	namesOfRulers[1]->setSize(250, numberTextSize);
+	namesOfRulers[1]->setText("Caesar");
+	namesOfRulers[1]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 40);
+	namesOfRulers[1]->setTextColor(sf::Color::White);
+	namesOfRulers[1]->setFillColor(sf::Color::Black);
+	namesOfRulers[1]->setOutlineThickness(2);
+	namesOfRulers[1]->setOutlineColor(Color::Black);
+	namesOfRulers[1]->setFlag(true);
+
+	namesOfRulers[2]->setTextSize(numberTextSize);
+	namesOfRulers[2]->setSize(250, numberTextSize);
+	namesOfRulers[2]->setText("Mehmet Fatih");
+	namesOfRulers[2]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 80);
+	namesOfRulers[2]->setTextColor(sf::Color::White);
+	namesOfRulers[2]->setFillColor(sf::Color::Black);
+	namesOfRulers[2]->setOutlineThickness(2);
+	namesOfRulers[2]->setOutlineColor(Color::Black);
+	namesOfRulers[2]->setFlag(true);
+
+	namesOfRulers[3]->setTextSize(numberTextSize);
+	namesOfRulers[3]->setSize(250, numberTextSize);
+	namesOfRulers[3]->setText("Genghis Khan");
+	namesOfRulers[3]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 120);
+	namesOfRulers[3]->setTextColor(sf::Color::White);
+	namesOfRulers[3]->setFillColor(sf::Color::Black);
+	namesOfRulers[3]->setOutlineThickness(2);
+	namesOfRulers[3]->setOutlineColor(Color::Black);
+	namesOfRulers[3]->setFlag(true);
+
+	namesOfRulers[4]->setTextSize(numberTextSize);
+	namesOfRulers[4]->setSize(250, numberTextSize);
+	namesOfRulers[4]->setText("Alexander Great");
+	namesOfRulers[4]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 160);
+	namesOfRulers[4]->setTextColor(sf::Color::White);
+	namesOfRulers[4]->setFillColor(sf::Color::Black);
+	namesOfRulers[4]->setOutlineThickness(2);
+	namesOfRulers[4]->setOutlineColor(Color::Black);
+	namesOfRulers[4]->setFlag(true);
+
+	namesOfRulers[5]->setTextSize(numberTextSize);
+	namesOfRulers[5]->setSize(250, numberTextSize);
+	namesOfRulers[5]->setText("Elizabeth I");
+	namesOfRulers[5]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 200);
+	namesOfRulers[5]->setTextColor(sf::Color::White);
+	namesOfRulers[5]->setFillColor(sf::Color::Black);
+	namesOfRulers[5]->setOutlineThickness(2);
+	namesOfRulers[5]->setOutlineColor(Color::Black);
+	namesOfRulers[5]->setFlag(true);
+
+
+
+	////CreateGame page///////////////////////////////////////////
+
+
+	cout << "done" << endl;
 }
 
 WindowManager::~WindowManager() {
@@ -2037,39 +2227,35 @@ void WindowManager::displayPlayerStatus() {
 	}
 }
 
-//void WindowManager::menuScreen(RenderWindow& window, Event& event) {
-//	static int x = 0;
-//	sf::Texture texture;
-//	if (!texture.loadFromFile("assets/T2.jpg"));
-//	// Assign it to a sprite
-//	sf::Sprite sprite2;
-//	sprite2.setTexture(texture);
-//	// Draw the textured sprite
-//	window.draw(sprite2);
-//
-//
-//
-//	while (window.pollEvent(event)) {
-//		if (event.type == sf::Event::Closed)
-//			window.close();
-//
-//		if (event.type == sf::Event::MouseMoved)
-//		{
-//
-//			menuEvents(event, 1);
-//
-//		}
-//		else if (event.type == sf::Event::MouseButtonPressed)
-//		{
-//			if (event.mouseButton.button == sf::Mouse::Left)
-//			{
-//				menuEvents(event, 0);
-//			}
-//		}
-//
-//	}
-//}
+void WindowManager::menuScreen(RenderWindow& window, Event& event) {
+	static int x = 0;
+	sf::Texture texture;
+	if (!texture.loadFromFile("assets/background2.png"));
 
+
+	// Assign it to a sprite
+	sf::Sprite sprite2;
+	sprite2.setTexture(texture);
+	// Draw the textured sprite
+	window.draw(sprite2);
+	menuEvents(event, 1);
+
+
+	while (window.pollEvent(event)) {
+		cout << "we are checking" << x++ << endl;
+		if (event.type == sf::Event::Closed)
+			window.close();
+
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				menuEvents(event, 0);
+			}
+		}
+
+	}
+}
 void WindowManager::menuEvents(sf::Event& e, int i) {
 	int id = 0;
 
@@ -2078,26 +2264,32 @@ void WindowManager::menuEvents(sf::Event& e, int i) {
 			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
 				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y) / 2) {
 				buttonClicked(id, e, window);
-				return;
+				break;
 			}
 			id++;
+
 		}
 	}
 	if (i == 1) {
 		int id = 0;
 		for (auto it = menuButton.begin(); it != menuButton.end(); it++) {
-			if ((*it)->getPosition().x < e.mouseMove.x && e.mouseMove.x < (*it)->getPosition().x + ((*it)->getSize().x) / 2 &&
-				(*it)->getPosition().y < e.mouseMove.y && e.mouseMove.y < (*it)->getPosition().y + ((*it)->getSize().y) / 2) {
+
+			if (IntRect((*it)->getPosition().x, (*it)->getPosition().y, (*it)->getGlobalBounds().width, (*it)->getGlobalBounds().height).contains(mu.getPosition(window))) {
 				changeButton(id);
-				return;
+				break;
 			}
 			id++;
+
 		}
 
 		window.draw(*menuButton[0]);
 		window.draw(*menuButton[1]);
 		window.draw(*menuButton[2]);
 		window.display();
+
+		for (int i = 0; i < menuButton.size(); i++) {
+			menuButton[i]->setColor(Color::White);
+		}
 		return;
 
 
@@ -2107,19 +2299,23 @@ void WindowManager::menuEvents(sf::Event& e, int i) {
 }
 
 void WindowManager::changeButton(int id) {
-	//sf::SoundBuffer buffer;
-	//buffer.loadFromFile("assets/menuOp.wav");
-
-		//sf::Sound sound;
-		//sound.setBuffer(buffer);
-		//sound.play();
-
-	window.draw(*menuButton[id + 3]);
-	window.display();
+	menuButton[id]->setColor(Color(200, 200, 200));
 }
 
-void WindowManager::menuScreen(RenderWindow & window, Event & event) {
-	static int x = 0;
+void WindowManager::createGamePage(RenderWindow& window, Event& event) {
+	page = CREATE_GAME_SCREEN;
+	window.clear(Color::White);
+
+	window.draw(spriteOfBackground);
+	window.draw(backForCreateGame);
+	createGameButtons[1]->setText(to_string(numberOfPlayersInCreateGame));
+
+	for (int i = 0; i < createGameButtons.size(); i++) {
+		createGameButtons[i]->draw(window);
+	}
+
+	window.display();
+
 	while (window.pollEvent(event)) {
 		if (event.type == sf::Event::Closed)
 			window.close();
@@ -2127,24 +2323,126 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 		{
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
-				checkClickEvents(event);
+				createGamePageEvents(event, 0);
 			}
 		}
 	}
+}
+void WindowManager::createGamePageEvents(sf::Event& e, int i) {
+	int id = 0;
+	if (i == 0) {
+		for (auto it = createGameButtons.begin(); it != createGameButtons.end(); it++) {
+			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) &&
+				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y)) {
+				cout << "CreateGame Events BUTTON" << id << endl;
+				buttonClicked(id, e, window);
+				return;
+			}
+			id++;
+		}
+	}
+}
+void WindowManager::joinGamePage(RenderWindow& window, Event& event) {
+	page = JOIN_GAME_SCREEN;
+	window.clear(Color::White);
 
-	window.setView(mainView);
+	window.draw(spriteOfBackground);
+	window.draw(backForCreateGame);
 
-	window.clear(sf::Color::Black);
-
-	window.setView(window.getDefaultView());
-
-	buttons[5]->draw(window);
-	buttons[6]->draw(window);
-	buttons[7]->draw(window);
-	buttons[8]->draw(window);
+	for (int i = 0; i < joinGameButtons.size(); i++) {
+		joinGameButtons[i]->draw(window);
+	}
+	for (int i = 0; i < namesOfRulers.size(); i++) {
+		namesOfRulers[i]->draw(window);
+	}
 
 	window.display();
+
+
+	while (window.pollEvent(event)) {
+		if (event.type == sf::Event::Closed)
+			window.close();
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+
+				joinGamePageEvents(event, 1);
+				joinGamePageEvents(event, 0);
+			}
+		}
+	}
 }
+void WindowManager::joinGamePageEvents(sf::Event& e, int i) {
+	int id = 0;
+	if (i == 0) {
+		for (auto it = joinGameButtons.begin(); it != joinGameButtons.end(); it++) {
+			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) &&
+				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y)) {
+				cout << "CreateGame Events BUTTON" << id << endl;
+				buttonClicked(id, e, window);
+				return;
+			}
+			id++;
+		}
+	}
+	if (i == 1) {
+		for (auto it = namesOfRulers.begin(); it != namesOfRulers.end(); it++) {
+			if ((*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) &&
+				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y))
+			{
+				cout << "selectUnit Events BUTTON" << id << endl;
+				if (nameSelectedInJoin != (*it)->text.getString()) {
+					nameSelectedInJoin = (*it)->text.getString();
+					hoverButtonOfNames(id);
+				}
+				return;
+			}
+			id++;
+		}
+	}
+
+
+}
+
+void WindowManager::hoverButtonOfNames(int id) {
+	for (int i = 0; i < namesOfRulers.size(); i++) {
+		if (i == id)
+			namesOfRulers[i]->setFillColor(Color(0, 100, 0));
+		else
+			namesOfRulers[i]->setFillColor(Color::Black);
+	}
+}
+
+
+//void WindowManager::menuScreen(RenderWindow & window, Event & event) {
+//	static int x = 0;
+//	while (window.pollEvent(event)) {
+//		cout << "we are checking" << x++ << endl;
+//		if (event.type == sf::Event::Closed)
+//			window.close();
+//		else if (event.type == sf::Event::MouseButtonPressed)
+//		{
+//			if (event.mouseButton.button == sf::Mouse::Left)
+//			{
+//				checkClickEvents(event);
+//			}
+//		}
+//	}
+//
+//	window.setView(mainView);
+//
+//	window.clear(sf::Color::Black);
+//
+//	window.setView(window.getDefaultView());
+//
+//	buttons[5]->draw(window);
+//	buttons[6]->draw(window);
+//	buttons[7]->draw(window);
+//	buttons[8]->draw(window);
+//
+//	window.display();
+//}
 
 
 void WindowManager::multGameComp(RenderWindow & window, Event & event) {
@@ -2310,7 +2608,6 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 		window.draw(*playerStatus[i]);
 	}
 
-
 	int currentPlayer = GM->currentPlayer;
 	string currentPlayerName;
 	Player * curPlayer = GM->getPlayerByID(currentPlayer, currentPlayerName);
@@ -2349,6 +2646,7 @@ bool WindowManager::insideTheWindow(Vector2i mousePos) {
 void WindowManager::createWindow() {
 
 	window.setKeyRepeatEnabled(false);
+
 	window.create(sf::VideoMode(screenWidth, screenHeight), "Risk");
 	window.setPosition(Vector2i(0, 0));
 
@@ -2441,6 +2739,13 @@ void WindowManager::createWindow() {
 			multGameComp(window, event);
 			continue;
 		}
+		else if (page == CREATE_GAME_SCREEN) {
+
+			createGamePage(window, event);
+		}
+		else if (page == JOIN_GAME_SCREEN) {
+			joinGamePage(window, event);
+		}
 	}
 }
 
@@ -2504,26 +2809,33 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	sound.play();
 	if (page == MENU_SCREEN) {
 
-		if (id == 0) {
-			playerCount = 3; // will be taken from user
-			const string name = "player";
-			for (int i = 0; i < playerCount; i++) {
-				this->GM->addPlayer(name + to_string(i + 1));
-			}
-			if (_randomPlacement == true) {
-				GM->randomPlacement();
-				string dummy;
-				for (int i = 0; i < playerCount; i++)
-					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
-				phase = PLACEMENT_PHASE;
-			}
-			else {
-				phase = INITIAL_PHASE;
-			}
-			turn = 0;
-			page = COMPUTER_GAME_SCREEN;
-		}
 
+		if (id == 0) {
+			//playerCount = 3; // will be taken from user
+			//const string name = "player";
+			//for (int i = 0; i < playerCount; i++) {
+			//	this->GM->addPlayer(name + to_string(i + 1));
+			//}
+			//if (_randomPlacement == true) {
+			//	GM->randomPlacement();
+			//	string dummy;
+			//	for (int i = 0; i < playerCount; i++)
+			//		GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+			//	phase = PLACEMENT_PHASE;
+			//}
+			//else {
+			//	phase = INITIAL_PHASE;
+			//}
+			//cout << "clickked weghwioefng" << endl;
+			//turn = 0;
+			//page = COMPUTER_GAME_SCREEN;
+
+			page = CREATE_GAME_SCREEN;
+			return;
+		}
+		else if (id == 1) {
+			page = JOIN_GAME_SCREEN;
+		}
 		else if (id == 5) {
 			userName = "host";
 			NM->createNetwork(&GM, "h", userName);
@@ -2557,6 +2869,46 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 		return;
 	}
+	else if (page == CREATE_GAME_SCREEN) {
+
+		if (id == 0) {
+			if (numberOfPlayersInCreateGame > 1)
+				numberOfPlayersInCreateGame--;
+		}
+
+		if (id == 2) {
+			if (numberOfPlayersInCreateGame < 6)
+				numberOfPlayersInCreateGame++;
+		}
+		if (id == 3) {
+			page = MENU_SCREEN;
+		}
+		if (id == 4 && !create_game_clicked) {
+			create_game_clicked = true;
+			//Burak code
+		}
+		if (id == 5) {
+			if (_randomPlacement) {
+				_randomPlacement = false;
+				createGameButtons[id]->setFillColor(Color(255, 0, 0));
+			}
+			else {
+				_randomPlacement = true;
+				createGameButtons[id]->setFillColor(Color(0, 255, 0));
+			}
+
+		}
+
+	}
+	else if (page == JOIN_GAME_SCREEN) {
+		if (id == 0) {
+			page = MENU_SCREEN;
+		}
+		if (id == 1 && !join_game_clicked) {
+			join_game_clicked = true;
+		}
+	}
+
 
 	string dummy;
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
@@ -2831,7 +3183,7 @@ void WindowManager::handleWheel() {
 		int random = die.roll();
 		Province* prov = GM->getWorldMap()->getProvinceByID(random);
 		string pname;
-		GM->getPlayerByID(turn, pname);	
+		GM->getPlayerByID(turn, pname);
 		while (prov->getOwner()->getName() != pname) {
 			int random = die.roll();
 			prov = GM->getWorldMap()->getProvinceByID(random);

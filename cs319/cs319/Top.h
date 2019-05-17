@@ -30,6 +30,29 @@ class ArmyBage;
 class TopBar;
 class LineBetweenProvinces;
 
+class Button : public sf::RectangleShape {
+public:
+	sf::Text text;
+	int id;
+
+	Button();
+	Button(sf::Font & font);
+	~Button();
+	void setText(string text);
+	void draw(sf::RenderWindow & window);
+	void setPosition(float x, float y);
+	void setTextColor(sf::Color color);
+	void setTextSize(int size);
+	void setSize(int width, int height);
+	void setFlag(bool flag);
+	bool getFlag();
+	int getText();
+
+private:
+	bool flag;
+};
+
+
 class PhaseNotifier : public sf::Sprite {
 public:
 	Image img;
@@ -438,6 +461,7 @@ public:
 	vector<CastleBage*> listOfCastleBage;
 	vector<PhaseNotifier*> listOfPhaseNotifiers;
 	BattleNotifier* battleNotifier;
+	Mouse mu;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
@@ -450,6 +474,8 @@ public:
 	const int MENU_SCREEN = 0;
 	const int GAME_SCREEN = 1;
 	const int COMPUTER_GAME_SCREEN = 2;
+	const int CREATE_GAME_SCREEN = 5;
+	const int JOIN_GAME_SCREEN = 6;
 
 	const int NEXT_PHASE_BUTTON = 0;
 	const int ATTACK_BUTTON = 1;
@@ -489,7 +515,7 @@ public:
 	int userTurn;
 	int turn = 0;
 
-	bool _randomPlacement = false;
+	bool _randomPlacement = true;
 	bool getInitialState = false;
 	bool castle = false;
 
@@ -529,29 +555,20 @@ public:
 	void drawAllCastles(RenderWindow & window, Event & e);
 	void menuEvents(sf::Event& e, int i);
 	void changeButton(int id);
-};
+	void createGamePage(RenderWindow& window, Event& event);
+	void createGamePageEvents(sf::Event& e, int i);
+	//Button *ipButton, *nameButton, *NumberOfPlayersButton1, *NumberOfPlayersButton2, *NumberOfPlayersButton3 , *createGameButton,*joinedPlayers;
+	vector<Button*> createGameButtons;
+	Image backGround; Texture textureOfBackGround; Sprite spriteOfBackground;
+	RectangleShape backForCreateGame;
+	int numberOfPlayersInCreateGame = 1;
 
-class Button : public sf::RectangleShape {
-public:
-	sf::Text text;
-	int id;
-
-	Button();
-	Button(sf::Font & font);
-	~Button();
-
-	void setText(string text);
-	void draw(sf::RenderWindow & window);
-	void setPosition(float x, float y);
-	void setTextColor(sf::Color color);
-	void setTextSize(int size);
-	void setSize(int width, int height);
-	void setFlag(bool flag);
-	bool getFlag();
-	int getText();
-
-private:
-	bool flag;
+	vector<Button*> joinGameButtons;
+	void joinGamePage(RenderWindow& window, Event& event);
+	vector<Button*> namesOfRulers;
+	void joinGamePageEvents(sf::Event& e, int i);
+	void hoverButtonOfNames(int id);
+	String nameSelectedInJoin = "";
 };
 
 class MyImage : public sf::Sprite {
