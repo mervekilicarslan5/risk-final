@@ -2359,7 +2359,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.draw(infoText);
 
 	for (int i = 0; i < buttons.size(); i++) {
-		if (i != 5 && i != 6 && i != 7 && i != 8) {
+		if (i != 5 && i != 6 && i != 7 && i != 8 && i !=10 && i!=11 && i!=12 && i!=13) {
 			if (buttons[i]->getFlag())
 				buttons[i]->draw(window);
 		}
