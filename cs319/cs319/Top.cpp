@@ -1,4 +1,10 @@
-
+#include "Top.h"
+namespace globalsS {
+	int screenWidth;
+	int screenHeight;
+};
+using namespace std;
+using namespace globalsS;
 Die::Die(int _numberOfFaces)
 {
 	numberOfFaces = _numberOfFaces;
