@@ -1779,7 +1779,7 @@ WindowManager::WindowManager()
 
 
 	font;
-	if (!font.loadFromFile("assets/font4.ttf"))
+	if (!font.loadFromFile("assets/font.ttf"))
 	{
 		// error...
 	}
