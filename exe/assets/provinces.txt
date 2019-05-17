@@ -1,0 +1,42 @@
+Greenland;-5389569
+North West;834384383
+Alaska;867807743
+Alberta;867873023
+Ontario;884650495
+Quebec;867873279
+Western United States;901427711
+Eastern United States;834318847
+Central America;867807487
+Venezuela;-72401921
+Brazil;-89244929
+Peru;-72467457
+Argentina;-72532993
+Iceland;1786484991
+England;1769773311
+Scandinavia;1769773567
+Northern Europe;1752865023
+Western Europe;1769707519
+Southern Europe;1769707263
+Russia;1752930559
+Egypt;-1471511553
+North Africa;-1471446017
+East Africa;-1471380481
+Congo;-1471577089
+South Africa;-1471642625
+Madagascar;-1471708161
+Middle East;-189432065
+Afghanistan;-206209025
+Ural;-189497345
+China;-189563137
+India;-189497601
+Siam;-206209025
+Mongolia;-206340097
+Siberia;-172720129
+Irkutsk;-206274561
+Yakutsk;-189431809
+Kamchatka;-189497089
+Japan;-172785665
+Indonesia;-1901330433
+New Guinea;-1901395969
+Western Australia;-1901396225
+Eastern Australia;-1918107649
