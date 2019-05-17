@@ -1691,7 +1691,7 @@ WindowManager::WindowManager()
 	if (!hoverImg.loadFromFile("assets/hover.jpeg")) {
 		cout << "Unable to open file" << endl;
 	}
-	if (!roundedSquare.loadFromFile("assets/roundedSquare.png")) {
+	if (!roundedSquare.loadFromFile("assets/redButton.png")) {
 		cout << "Unable to open file" << endl;
 	}
 	if (!lineImg.loadFromFile("assets/line.png")) {
@@ -3610,8 +3610,9 @@ void WindowManager::drawAllArmies(RenderWindow & window, Event & e) {
 				listOfArmyBage[i]->setSizeOfArmy(sizeOfArmy);
 			if (ptr->getOwner() != NULL) {
 				playerId = ptr->getOwner()->getId();
-				if (playerId == 0)
-					listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
+				if (playerId == 0) {
+					//listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
+				}
 				if (playerId == 1)
 					listOfArmyBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
 				if (playerId == 2)
@@ -3963,6 +3964,7 @@ ArmyBage::ArmyBage(Image img, int x, int y, string nameOfProvince, Font &font) {
 	string temp = to_string(sizeOfArmy);
 	text.setCharacterSize(20);
 	text.setString(String(temp));
+	text.setFillColor(Color::White);
 	centerCoordinates = Vector2f(x, y);
 
 	this->setPosition(x - this->getGlobalBounds().width / 2, y - this->getGlobalBounds().height / 2);
