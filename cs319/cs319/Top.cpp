@@ -1691,7 +1691,7 @@ WindowManager::WindowManager()
 	if (!hoverImg.loadFromFile("assets/hover.jpeg")) {
 		cout << "Unable to open file" << endl;
 	}
-	if (!roundedSquare.loadFromFile("assets/redButton.png")) {
+	if (!roundedSquare.loadFromFile("assets/roundedSquare.png")) {
 		cout << "Unable to open file" << endl;
 	}
 	if (!lineImg.loadFromFile("assets/line.png")) {
@@ -2182,7 +2182,7 @@ WindowManager::WindowManager()
 
 	namesOfRulers[2]->setTextSize(numberTextSize);
 	namesOfRulers[2]->setSize(250, numberTextSize);
-	namesOfRulers[2]->setText("Mehmet Fatih");
+	namesOfRulers[2]->setText("MehmetFatih");
 	namesOfRulers[2]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 80);
 	namesOfRulers[2]->setTextColor(sf::Color::White);
 	namesOfRulers[2]->setFillColor(sf::Color::Black);
@@ -2192,7 +2192,7 @@ WindowManager::WindowManager()
 
 	namesOfRulers[3]->setTextSize(numberTextSize);
 	namesOfRulers[3]->setSize(250, numberTextSize);
-	namesOfRulers[3]->setText("Genghis Khan");
+	namesOfRulers[3]->setText("GenghisKhan");
 	namesOfRulers[3]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 120);
 	namesOfRulers[3]->setTextColor(sf::Color::White);
 	namesOfRulers[3]->setFillColor(sf::Color::Black);
@@ -2202,7 +2202,7 @@ WindowManager::WindowManager()
 
 	namesOfRulers[4]->setTextSize(numberTextSize);
 	namesOfRulers[4]->setSize(250, numberTextSize);
-	namesOfRulers[4]->setText("Alexander Great");
+	namesOfRulers[4]->setText("AlexanderGreat");
 	namesOfRulers[4]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 160);
 	namesOfRulers[4]->setTextColor(sf::Color::White);
 	namesOfRulers[4]->setFillColor(sf::Color::Black);
@@ -2212,7 +2212,7 @@ WindowManager::WindowManager()
 
 	namesOfRulers[5]->setTextSize(numberTextSize);
 	namesOfRulers[5]->setSize(250, numberTextSize);
-	namesOfRulers[5]->setText("Elizabeth I");
+	namesOfRulers[5]->setText("ElizabethI");
 	namesOfRulers[5]->setPosition(namesOfRulers[0]->getPosition().x, screenHeight * 0.2 + 200);
 	namesOfRulers[5]->setTextColor(sf::Color::White);
 	namesOfRulers[5]->setFillColor(sf::Color::Black);
@@ -2261,7 +2261,6 @@ void WindowManager::menuScreen(RenderWindow& window, Event& event) {
 
 
 	while (window.pollEvent(event)) {
-		cout << "we are checking" << x++ << endl;
 		if (event.type == sf::Event::Closed)
 			window.close();
 
@@ -2412,10 +2411,11 @@ void WindowManager::joinGamePageEvents(sf::Event& e, int i) {
 				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y))
 			{
 				cout << "selectUnit Events BUTTON" << id << endl;
-				if (nameSelectedInJoin != (*it)->text.getString()) { 
+				/*if (nameSelectedInJoin != (*it)->text.getString()) { 
 					nameSelectedInJoin = (*it)->text.getString();
 					hoverButtonOfNames(id);
-				}
+				}*/
+				buttonClicked(id, e, window);
 				return;
 				
 			}
@@ -2676,16 +2676,6 @@ void WindowManager::createWindow() {
 		NM->socket.setBlocking(false);
 		if (page == 0) {
 			menuScreen(window, event);
-			if (create_game_clicked) {
-				NM->getNamesConnect(&GM);
-				provinceNameTxt.setString("Your Turn");
-				if (playerCount == 2) {
-					create_game_clicked = false;
-				}
-			}
-			else if (join_game_clicked) {
-				NM->getAllNames(&GM);
-			}
 			continue;
 		}
 		else if (page == 1) {
@@ -2760,11 +2750,23 @@ void WindowManager::createWindow() {
 			continue;
 		}
 		else if (page == CREATE_GAME_SCREEN) {
-
 			createGamePage(window, event);
+			if (create_game_clicked) {
+				NM->getNamesConnect(&GM);
+				provinceNameTxt.setString("Your Turn");
+				if (playerCount == 2) {
+					create_game_clicked = false;
+				}
+
+			}
+			continue;
 		}
 		else if (page == JOIN_GAME_SCREEN) {
 			joinGamePage(window, event);
+			if (join_game_clicked) {
+				NM->getAllNames(&GM);
+			}
+			continue;
 		}
 	}
 }
@@ -2828,28 +2830,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 	sound.setBuffer(buffer);
 	sound.play();
 	if (page == MENU_SCREEN) {
-
-
 		if (id == 0) {
-			//playerCount = 3; // will be taken from user
-			//const string name = "player";
-			//for (int i = 0; i < playerCount; i++) {
-			//	this->GM->addPlayer(name + to_string(i + 1));
-			//}
-			//if (_randomPlacement == true) {
-			//	GM->randomPlacement();
-			//	string dummy;
-			//	for (int i = 0; i < playerCount; i++)
-			//		GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
-			//	phase = PLACEMENT_PHASE;
-			//}
-			//else {
-			//	phase = INITIAL_PHASE;
-			//}
-			//cout << "clickked weghwioefng" << endl;
-			//turn = 0;
-			//page = COMPUTER_GAME_SCREEN;
-
 			page = CREATE_GAME_SCREEN;
 			return;
 		}
@@ -2863,9 +2844,27 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 
 		else if (id == 6) {
-			cout << "start game" << endl;
-			//Burak this is for play on one computer
+			cout << "start game" << endl; 
+			//Burak this is for play on one computer 
 			//button play is pressed and it returns  id6
+			playerCount = 3; // will be taken from user
+			const string name = "player";
+			for (int i = 0; i < playerCount; i++) {
+				this->GM->addPlayer(name + to_string(i + 1));
+			}
+			if (_randomPlacement == true) {
+				GM->randomPlacement();
+				string dummy;
+				for (int i = 0; i < playerCount; i++)
+					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+				phase = PLACEMENT_PHASE;
+			}
+			else {
+				phase = INITIAL_PHASE;
+			}
+			cout << "clickked weghwioefng" << endl;
+			turn = 0;
+			page = COMPUTER_GAME_SCREEN;
 		}
 		else if (id == 7) {
 			userName = "client2";
@@ -2873,7 +2872,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			join_game_clicked = true;
 		}
 		else if (id == 8) {
-			NM->startGame();
+			/*NM->startGame();
 			userTurn = GM->getPlayerTurn(userName);
 			if (_randomPlacement) {
 				GM->randomPlacement();
@@ -2885,7 +2884,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			}
 
 
-			page = 1;
+			page = 1;*/
 		}
 		return;
 	}
@@ -2923,6 +2922,17 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 		else if (id == 6) {
 			cout << "start game pressed" << endl;
+			NM->startGame();
+			userTurn = GM->getPlayerTurn(userName);
+			if (_randomPlacement) {
+				GM->randomPlacement();
+				GM->sendAllProvincesFromHost(&NM);
+				phase = PLACEMENT_PHASE;
+			}
+			else {
+				phase = INITIAL_PHASE;
+			}
+			page = 1;
 			//Start Game Burak right your code!!!!!!!!!!!!!!
 		}
 
@@ -2931,12 +2941,30 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		if (id == 0) {
 			page = MENU_SCREEN;
 		}
-		if (id == 1 && !join_game_clicked) {
+		else if (id == 1) {
 
-			NM->createNetwork(&GM, "client", nameSelectedInJoin);
-			join_game_clicked = true;
-			
 		}
+		else if (id == 2) {
+			NM->createNetwork(&GM, "c1", "Napolion");
+			join_game_clicked = true;
+		}
+		else if (id == 3) {
+			NM->createNetwork(&GM, "c2", "B");
+			join_game_clicked = true;
+		}
+		else if (id == 4) {
+			NM->createNetwork(&GM, "c3", "C");
+			join_game_clicked = true;
+		}
+		else if (id == 5) {
+			NM->createNetwork(&GM, "c4", "D");
+			join_game_clicked = true;
+		}
+		else if (id == 6) {
+			NM->createNetwork(&GM, "c5", "E");
+			join_game_clicked = true;
+		}
+		
 	}
 
 
@@ -3634,7 +3662,7 @@ void WindowManager::drawAllArmies(RenderWindow & window, Event & e) {
 			if (ptr->getOwner() != NULL) {
 				playerId = ptr->getOwner()->getId();
 				if (playerId == 0) {
-					//listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
+					listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
 				}
 				if (playerId == 1)
 					listOfArmyBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
@@ -3760,11 +3788,33 @@ void NetworkManager::getNamesConnect(GameManager ** const GM) {
 			String name;
 			packet >> name;
 			string display = name;
-			
-			cout << display << " has joined the room." << endl;
-			(*GM)->addPlayer(display);
-			playersName += name + ",";
-			
+			if (port == 2001) {
+				cout << display << " has joined the room." << endl;
+				(*GM)->addPlayer(display);
+				playersName += name + ",";
+			}
+			if (port == 2002) {
+				cout << display << " has joined the room." << endl;
+				(*GM)->addPlayer(display);
+				playersName += name + ",";
+			}
+			if (port == 2003) {
+				cout << display << " has joined the room." << endl;
+				(*GM)->addPlayer(display);
+				playersName += name + ",";
+			}
+			if (port == 2004) {
+				cout << display << " has joined the room." << endl;
+				(*GM)->addPlayer(display);
+				playersName += name + ",";
+			}
+			if (port == 2005) {
+				cout << display << " has joined the room." << endl;
+				(*GM)->addPlayer(display);
+				playersName += name + ",";
+
+			}
+
 		}
 		//cout << "Player in the game: " << playerCount << endl;
 
@@ -3795,6 +3845,7 @@ void NetworkManager::getAllNames(GameManager ** const GM) {
 				}
 			}*/
 			WM->phase = WM->END_TURN;
+			cout << "***************************************" << WM->page <<endl;
 			WM->provinceNameTxt.setString("Waiting for opponent: " + ((*GM)->getPlayers())[0]->getName());
 		}
 	}
@@ -3813,16 +3864,16 @@ void NetworkManager::createNetwork(GameManager ** const GM, string _connectionTy
 	if (connectionType == "h") {
 		port = 2000;
 	}
-	else 
-		port = Socket::AnyPort;
-	/*else if (connectionType == "c2")
+	else if (connectionType == "c1")
+		port = 2001;
+	else if (connectionType == "c2")
 		port = 2002;
 	else if (connectionType == "c3")
 		port = 2003;
 	else if (connectionType == "c4")
 		port = 2004;
 	else if (connectionType == "c5")
-		port = 2005;*/
+		port = 2005;
 
 	if (socket.bind(port) != Socket::Done) {
 		cout << "Couldnt binded. ";
