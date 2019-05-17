@@ -476,6 +476,7 @@ public:
 	const int COMPUTER_GAME_SCREEN = 2;
 	const int CREATE_GAME_SCREEN = 5;
 	const int JOIN_GAME_SCREEN = 6;
+	const int START_GAME_ON_ONE_COMPUTER_SCREEN = 7;
 
 	const int NEXT_PHASE_BUTTON = 0;
 	const int ATTACK_BUTTON = 1;
@@ -569,6 +570,9 @@ public:
 	void joinGamePageEvents(sf::Event& e, int i);
 	void hoverButtonOfNames(int id);
 	String nameSelectedInJoin = "";
+
+	void startGameOnOneComputerPage(RenderWindow& window, Event& event);
+	void startGameOnOneComputerPageEvents(sf::Event& e, int i);
 };
 
 class MyImage : public sf::Sprite {

@@ -2435,6 +2435,48 @@ void WindowManager::hoverButtonOfNames(int id) {
 	}
 }
 
+void WindowManager::startGameOnOneComputerPage(RenderWindow& window, Event& event) {
+	page = START_GAME_ON_ONE_COMPUTER_SCREEN;
+	window.clear(Color::White);
+	window.draw(spriteOfBackground);
+	window.draw(backForCreateGame);
+	createGameButtons[1]->setText(to_string(numberOfPlayersInCreateGame));
+
+	for (int i = 0; i < createGameButtons.size(); i++) {
+		if(i!=4)
+			createGameButtons[i]->draw(window);
+	}
+
+	window.display();
+
+	while (window.pollEvent(event)) {
+		if (event.type == sf::Event::Closed)
+			window.close();
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				startGameOnOneComputerPageEvents(event, 0);
+			}
+		}
+	}
+}
+void WindowManager::startGameOnOneComputerPageEvents(sf::Event& e, int i) {
+	int id = 0;
+	if (i == 0) {
+		for (auto it = createGameButtons.begin(); it != createGameButtons.end(); it++) {
+			if (id!=4 && (*it)->getPosition().x < e.mouseButton.x && e.mouseButton.x < (*it)->getPosition().x + ((*it)->getSize().x) &&
+				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y)) {
+				cout << "CreateGame Events BUTTON" << id << endl;
+				buttonClicked(id, e, window);
+				return;
+			}
+			id++;
+		}
+	}
+}
+
+
 
 //void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 //	static int x = 0;
@@ -2763,10 +2805,10 @@ void WindowManager::createWindow() {
 		}
 		else if (page == JOIN_GAME_SCREEN) {
 			joinGamePage(window, event);
-			if (join_game_clicked) {
-				NM->getAllNames(&GM);
-			}
-			continue;
+		}
+		else if (page == START_GAME_ON_ONE_COMPUTER_SCREEN)
+		{
+			startGameOnOneComputerPage(window,event);
 		}
 	}
 }
@@ -2836,6 +2878,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 		else if (id == 1) {
 			page = JOIN_GAME_SCREEN;
+			return;
 		}
 		else if (id == 5) {
 			/*userName = "host";
@@ -2844,8 +2887,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 
 		else if (id == 6) {
-			cout << "start game" << endl; 
-			//Burak this is for play on one computer 
+			cout << "start game" << endl;
+			page = 7;
+			//Burak this is for play on one computer
 			//button play is pressed and it returns  id6
 			playerCount = 3; // will be taken from user
 			const string name = "player";
@@ -2963,10 +3007,38 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		else if (id == 6) {
 			NM->createNetwork(&GM, "c5", "E");
 			join_game_clicked = true;
+			
 		}
-		
 	}
+	else if (page = START_GAME_ON_ONE_COMPUTER_SCREEN) {
+			if (id == 0) {
+			if (numberOfPlayersInCreateGame > 1)
+				numberOfPlayersInCreateGame--;
+		}
 
+		else if (id == 2) {
+			if (numberOfPlayersInCreateGame < 6)
+				numberOfPlayersInCreateGame++;
+		}
+		else if (id == 3) {
+			page = MENU_SCREEN;
+		}
+		else if (id == 5) {
+			if (_randomPlacement) {
+				_randomPlacement = false;
+				createGameButtons[id]->setFillColor(Color(255, 0, 0));
+			}
+			else {
+				_randomPlacement = true;
+				createGameButtons[id]->setFillColor(Color(0, 255, 0));
+			}
+
+		}
+		else if (id == 6) {
+			cout << "start game on one computer pressed" << endl;
+			//Start on one computer Game Burak right your code!!!!!!!!!!!!!! This is for one computer.
+		}
+	}
 
 	string dummy;
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
