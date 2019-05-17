@@ -2438,7 +2438,6 @@ void WindowManager::hoverButtonOfNames(int id) {
 }
 
 void WindowManager::startGameOnOneComputerPage(RenderWindow& window, Event& event) {
-	page = START_GAME_ON_ONE_COMPUTER_SCREEN;
 	window.clear(Color::White);
 	window.draw(spriteOfBackground);
 	cout << "Problem here ***** PAGE : " << page  << endl;
@@ -2700,6 +2699,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.setView(miniMap);
 	miniMap.update(mainView);
 	miniMap.draw(window);
+	window.setView(window.getDefaultView());
 
 	window.display();
 }
@@ -2717,6 +2717,7 @@ void WindowManager::createWindow() {
 
 
 	while (window.isOpen()) {
+		cout << page << endl;
 		sf::Event event;
 		NM->socket.setBlocking(false);
 		if (page == 0) {
@@ -2792,7 +2793,6 @@ void WindowManager::createWindow() {
 		}
 		else if (page == 2) {
 			multGameComp(window, event);
-			continue;
 		}
 		else if (page == CREATE_GAME_SCREEN) {
 			createGamePage(window, event);
@@ -2893,6 +2893,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		else if (id == 6) {
 			cout << "start game" << endl;
 			page = 7;
+			return;
 			//Burak this is for play on one computer
 			//button play is pressed and it returns  id6
 
@@ -3061,9 +3062,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			cout << "clickked weghwioefng" << endl;
 			turn = 0;
 			page = COMPUTER_GAME_SCREEN;
+			return;
 		}
 	}
-
 	string dummy;
 	Player* player = GM->getPlayerByID(GM->currentPlayer, dummy);
 	if (id == NEXT_PHASE_BUTTON) {
