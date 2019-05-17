@@ -1,14 +1,3 @@
-#include "Top.h"
-namespace globalsS {
-	int screenWidth;
-	int screenHeight;
-};
-using namespace std;
-using namespace globalsS;
-Die::Die()
-{
-	numberOfFaces = 6;
-}
 
 Die::Die(int _numberOfFaces)
 {
@@ -4087,3 +4076,4 @@ void BattleNotifier::deactivate() {
 	opacityParam = 0.f;
 
 }
+

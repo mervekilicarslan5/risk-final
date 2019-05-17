@@ -1,16 +1,3 @@
-#pragma once
-#include <string>
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <fstream>
-#include <random>
-#include <SFML/Graphics.hpp>
-#include <SFML/Network.hpp>
-#include <SFML/Audio.hpp>
-#include <Windows.h>
-#include <map>
-#include <sstream>
 
 using namespace std;
 using namespace sf;
@@ -572,3 +559,4 @@ public:
 	void setInitialPosition(float x, float y);
 	sf::Vector2f getInitialPosition();
 };
+
