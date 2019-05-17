@@ -157,7 +157,7 @@ Player::Player()
 
 Player::Player(string _name, int _id)
 {
-	leftSoldier = 14;
+	leftSoldier = 70;
 	name = _name;
 	id = _id;
 	battlesLost = 0;
@@ -2326,6 +2326,7 @@ void WindowManager::createGamePage(RenderWindow& window, Event& event) {
 	window.clear(Color::White);
 
 	window.draw(spriteOfBackground);
+	
 	window.draw(backForCreateGame);
 	createGameButtons[1]->setText(to_string(numberOfPlayersInCreateGame));
 
@@ -2366,6 +2367,7 @@ void WindowManager::joinGamePage(RenderWindow& window, Event& event) {
 	window.clear(Color::White);
 
 	window.draw(spriteOfBackground);
+	cout << "Problem here" << endl;
 	window.draw(backForCreateGame);
 
 	for (int i = 0; i < joinGameButtons.size(); i++) {
@@ -2439,6 +2441,7 @@ void WindowManager::startGameOnOneComputerPage(RenderWindow& window, Event& even
 	page = START_GAME_ON_ONE_COMPUTER_SCREEN;
 	window.clear(Color::White);
 	window.draw(spriteOfBackground);
+	cout << "Problem here ***** PAGE : " << page  << endl;
 	window.draw(backForCreateGame);
 	createGameButtons[1]->setText(to_string(numberOfPlayersInCreateGame));
 
@@ -2809,6 +2812,7 @@ void WindowManager::createWindow() {
 		else if (page == START_GAME_ON_ONE_COMPUTER_SCREEN)
 		{
 			startGameOnOneComputerPage(window,event);
+
 		}
 	}
 }
@@ -2891,24 +2895,26 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			page = 7;
 			//Burak this is for play on one computer
 			//button play is pressed and it returns  id6
-			playerCount = 3; // will be taken from user
-			const string name = "player";
-			for (int i = 0; i < playerCount; i++) {
-				this->GM->addPlayer(name + to_string(i + 1));
-			}
-			if (_randomPlacement == true) {
-				GM->randomPlacement();
-				string dummy;
-				for (int i = 0; i < playerCount; i++)
-					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
-				phase = PLACEMENT_PHASE;
-			}
-			else {
-				phase = INITIAL_PHASE;
-			}
-			cout << "clickked weghwioefng" << endl;
-			turn = 0;
-			page = COMPUTER_GAME_SCREEN;
+
+
+			//playerCount = 3; // will be taken from user
+			//const string name = "player";
+			//for (int i = 0; i < playerCount; i++) {
+			//	this->GM->addPlayer(name + to_string(i + 1));
+			//}
+			//if (_randomPlacement == true) {
+			//	GM->randomPlacement();
+			//	string dummy;
+			//	for (int i = 0; i < playerCount; i++)
+			//		GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+			//	phase = PLACEMENT_PHASE;
+			//}
+			//else {
+			//	phase = INITIAL_PHASE;
+			//}
+			//cout << "clickked weghwioefng" << endl;
+			//turn = 0;
+			//page = COMPUTER_GAME_SCREEN;
 		}
 		else if (id == 7) {
 			userName = "client2";
@@ -3037,6 +3043,24 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		else if (id == 6) {
 			cout << "start game on one computer pressed" << endl;
 			//Start on one computer Game Burak right your code!!!!!!!!!!!!!! This is for one computer.
+			playerCount = numberOfPlayersInCreateGame; // will be taken from user
+			const string name = "player";
+			for (int i = 0; i < playerCount; i++) {
+				this->GM->addPlayer(name + to_string(i + 1));
+			}
+			if (_randomPlacement == true) {
+				GM->randomPlacement();
+				string dummy;
+				for (int i = 0; i < playerCount; i++)
+					GM->getPlayerByID(i, dummy)->setLeftSoldier(GM->getPlayerByID(i, dummy)->getNumberOfProvinces() / 3);
+				phase = PLACEMENT_PHASE;
+			}
+			else {
+				phase = INITIAL_PHASE;
+			}
+			cout << "clickked weghwioefng" << endl;
+			turn = 0;
+			page = COMPUTER_GAME_SCREEN;
 		}
 	}
 
