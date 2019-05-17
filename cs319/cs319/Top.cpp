@@ -1827,6 +1827,7 @@ WindowManager::WindowManager()
 	createGameButtons.push_back(new Button(font));//back
 	createGameButtons.push_back(new Button(font));//start game
 	createGameButtons.push_back(new Button(font));//random placement
+	createGameButtons.push_back(new Button(font));
 
 
 	joinGameButtons.push_back(new Button(font));//back
@@ -2126,6 +2127,16 @@ WindowManager::WindowManager()
 	createGameButtons[5]->setOutlineThickness(2);
 	createGameButtons[5]->setOutlineColor(Color::Black);
 	createGameButtons[5]->setFlag(true);
+
+	createGameButtons[6]->setTextSize(numberTextSize);
+	createGameButtons[6]->setSize(200, numberTextSize);
+	createGameButtons[6]->setText("Start Game");
+	createGameButtons[6]->setPosition(screenWidth / 2 - createGameButtons[4]->getGlobalBounds().width / 2, createGameButtons[2]->getPosition().y + 80);
+	createGameButtons[6]->setTextColor(sf::Color::White);
+	createGameButtons[6]->setFillColor(sf::Color::Black);
+	createGameButtons[6]->setOutlineThickness(2);
+	createGameButtons[6]->setOutlineColor(Color::Black);
+	createGameButtons[6]->setFlag(true);
 
 
 	joinGameButtons[0]->setTextSize(numberTextSize);
@@ -2852,9 +2863,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 
 		else if (id == 6) {
-			/*userName = "client1";
-			NM->createNetwork(&GM, "c1", userName);
-			join_game_clicked = true;*/
+			cout << "start game" << endl;
+			//Burak this is for play on one computer
+			//button play is pressed and it returns  id6
 		}
 		else if (id == 7) {
 			userName = "client2";
@@ -2885,21 +2896,21 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				numberOfPlayersInCreateGame--;
 		}
 
-		if (id == 2) {
+		else if (id == 2) {
 			if (numberOfPlayersInCreateGame < 6)
 				numberOfPlayersInCreateGame++;
 		}
-		if (id == 3) {
+		else if (id == 3) {
 			page = MENU_SCREEN;
 		}
-		if (id == 4 && !create_game_clicked) {
+		else if (id == 4 && !create_game_clicked) {
 			create_game_clicked = true;
 			//Burak  --> 
 			userName = "Host";
 			NM->createNetwork(&GM, "h", userName);
 			create_game_clicked = true;
 		}
-		if (id == 5) {
+		else if (id == 5) {
 			if (_randomPlacement) {
 				_randomPlacement = false;
 				createGameButtons[id]->setFillColor(Color(255, 0, 0));
@@ -2909,6 +2920,10 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				createGameButtons[id]->setFillColor(Color(0, 255, 0));
 			}
 
+		}
+		else if (id == 6) {
+			cout << "start game pressed" << endl;
+			//Start Game Burak right your code!!!!!!!!!!!!!!
 		}
 
 	}
