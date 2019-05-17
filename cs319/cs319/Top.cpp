@@ -2392,11 +2392,12 @@ void WindowManager::joinGamePageEvents(sf::Event& e, int i) {
 				(*it)->getPosition().y < e.mouseButton.y && e.mouseButton.y < (*it)->getPosition().y + ((*it)->getSize().y))
 			{
 				cout << "selectUnit Events BUTTON" << id << endl;
-				if (nameSelectedInJoin != (*it)->text.getString()) {
+				if (nameSelectedInJoin != (*it)->text.getString()) { 
 					nameSelectedInJoin = (*it)->text.getString();
 					hoverButtonOfNames(id);
 				}
 				return;
+				
 			}
 			id++;
 		}
@@ -2837,15 +2838,15 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			page = JOIN_GAME_SCREEN;
 		}
 		else if (id == 5) {
-			userName = "host";
+			/*userName = "host";
 			NM->createNetwork(&GM, "h", userName);
-			create_game_clicked = true;
+			create_game_clicked = true;*/
 		}
 
 		else if (id == 6) {
-			userName = "client1";
+			/*userName = "client1";
 			NM->createNetwork(&GM, "c1", userName);
-			join_game_clicked = true;
+			join_game_clicked = true;*/
 		}
 		else if (id == 7) {
 			userName = "client2";
@@ -2885,7 +2886,10 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 		if (id == 4 && !create_game_clicked) {
 			create_game_clicked = true;
-			//Burak code
+			//Burak  --> 
+			userName = "Host";
+			NM->createNetwork(&GM, "h", userName);
+			create_game_clicked = true;
 		}
 		if (id == 5) {
 			if (_randomPlacement) {
@@ -2905,7 +2909,10 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			page = MENU_SCREEN;
 		}
 		if (id == 1 && !join_game_clicked) {
+
+			NM->createNetwork(&GM, "client", nameSelectedInJoin);
 			join_game_clicked = true;
+			
 		}
 	}
 
@@ -3729,11 +3736,11 @@ void NetworkManager::getNamesConnect(GameManager ** const GM) {
 			String name;
 			packet >> name;
 			string display = name;
-			if (port == 2001 || port == 2002 || port == 2003 || port == 2004 || port == 2005) {
-				cout << display << " has joined the room." << endl;
-				(*GM)->addPlayer(display);
-				playersName += name + ",";
-			}
+			
+			cout << display << " has joined the room." << endl;
+			(*GM)->addPlayer(display);
+			playersName += name + ",";
+			
 		}
 		//cout << "Player in the game: " << playerCount << endl;
 
@@ -3782,16 +3789,16 @@ void NetworkManager::createNetwork(GameManager ** const GM, string _connectionTy
 	if (connectionType == "h") {
 		port = 2000;
 	}
-	else if (connectionType == "c1")
-		port = 2001;
-	else if (connectionType == "c2")
+	else 
+		port = Socket::AnyPort;
+	/*else if (connectionType == "c2")
 		port = 2002;
 	else if (connectionType == "c3")
 		port = 2003;
 	else if (connectionType == "c4")
 		port = 2004;
 	else if (connectionType == "c5")
-		port = 2005;
+		port = 2005;*/
 
 	if (socket.bind(port) != Socket::Done) {
 		cout << "Couldnt binded. ";
