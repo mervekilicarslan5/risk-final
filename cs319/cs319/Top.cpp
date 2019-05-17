@@ -1722,6 +1722,11 @@ WindowManager::WindowManager()
 	listOfPhaseNotifiers.push_back(new PhaseNotifier(4, fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
 	listOfPhaseNotifiers.push_back(new PhaseNotifier(5, marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
 
+	createGameButtons.push_back(new Button(font));//-		
+	createGameButtons.push_back(new Button(font));//number		
+	createGameButtons.push_back(new Button(font));//+		
+
+
 	battleNotifier = new BattleNotifier(actionImg, sceleteImg, warriorImg, battleNotificationImg, screenWidth / 2, screenHeight / 2, font);
 
 	if (myfile.is_open()) {
@@ -1744,6 +1749,10 @@ WindowManager::WindowManager()
 	lineForProvinces = new LineBetweenProvinces(lineImg);
 
 
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
+	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
@@ -1961,6 +1970,48 @@ WindowManager::WindowManager()
 	infoText.setPosition(buttons[1]->getPosition().x + buttons[1]->getSize().x + 20, bottomUpperMargin + 40);
 
 	GM->windowManager = this;
+
+	buttons[10]->setTextSize(numberTextSize);
+	buttons[10]->setSize(numberTextSize, numberTextSize);
+	buttons[10]->setText("1");
+	buttons[10]->setPosition(screenWidth / 2 - buttons[1]->getGlobalBounds().width / 2, 0);
+	buttons[10]->setTextColor(sf::Color::Black);
+	buttons[10]->setFillColor(sf::Color::Red);
+	buttons[10]->setOutlineThickness(2);
+	buttons[10]->setOutlineColor(Color::Black);
+	buttons[10]->setFlag(true);
+
+	buttons[11]->setTextSize(numberTextSize);
+	buttons[11]->setSize(numberTextSize, numberTextSize);
+	buttons[11]->setText("-");
+	buttons[11]->setPosition(buttons[1]->getPosition().x - buttons[1]->getGlobalBounds().width,0);
+	buttons[11]->setTextColor(sf::Color::Black);
+	buttons[11]->setFillColor(sf::Color::Red);
+	buttons[11]->setOutlineThickness(2);
+	buttons[11]->setOutlineColor(Color::Black);
+	buttons[11]->setFlag(true);
+
+	buttons[12]->setTextSize(numberTextSize);
+	buttons[12]->setSize(numberTextSize, numberTextSize);
+	buttons[12]->setText("+");
+	buttons[12]->setPosition(buttons[1]->getPosition().x + buttons[1]->getGlobalBounds().width, 0);
+	buttons[12]->setTextColor(sf::Color::Black);
+	buttons[12]->setFillColor(sf::Color::Red);
+	buttons[12]->setOutlineThickness(2);
+	buttons[12]->setOutlineColor(Color::Black);
+	buttons[12]->setFlag(true);
+
+	buttons[13]->setTextSize(numberTextSize);
+	buttons[13]->setSize(300, 40);
+	buttons[13]->setText("Randomize");
+	buttons[13]->setPosition(buttons[1]->getPosition().x , 40);
+	buttons[13]->setTextColor(sf::Color::Black);
+	buttons[13]->setFillColor(sf::Color::Red);
+	buttons[13]->setOutlineThickness(2);
+	buttons[13]->setOutlineColor(Color::Black);
+	buttons[13]->setFlag(true);
+
+
 }
 
 WindowManager::~WindowManager() {
@@ -2084,6 +2135,14 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	buttons[6]->draw(window);
 	buttons[7]->draw(window);
 	buttons[8]->draw(window);
+	buttons[10]->draw(window);
+	buttons[11]->draw(window);
+	buttons[12]->draw(window);
+	if(!_randomPlacement)
+		buttons[13]->setFillColor(Color::Red);
+	else
+		buttons[13]->setFillColor(Color::Green);
+	buttons[13]->draw(window);
 
 	window.display();
 }
@@ -2241,7 +2300,7 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.draw(infoText);
 
 	for (int i = 0; i < buttons.size(); i++) {
-		if (i != 5 && i != 6 && i != 7 && i != 8) {
+		if (i != 5 && i != 6 && i != 7 && i != 8 && i !=10 && i!=11 && i!=12 && i!=13) {
 			if (buttons[i]->getFlag())
 				buttons[i]->draw(window);
 		}
@@ -2488,6 +2547,28 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 
 
 			page = 1;
+		}
+		else if (id == 11) {
+			if (amountOfPlayers > 1)
+				amountOfPlayers--;
+			buttons[10]->setText(to_string(amountOfPlayers));
+
+		}
+
+		else if (id == 12) {
+			if (amountOfPlayers < 6)
+				amountOfPlayers++;
+			buttons[10]->setText(to_string(amountOfPlayers));
+		}
+		else if (id == 13) {
+			if (_randomPlacement == true) {
+				_randomPlacement = false;
+				buttons[13]->setFillColor(Color::Red);
+			}
+			else {
+				_randomPlacement = true;
+				buttons[13]->setFillColor(Color::Green);
+			}
 		}
 		return;
 	}

@@ -396,7 +396,7 @@ public:
 
 private:
 	IpAddress ip;
-	IpAddress sIP = "139.179.210.187";
+	IpAddress sIP = "139.179.202.124";
 	map<unsigned short, IpAddress> computerID;
 
 	vector<string> players;
@@ -438,12 +438,14 @@ public:
 	vector<CastleBage*> listOfCastleBage;
 	vector<PhaseNotifier*> listOfPhaseNotifiers;
 	BattleNotifier* battleNotifier;
+	vector<Button*>createGameButtons;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
 	bool turnWheel = false;
 	float time; //time to calculate elapsed time
 	Clock clock;
+	int amountOfPlayers= 2;
 
 	int totalTurn = 1;
 
