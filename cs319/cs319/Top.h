@@ -1,7 +1,4 @@
 
-using namespace std;
-using namespace sf;
-
 #pragma once
 #include <string>
 #include <iostream>
@@ -15,6 +12,9 @@ using namespace sf;
 #include <Windows.h>
 #include <map>
 #include <sstream>
+
+using namespace std;
+using namespace sf;
 
 class Die;
 class Castle;
