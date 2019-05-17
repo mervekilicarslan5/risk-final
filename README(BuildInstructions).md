@@ -1,11 +1,11 @@
 # risk-final
 1. You can download our exe folder and open the game from exe file.
 
-2.You can download our source code and open it from your IDE(sthe steps are explained accordingly to Visual Studio), for this the steps are: 
+2.You can download our source code and open it from your IDE(sthe steps are explained accordingly to Visual Studio), the steps are: 
 
 -Download the git repository
 
--Create an empty project with the name Risk in your IDE.
+-Create an empty project in your IDE.
 
 -Copy the folders you have downloaded into the folder for your empty project 
 
@@ -17,7 +17,7 @@
 
 -Build Your program in Release and x64
 
--try to run the program and create yorus relase folder (you should get errors for .dll files)
+-try to run the program and create your relase folder (you should get errors for .dll files)
 
 -Then copy the .dll files in the sfml/bin folder to "projectName/SolutionName/x64/Release"
 
