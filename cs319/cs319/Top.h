@@ -396,7 +396,7 @@ public:
 
 private:
 	IpAddress ip;
-	IpAddress sIP = "139.179.210.187";
+	IpAddress sIP = "139.179.202.124";
 	map<unsigned short, IpAddress> computerID;
 
 	vector<string> players;
