@@ -147,7 +147,7 @@ void Continent::setProvinces(vector<int> _provinces)
 
 Player::Player()
 {
-	leftSoldier = 14;
+	leftSoldier = 70;
 	name = "";
 	id = -1;
 	battlesLost = 0;
@@ -517,7 +517,7 @@ void WorldMap::getProvinceByName(string name, int & index, Province* & ptr) {
 }
 
 void WorldMap::showProvinceStatus(Province* p) {
-	/*cout << "------------------------------------" << endl;
+	cout << "------------------------------------" << endl;
 	cout << "Province Name: " << p->getName() << endl;
 	if (p->getOwner() == NULL)
 		cout << "Current Owner: None" << endl;
@@ -530,7 +530,7 @@ void WorldMap::showProvinceStatus(Province* p) {
 	else if (p->getCastle()->getLevel() == 1)
 		cout << "1 " << endl;
 	else if (p->getCastle()->getLevel() == 2)
-		cout << "2 " << endl;*/
+		cout << "2 " << endl;
 }
 
 int WorldMap::getNumberOfProvinces() {
@@ -1674,8 +1674,8 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2; // 1920; //
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2; // 1080; //
+	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2; //  1920; //
+	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2;  // 1080; //
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
@@ -1819,16 +1819,19 @@ WindowManager::WindowManager()
 	menuButton.push_back(new MyImage("B1K.png"));
 	menuButton.push_back(new MyImage("B4K.png"));
 	menuButton.push_back(new MyImage("creditsK.png"));
+	menuButton.push_back(new MyImage("B0.png"));
 
-	createGameButtons.push_back(new Button(font));
-	createGameButtons.push_back(new Button(font));
-	createGameButtons.push_back(new Button(font));
-	createGameButtons.push_back(new Button(font));
+	createGameButtons.push_back(new Button(font));//-
+	createGameButtons.push_back(new Button(font));//number
+	createGameButtons.push_back(new Button(font));//+
+	createGameButtons.push_back(new Button(font));//back
 	createGameButtons.push_back(new Button(font));//start game
 	createGameButtons.push_back(new Button(font));//random placement
+	createGameButtons.push_back(new Button(font));
 
-	joinGameButtons.push_back(new Button(font));
-	joinGameButtons.push_back(new Button(font));
+
+	joinGameButtons.push_back(new Button(font));//back
+	joinGameButtons.push_back(new Button(font));//joinGame
 
 	namesOfRulers.push_back(new Button(font));
 	namesOfRulers.push_back(new Button(font));
@@ -1861,6 +1864,10 @@ WindowManager::WindowManager()
 	menuButton[5]->setInitialPosition(screenWidth / 9, 5 * (screenHeight / 8));
 	menuButton[5]->setPosition(menuButton[5]->getInitialPosition());
 	menuButton[5]->setScale(0.5, 0.5);
+
+	menuButton[6]->setInitialPosition(screenWidth / 9, 2 * (screenHeight / 8));
+	menuButton[6]->setPosition(menuButton[6]->getInitialPosition());
+	menuButton[6]->setScale(0.5, 0.5);
 	//MENU BUTTON
 
 	for (int i = 0; i < 6; i++) {
@@ -2052,8 +2059,9 @@ WindowManager::WindowManager()
 	this->textureOfBackGround.loadFromImage(backGround);
 	this->spriteOfBackground.setTexture(textureOfBackGround);
 	this->spriteOfBackground.setTextureRect(IntRect(0, 0, (int)textureOfBackGround.getSize().x, (int)textureOfBackGround.getSize().y));
+	this->spriteOfBackground.setScale(screenWidth / backGround.getSize().x, screenHeight / backGround.getSize().y);
 	this->spriteOfBackground.setPosition(0, 0);
-	this->spriteOfBackground.setScale(backGround.getSize().x / screenWidth, backGround.getSize().y / screenHeight);
+
 
 
 	createGameButtons[1]->setTextSize(numberTextSize);
@@ -2119,6 +2127,16 @@ WindowManager::WindowManager()
 	createGameButtons[5]->setOutlineThickness(2);
 	createGameButtons[5]->setOutlineColor(Color::Black);
 	createGameButtons[5]->setFlag(true);
+
+	createGameButtons[6]->setTextSize(numberTextSize);
+	createGameButtons[6]->setSize(200, numberTextSize);
+	createGameButtons[6]->setText("Start Game");
+	createGameButtons[6]->setPosition(screenWidth / 2 - createGameButtons[4]->getGlobalBounds().width / 2, createGameButtons[2]->getPosition().y + 80);
+	createGameButtons[6]->setTextColor(sf::Color::White);
+	createGameButtons[6]->setFillColor(sf::Color::Black);
+	createGameButtons[6]->setOutlineThickness(2);
+	createGameButtons[6]->setOutlineColor(Color::Black);
+	createGameButtons[6]->setFlag(true);
 
 
 	joinGameButtons[0]->setTextSize(numberTextSize);
@@ -2229,15 +2247,16 @@ void WindowManager::displayPlayerStatus() {
 
 void WindowManager::menuScreen(RenderWindow& window, Event& event) {
 	static int x = 0;
-	sf::Texture texture;
-	if (!texture.loadFromFile("assets/background2.png"));
+	//sf::Texture texture;
+	//if (!texture.loadFromFile("assets/background2.png"));
 
 
-	// Assign it to a sprite
-	sf::Sprite sprite2;
-	sprite2.setTexture(texture);
+	//// Assign it to a sprite
+	//sf::Sprite sprite2;
+	//sprite2.setTexture(texture);
 	// Draw the textured sprite
-	window.draw(sprite2);
+	spriteOfBackground.setScale((float)screenWidth / spriteOfBackground.getTexture()->getSize().x, screenHeight / (float)spriteOfBackground.getTexture()->getSize().y);
+	window.draw(spriteOfBackground);
 	menuEvents(event, 1);
 
 
@@ -2285,6 +2304,7 @@ void WindowManager::menuEvents(sf::Event& e, int i) {
 		window.draw(*menuButton[0]);
 		window.draw(*menuButton[1]);
 		window.draw(*menuButton[2]);
+		window.draw(*menuButton[6]);
 		window.display();
 
 		for (int i = 0; i < menuButton.size(); i++) {
@@ -2452,7 +2472,6 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	time = time / 1200;
 	if (time > 20)
 		time = 20;
-
 	while (window.pollEvent(event))
 	{
 
@@ -2844,9 +2863,9 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 		}
 
 		else if (id == 6) {
-			/*userName = "client1";
-			NM->createNetwork(&GM, "c1", userName);
-			join_game_clicked = true;*/
+			cout << "start game" << endl;
+			//Burak this is for play on one computer
+			//button play is pressed and it returns  id6
 		}
 		else if (id == 7) {
 			userName = "client2";
@@ -2877,21 +2896,21 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				numberOfPlayersInCreateGame--;
 		}
 
-		if (id == 2) {
+		else if (id == 2) {
 			if (numberOfPlayersInCreateGame < 6)
 				numberOfPlayersInCreateGame++;
 		}
-		if (id == 3) {
+		else if (id == 3) {
 			page = MENU_SCREEN;
 		}
-		if (id == 4 && !create_game_clicked) {
+		else if (id == 4 && !create_game_clicked) {
 			create_game_clicked = true;
 			//Burak  --> 
 			userName = "Host";
 			NM->createNetwork(&GM, "h", userName);
 			create_game_clicked = true;
 		}
-		if (id == 5) {
+		else if (id == 5) {
 			if (_randomPlacement) {
 				_randomPlacement = false;
 				createGameButtons[id]->setFillColor(Color(255, 0, 0));
@@ -2901,6 +2920,10 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 				createGameButtons[id]->setFillColor(Color(0, 255, 0));
 			}
 
+		}
+		else if (id == 6) {
+			cout << "start game pressed" << endl;
+			//Start Game Burak right your code!!!!!!!!!!!!!!
 		}
 
 	}
