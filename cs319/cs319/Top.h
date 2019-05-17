@@ -40,6 +40,7 @@ public:
 	float moveTimer;
 	Clock ck;
 	int phaseId;
+	float ratio;
 
 	PhaseNotifier();
 	PhaseNotifier(int phaseId, Image img, int x, int y, int fx, int fy);
@@ -396,7 +397,7 @@ public:
 
 private:
 	IpAddress ip;
-	IpAddress sIP = "139.179.202.124";
+	IpAddress sIP = "139.179.211.226";
 	map<unsigned short, IpAddress> computerID;
 
 	vector<string> players;
@@ -416,6 +417,7 @@ public:
 	int leftMargin, rightMargin, topMargin, bottomLowerMargin, bottomUpperMargin;
 	sf::Image mapImg, hoverImg, roundedSquare, lineImg, coinImg, actionImg, timerImg, topPanelImg, crownImg, castleImg, sceleteImg, warriorImg, battleNotificationImg;
 	sf::Image attackPhaseImg, placementPhaseImg, postAttackPhaseImg, fortifyPhaseImg, marketPhaseImg;
+	Image backgroundImg;
 	sf::Texture mapTex;
 	sf::View mainView;
 	sf::Sprite mapSprite;

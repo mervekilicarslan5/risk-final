@@ -147,7 +147,7 @@ void Continent::setProvinces(vector<int> _provinces)
 
 Player::Player()
 {
-	leftSoldier = 14;
+	leftSoldier = 70;
 	name = "";
 	id = -1;
 	battlesLost = 0;
@@ -157,7 +157,7 @@ Player::Player()
 
 Player::Player(string _name, int _id)
 {
-	leftSoldier = 14;
+	leftSoldier = 70;
 	name = _name;
 	id = _id;
 	battlesLost = 0;
@@ -1362,7 +1362,7 @@ void GameManager::startFortifyPhase(int id) {
 
 void GameManager::randomPlacement() {
 
-	/*int size = worldMap->getNumberOfProvinces();
+	int size = worldMap->getNumberOfProvinces();
 	Die die(size);
 	int* shuffledArray = new int[size];
 	for (int i = 0; i < size; i++) {
@@ -1385,16 +1385,7 @@ void GameManager::randomPlacement() {
 	cout << "*** PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS ***" << endl;
 	delete shuffledArray;
 
-
-	*/
-
-
-
-
-
-
-
-	int size = worldMap->getNumberOfProvinces();
+	//int size = worldMap->getNumberOfProvinces();
 
 	/*
 	int* shuffledArray = new int[size];
@@ -1409,7 +1400,7 @@ void GameManager::randomPlacement() {
 	shuffledArray[r] = temp;
 	}*/
 
-	int t;
+	/*int t;
 	int numberOfPlayers = players.size();
 	Die die(numberOfPlayers);
 	t = die.roll() - 1;
@@ -1417,13 +1408,13 @@ void GameManager::randomPlacement() {
 	for (int i = 0; i < size; i++) {
 		Province* curProvince = worldMap->getProvinceByID(i);
 		if (players[t]->getNumberOfProvinces() < size / 3) {
-			placeSoldier(players[t], curProvince->getName(), 5);
+			placeSoldier(players[t], curProvince->getName(), 1);
 		}
 		else {
 			i--;
 		}
 		t = die.roll() - 1;
-	}
+	}*/
 
 	cout << "* PROVINCES HAVE BEEN RANDOMLY DISTRIBUTED TO THE PLAYERS *" << endl;
 	//delete shuffledArray;
@@ -1617,15 +1608,15 @@ WindowManager::WindowManager()
 
 	phase = INITIAL_PHASE;
 
-	screenWidth = GetSystemMetrics(SM_CXSCREEN) / 2; // 1920; //
-	screenHeight = GetSystemMetrics(SM_CYSCREEN) / 2; // 1080; //
+	screenWidth = GetSystemMetrics(SM_CXSCREEN)*2/3 ; // 1920; //
+	screenHeight = GetSystemMetrics(SM_CYSCREEN)*2/3; // 1080; //
 
 	cout << screenHeight << ", " << screenWidth << endl;
 
 	leftMargin = screenWidth / 10;
 	rightMargin = (screenWidth * 9) / 10;
 	topMargin = screenHeight / 10;
-	bottomLowerMargin = (screenHeight * 7) / 10;
+	bottomLowerMargin = (screenHeight * 31) / 40;
 	bottomUpperMargin = (screenHeight * 8) / 10;
 
 	if (!mapImg.loadFromFile("assets/mapp.png")) {
@@ -1685,6 +1676,9 @@ WindowManager::WindowManager()
 	if (!battleNotificationImg.loadFromFile("assets/armyNotifier.png")) {
 		cout << "Unable to open file" << endl;
 	}
+	if (!backgroundImg.loadFromFile("assets/background2.png")) {
+		cout << "Unable to open file" << endl;
+	}
 
 
 	font;
@@ -1716,11 +1710,11 @@ WindowManager::WindowManager()
 	string line;
 	ifstream myfile("assets/coordinates.txt");
 
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(1, placementPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(2, attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.70, 5));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(4, fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
-	listOfPhaseNotifiers.push_back(new PhaseNotifier(5, marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.75, 5));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(1, placementPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.7, topPanelImg.getSize().y/2 - placementPhaseImg.getSize().y/2));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(2, attackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.7, topPanelImg.getSize().y / 2 - placementPhaseImg.getSize().y / 2));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(3, postAttackPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.7, topPanelImg.getSize().y / 2 - placementPhaseImg.getSize().y / 2));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(4, fortifyPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.7, topPanelImg.getSize().y / 2 - placementPhaseImg.getSize().y / 2));
+	listOfPhaseNotifiers.push_back(new PhaseNotifier(5, marketPhaseImg, screenWidth / 2, screenHeight / 2, screenWidth *0.7, topPanelImg.getSize().y / 2 - placementPhaseImg.getSize().y / 2));
 
 	createGameButtons.push_back(new Button(font));//-		
 	createGameButtons.push_back(new Button(font));//number		
@@ -1765,16 +1759,16 @@ WindowManager::WindowManager()
 	buttons.push_back(new Button(font));
 	buttons.push_back(new Button(font));
 
-	menuButton.push_back(new MyImage("B2.png"));
+	/*menuButton.push_back(new MyImage("B2.png"));
 	menuButton.push_back(new MyImage("B3.png"));
 	menuButton.push_back(new MyImage("B0.png"));
 	menuButton.push_back(new MyImage("settingsK.png"));
 	menuButton.push_back(new MyImage("creditsK.png"));
-	menuButton.push_back(new MyImage("playK.png"));
+	menuButton.push_back(new MyImage("playK.png"));*/
 
 
 
-	menuButton[0]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 6);
+	/*menuButton[0]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 8 + screenHeight / 6);
 	menuButton[0]->setPosition(menuButton[0]->getInitialPosition());
 	menuButton[0]->setScale(0.5, 0.5);
 
@@ -1797,7 +1791,7 @@ WindowManager::WindowManager()
 
 	menuButton[5]->setInitialPosition(screenWidth / 4 + screenWidth / 8, screenHeight / 4 + screenHeight / 6);
 	menuButton[5]->setPosition(menuButton[5]->getInitialPosition());
-	menuButton[5]->setScale(0.5, 0.5);
+	menuButton[5]->setScale(0.5, 0.5);*/
 	//MENU BUTTON
 
 	for (int i = 0; i < 6; i++) {
@@ -1819,10 +1813,9 @@ WindowManager::WindowManager()
 	playerStatus[0]->setFillColor(Color::Red);
 	playerStatus[1]->setFillColor(Color::Blue);
 	playerStatus[2]->setFillColor(Color::Green);
-	playerStatus[3]->setFillColor(Color::Cyan);
-	playerStatus[4]->setFillColor(Color::Black);
-	playerStatus[5]->setFillColor(Color::Magenta);
-
+	playerStatus[3]->setFillColor(Color::Color(255, 150, 0, 255));
+	playerStatus[4]->setFillColor(Color::Color(118, 194, 184, 255));
+	playerStatus[5]->setFillColor(Color::Color(148, 90, 176, 255));
 
 	wheelStr.push_back("Draw bonus card");
 	wheelStr.push_back("Bankruptcy");
@@ -1920,30 +1913,30 @@ WindowManager::WindowManager()
 
 
 
-	buttons[5]->setSize(100, 40);
-	buttons[5]->setText("Host");
-	buttons[5]->setPosition(screenWidth / 2, screenHeight / 2);
+	buttons[5]->setSize(120, 40);
+	buttons[5]->setText("CreateGame");
+	buttons[5]->setPosition(screenWidth / 2 - buttons[5]->getSize().x, screenHeight / 2);
 	buttons[5]->setTextSize(20);
 	buttons[5]->setTextColor(sf::Color::White);
 	buttons[5]->setFillColor(sf::Color::Red);
 
-	buttons[6]->setSize(100, 40);
-	buttons[6]->setText("C1");
-	buttons[6]->setPosition(screenWidth / 2 + 120, screenHeight / 2);
+	buttons[6]->setSize(120, 40);
+	buttons[6]->setText("Client1");
+	buttons[6]->setPosition(screenWidth / 2 - buttons[5]->getSize().x + 120, screenHeight / 2);
 	buttons[6]->setTextSize(20);
 	buttons[6]->setTextColor(sf::Color::White);
 	buttons[6]->setFillColor(sf::Color::Red);
 
-	buttons[7]->setSize(100, 40);
-	buttons[7]->setText("C2");
+	buttons[7]->setSize(120, 40);
+	buttons[7]->setText("Client2");
 	buttons[7]->setTextSize(20);
-	buttons[7]->setPosition(screenWidth / 2 + 120, screenHeight / 2 + 60);
+	buttons[7]->setPosition(screenWidth / 2 - buttons[5]->getSize().x + 120, screenHeight / 2 + 60);
 	buttons[7]->setTextColor(sf::Color::White);
 	buttons[7]->setFillColor(sf::Color::Red);
 
-	buttons[8]->setSize(100, 40);
-	buttons[8]->setText("Start");
-	buttons[8]->setPosition(screenWidth / 2, screenHeight / 2 + 60);
+	buttons[8]->setSize(120, 40);
+	buttons[8]->setText("StartGame");
+	buttons[8]->setPosition(screenWidth / 2 - buttons[5]->getSize().x, screenHeight / 2 + 60);
 	buttons[8]->setTextSize(20);
 	buttons[8]->setTextColor(sf::Color::White);
 	buttons[8]->setFillColor(sf::Color::Red);
@@ -1974,7 +1967,7 @@ WindowManager::WindowManager()
 	buttons[10]->setTextSize(numberTextSize);
 	buttons[10]->setSize(numberTextSize, numberTextSize);
 	buttons[10]->setText("1");
-	buttons[10]->setPosition(screenWidth / 2 - buttons[1]->getGlobalBounds().width / 2, 0);
+	buttons[10]->setPosition(screenWidth / 2 - buttons[10]->getSize().x / 2, screenWidth/10);
 	buttons[10]->setTextColor(sf::Color::Black);
 	buttons[10]->setFillColor(sf::Color::Red);
 	buttons[10]->setOutlineThickness(2);
@@ -1984,7 +1977,7 @@ WindowManager::WindowManager()
 	buttons[11]->setTextSize(numberTextSize);
 	buttons[11]->setSize(numberTextSize, numberTextSize);
 	buttons[11]->setText("-");
-	buttons[11]->setPosition(buttons[1]->getPosition().x - buttons[1]->getGlobalBounds().width,0);
+	buttons[11]->setPosition(buttons[10]->getPosition().x - buttons[11]->getGlobalBounds().width, screenWidth / 10);
 	buttons[11]->setTextColor(sf::Color::Black);
 	buttons[11]->setFillColor(sf::Color::Red);
 	buttons[11]->setOutlineThickness(2);
@@ -1994,7 +1987,7 @@ WindowManager::WindowManager()
 	buttons[12]->setTextSize(numberTextSize);
 	buttons[12]->setSize(numberTextSize, numberTextSize);
 	buttons[12]->setText("+");
-	buttons[12]->setPosition(buttons[1]->getPosition().x + buttons[1]->getGlobalBounds().width, 0);
+	buttons[12]->setPosition(buttons[10]->getPosition().x + buttons[10]->getGlobalBounds().width, screenWidth / 10);
 	buttons[12]->setTextColor(sf::Color::Black);
 	buttons[12]->setFillColor(sf::Color::Red);
 	buttons[12]->setOutlineThickness(2);
@@ -2004,12 +1997,22 @@ WindowManager::WindowManager()
 	buttons[13]->setTextSize(numberTextSize);
 	buttons[13]->setSize(300, 40);
 	buttons[13]->setText("Randomize");
-	buttons[13]->setPosition(buttons[1]->getPosition().x , 40);
+	buttons[13]->setPosition(buttons[10]->getPosition().x - buttons[13]->getSize().x/2 + buttons[10]->getGlobalBounds().width/2, 20);
 	buttons[13]->setTextColor(sf::Color::Black);
 	buttons[13]->setFillColor(sf::Color::Red);
 	buttons[13]->setOutlineThickness(2);
 	buttons[13]->setOutlineColor(Color::Black);
 	buttons[13]->setFlag(true);
+
+	buttons[14]->setTextSize(numberTextSize);
+	buttons[14]->setSize(200, 40);
+	buttons[14]->setText("PlayOffline");
+	buttons[14]->setPosition(screenWidth / 2 - buttons[14]->getSize().x/2, screenHeight / 2  - 60 );
+	buttons[14]->setTextColor(sf::Color::White);
+	buttons[14]->setFillColor(sf::Color::Red);
+	buttons[14]->setOutlineThickness(2);
+	buttons[14]->setOutlineColor(Color::Black);
+	buttons[14]->setFlag(true);
 
 
 }
@@ -2130,7 +2133,14 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	window.clear(sf::Color::Black);
 
 	window.setView(window.getDefaultView());
+	Texture texture;
+	texture.loadFromImage(backgroundImg);
+	
+	Sprite spr; spr.setTexture(texture);
 
+	//spr.setScale(screenWidth / texture.getSize().x, screenHeight / texture.getSize().y);
+	spr.setPosition(0, 0);
+	window.draw(spr);
 	buttons[5]->draw(window);
 	buttons[6]->draw(window);
 	buttons[7]->draw(window);
@@ -2138,6 +2148,7 @@ void WindowManager::menuScreen(RenderWindow & window, Event & event) {
 	buttons[10]->draw(window);
 	buttons[11]->draw(window);
 	buttons[12]->draw(window);
+	buttons[14]->draw(window);
 	if(!_randomPlacement)
 		buttons[13]->setFillColor(Color::Red);
 	else
@@ -2300,8 +2311,8 @@ void WindowManager::multGameComp(RenderWindow & window, Event & event) {
 	window.draw(infoText);
 
 	for (int i = 0; i < buttons.size(); i++) {
-		if (i != 5 && i != 6 && i != 7 && i != 8 && i !=10 && i!=11 && i!=12 && i!=13) {
-			if (buttons[i]->getFlag())
+		if (i != 5 && i != 6 && i != 7 && i != 8 && i !=10 && i!=11 && i!=12 && i!=13 && i!=14) {
+			if (buttons[i]->getFlag()) 
 				buttons[i]->draw(window);
 		}
 	}
@@ -2497,8 +2508,8 @@ void WindowManager::checkClickEvents(sf::Event & e) {
 void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & window) {
 	if (page == MENU_SCREEN) {
 
-		if (id == 0) {
-			playerCount = 3; // will be taken from user
+		if (id == 14) {
+			playerCount = amountOfPlayers; // will be taken from user
 			const string name = "player";
 			for (int i = 0; i < playerCount; i++) {
 				this->GM->addPlayer(name + to_string(i + 1));
@@ -2582,6 +2593,7 @@ void WindowManager::buttonClicked(int id, sf::Event &event, sf::RenderWindow & w
 			phase = PLACEMENT_PHASE; //YOU WILL NOT BE ABLE TO CLICK ANYTHING IN INITIAL PHASE JUST SOLDIER */
 		}
 		else if (phase == PLACEMENT_PHASE) {
+			player->setMoney(player->getMoney()+player->getNumberOfProvinces()*5);
 			if (player->getLeftSoldier() == 0)
 				phase = ATTACKING_PHASE;
 			buttons[ATTACK_BUTTON]->setText("Attack");
@@ -3204,10 +3216,16 @@ void WindowManager::drawAllCastles(RenderWindow & window, Event & e) {
 				playerId = ptr->getOwner()->getId();
 				if (playerId == 0)
 					listOfCastleBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
-				if (playerId == 1)
+				else if (playerId == 1)
 					listOfCastleBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
-				if (playerId == 2)
+				else if (playerId == 2)
 					listOfCastleBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
+				else if (playerId == 3)
+					listOfCastleBage[i]->setBageColor(Color::Color(255, 150, 0, 255));
+				else if (playerId == 4)
+					listOfCastleBage[i]->setBageColor(Color::Color(118, 194, 184, 255));
+				else if (playerId == 5)
+					listOfCastleBage[i]->setBageColor(Color::Color(148, 90, 176, 255));
 				(listOfCastleBage[i])->draw(window);
 			}
 
@@ -3233,10 +3251,16 @@ void WindowManager::drawAllArmies(RenderWindow & window, Event & e) {
 				playerId = ptr->getOwner()->getId();
 				if (playerId == 0)
 					listOfArmyBage[i]->setBageColor(Color::Color(255, 0, 0, 255));
-				if (playerId == 1)
+				else if (playerId == 1)
 					listOfArmyBage[i]->setBageColor(Color::Color(0, 0, 255, 255));
-				if (playerId == 2)
+				else if (playerId == 2)
 					listOfArmyBage[i]->setBageColor(Color::Color(0, 255, 0, 255));
+				else if (playerId == 3)
+					listOfArmyBage[i]->setBageColor(Color::Color(255, 150, 0, 255));
+				else if (playerId == 4)
+					listOfArmyBage[i]->setBageColor(Color::Color(118, 194, 184, 255));
+				else if (playerId == 5)
+					listOfArmyBage[i]->setBageColor(Color::Color(148, 90, 176, 255));
 				(listOfArmyBage[i])->draw(window);
 			}
 
@@ -3828,6 +3852,7 @@ PhaseNotifier::PhaseNotifier() {
 }
 
 PhaseNotifier::PhaseNotifier(int phaseId, Image img, int x, int y, int fx, int fy) {
+	this->ratio = (float)screenWidth / 700;
 	this->phaseId = phaseId;
 	this->img = img;
 	this->tex.loadFromImage(img);
@@ -3865,7 +3890,7 @@ void PhaseNotifier::draw(sf::RenderWindow & window, float time) {
 				this->setPosition(this->getPosition().x, this->getPosition().y - 2 * time);
 		}
 
-		if (this->getScale().x > 0.4)
+		if (this->getScale().x > 0.4*ratio)
 			this->setScale(this->getScale().x - 0.01*time, this->getScale().x - 0.01*time);
 		this->setColor(Color(255, 255, 255, 255));
 	}
@@ -3878,7 +3903,7 @@ void PhaseNotifier::activate() {
 		return;
 	visible = true;
 	moveTimer = 0;
-	this->setScale(1, 1);
+	this->setScale(1*ratio, 1*ratio);
 	this->setPosition(this->bigCoordinates);
 	ck.restart();
 	this->setColor(Color(0, 0, 0, 255));
@@ -4000,7 +4025,7 @@ void BattleNotifier::draw(sf::RenderWindow & window, float time) {
 	removeTimer = this->ckk.getElapsedTime().asSeconds() + removeTimer;
 	this->ckk.restart();
 
-	if (removeTimer > 1) {
+	if (removeTimer > 3) {
 		opacityParam = opacityParam - 0.3*time;
 		this->setColor(Color(this->getColor().r, this->getColor().g, this->getColor().b, opacityParam));
 		backPageSprite.setColor(Color(backPageSprite.getColor().r, backPageSprite.getColor().g, backPageSprite.getColor().b, (int)opacityParam));
