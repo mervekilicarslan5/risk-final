@@ -438,12 +438,14 @@ public:
 	vector<CastleBage*> listOfCastleBage;
 	vector<PhaseNotifier*> listOfPhaseNotifiers;
 	BattleNotifier* battleNotifier;
+	vector<Button*>createGameButtons;
 	int phase;
 	int page = 0;
 	int soldierAmount = 1;
 	bool turnWheel = false;
 	float time; //time to calculate elapsed time
 	Clock clock;
+	int amountOfPlayers= 2;
 
 	int totalTurn = 1;
 
